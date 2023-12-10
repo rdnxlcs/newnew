@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="modal modal-sheet position-static d-block">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content rounded-4">
+        <div class="modal-body">
+            <div class="px-4 my-3 text-center">
+                <h1 class="display-5 fw-bold text-body-emphasis">Парковка завершена</h1>
+                <hr>
+                <p class="lead">{{ reciept.final_price }}</p>
+                <hr>
+                <div class="mx-auto">
+                    <p class="lead my-0">id парковки: {{ reciept.parking_id.pk }}</p>
+                    <p class="lead">id чека: {{ reciept.pk }}</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
