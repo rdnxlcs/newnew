@@ -108,7 +108,7 @@ def enter(request):
                 auth.login(request, user)
                 return redirect(reverse('parkingapp:index'))
         except:
-            return render(request, 'enter.html', {'error': 'ДУРА!!! ПОШЛА НАХУЙ!', 'logged':check_logged(request)})
+            return render(request, 'enter.html', {'error': 'Не туда!', 'logged':check_logged(request)})
 
     return render(request, 'enter.html', {'logged':check_logged(request)})
     
