@@ -66,6 +66,7 @@ def index(request):
             parkings.append(99999)
 
     except:
+        parkings = []
         reciepts = []
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
