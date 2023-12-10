@@ -11,15 +11,19 @@ def index(request):
     if request.method == 'POST':
         if 'create_park' in request.POST:
             user = request.user
-            park_id = request.POST.get('park_id')
-            parkings = Parking.objects.filter(pk=park_id)
-            if parkings:
-                parking = parkings[0]
-                parking.occupied_places += 1
-                parking.save()
-
-                starttime = datetime.now()
-                Reciept.objects.create(parking_id=parking, user_id=user, start_time=starttime, finish_time=starttime)
+            park_id = int(request.POST.get('park_id'))
+            try:
+                parking = Parking.objects.get(pk=park_id)
+                print(type(parking))
+                if parking.occupied_places >= parking.max_parking_spaces:
+                    return redirect('http://kremlin.ru')
+                else:
+                    parking.occupied_places += 1
+                    parking.save()
+                    starttime = datetime.now()
+                    Reciept.objects.create(parking_id=parking, user_id=user, start_time=starttime, finish_time=starttime)
+            except:
+                return redirect('http://kremlin.ru')
         elif 'end_park' in request.POST:
             reciept_id = request.POST.get('end_park')
             reciept = Reciept.objects.get(pk=reciept_id)
@@ -41,8 +45,18 @@ def index(request):
 
             reciept = Reciept.objects.get(pk=reciept_id)
             return render(request, 'endparking.html', {'reciept': reciept})
+
+
     try:
         reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
+        parkings = []
+        for el in Parking.objects.all():
+            parkings.append(el.lattitude)
+            parkings.append(el.longitude)
+            parkings.append(el.pk)
+            parkings.append(el.max_parking_spaces - el.occupied_places)
+            parkings.append(el.price_per_minute)
+            parkings.append(99999)
 
     except:
         reciepts = []

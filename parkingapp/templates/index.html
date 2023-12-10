@@ -50,4 +50,53 @@
 {% endfor %}
 {% endif %}
 
+<div id="map" style="width:500px; height:400px"></div>
+<script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
+<script type="text/javascript">
+    var map;
+    DG.then(function () {
+      map = DG.map('map', {
+          center: [54.7065, 20.511],
+          zoom: 9
+      });
+      let parking = "{{parkings}}".replace("[", "").replace("]", "").replace(",", "").split(" ");
+      for(let i=0; i<parking.length; i++){
+        parking[i] = parking[i].replace(",", "")
+      }
+      var myIcon;
+      myIcon = DG.icon({
+        iconUrl: 'https://maps.api.2gis.ru/2.0/example_logo.png',
+        iconSize: [48, 48]
+      })
+      map.locate({setView: true, watch: true})
+                    .on('locationfound', function(e) {
+                        DG.marker([e.latitude, e.longitude], {icon:myIcon}).addTo(map).bindPopup("Ваше местоположение");
+                      }).on('locationerror', function(e) {
+                        DG.popup()
+                          .setLatLng(map.getCenter())
+                          .setContent('Доступ к определению местоположения отключён')
+                          .openOn(map);
+                          });
+
+
+
+      let x=0, y=0, id=0, places=0, price=0;
+      for(let i=0; i<parking.length; i++){
+        if(i%6==0) x=Number(parking[i]);
+        else if(i%6==1) y=Number(parking[i]);
+        else if(i%6==2) id=Number(parking[i]);
+        else if(i%6==3) places=Number(parking[i]);
+        else if(i%6==4) price=Number(parking[i]);
+        else if(i%6==5){
+          //console.log(x, y, id);
+          DG.marker([x, y]).addTo(map).bindPopup("Айди парковки: "+id+", Свободные места:"+places+", Цена:"+price);
+        }
+      }
+      console.log(parking)
+      //for(let i=0; i<)
+      //DG.marker([x, y]).addTo(map).bindPopup("{{el.address}}, {{el.pk}}");
+    });
+</script>
+
+
 {% endblock %}
