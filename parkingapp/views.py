@@ -134,10 +134,10 @@ def signadmin(request):
             password = request.POST.get('password')
             try :
                 User.objects.get(username=username)
+                return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
             except:
-                return render(request, 'signadmin.html', {'error': 'Такой пользователь уже существует!'})
-            User.objects.create(username=username, password=password, rights=2)
-            return HttpResponseRedirect(reverse('parkingapp:enter'))
+                User.objects.create(username=username, password=password, rights=2)
+                return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
             return render(request, 'error.html', {'logged':check_logged(request)})
     return render(request, 'signadmin.html', {'logged':check_logged(request)})
@@ -152,13 +152,13 @@ def signcoupon(request):
             park_id = request.POST.get('park_id')
             try :
                 User.objects.get(username=username)
+                return render(request, 'signcoupon.html', {'error': 'Такой пользователь уже существует!', 'logged':check_logged(request)})
             except:
-                return render(request, 'signcoupon.html', {'error': 'Такой пользователь уже существует!'})
-            User.objects.create(username=username, password=password, park_id=park_id, rights=1)
-            return HttpResponseRedirect(reverse('parkingapp:enter'))
+                User.objects.create(username=username, password=password, park_id=park_id, rights=1)
+                return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html', {'logged':check_logged})
-    return render(request, 'signcoupon.html', {'logged':check_logged})
+            return render(request, 'error.html', {'logged':check_logged(request)})
+    return render(request, 'signcoupon.html', {'logged':check_logged(request)})
    
 
 def coupon(request):
