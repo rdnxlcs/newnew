@@ -290,12 +290,12 @@ def data(period_start, period_end):
             with_benefits = park.with_benefits
             benefits_price = with_benefits * price_per_minute
 
-            fins_parkings_array.append(
-                Fin(
-                    parking.address, total_price, how_much_people_used, 
-                    with_benefits, benefits_price
-                    )
-            )
+        fins_parkings_array.append(
+            Fin(
+                parking.address, total_price, how_much_people_used, 
+                with_benefits, benefits_price
+                )
+        )
     return parkings_array, fins_parkings_array
 
 def panel(request):
