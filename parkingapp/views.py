@@ -3,6 +3,7 @@ from parkingapp.models import *
 from django.urls import reverse
 from datetime import datetime, timezone, timedelta
 from django.shortcuts import render, redirect, HttpResponseRedirect
+import geocoder
 
 def index(request):
     if request.method == 'POST':
@@ -155,114 +156,212 @@ class Fin:
         self.with_benbefits = with_benefits
         self.benefits_price = benefits_price
 
+def coordinate(address):
+    geolocator = Nominatim(user_agent="Tester")
+    location = geolocator.geocode(address)
+    return location.latitude, location.longitude
+
 def panel(request):
+    print(geocoder.google('Mountain View, CA').latlng)
     parkings = Parking.objects.all()
-
-    if request.method == 'POST':
-
-        period_start = str(request.POST.get('period_start'))
-        period_start = period_start[:10]
-        period_end = str(request.POST.get('period_end'))
-        period_end = period_end[:10]
-
-
-        period_start = [i for i in period_start.split('-')]
-        period_end = [i for i in period_end.split('-')]
-
-        period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
-        period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
-
-        parkings = Parking.objects.all()
-        parkings_array = []
-        fins_parkings_array = []
-        for park in parkings:
-            reciepts = Reciept.objects.filter(parking_id=park.pk)
-
-            how_much_people_used = 0
-            people_used_free_time = 0
-            minutes = 0
-            sessions = []
-            benefit_sessions = []
-            with_benefits = 0
-
-            for reciept in reciepts:
-                if reciept.start_time >= period_start and reciept.finish_time <= period_end:
-                    parking = reciept.parking_id
-                    parking_id = parking.pk
-
-                    how_much_people_used += 1
-
-                    difference = (reciept.finish_time - reciept.start_time)
-                    seconds = difference.total_seconds()
-                    minutes = seconds // 60
-
-                    sessions.append(minutes)
-
-                    if minutes <= parking.free_time:
-                        people_used_free_time += 1
-
-                    if reciept.benefit == True:
-                        with_benefits += 1
-                        benefit_sessions.append(minutes)
-
-            if len(sessions) != 0:
-                session_avarage_duration = int(sum(sessions)) // len(sessions)
-                total_time = sum(sessions)
-                min_session = min(sessions)
-                max_session = max(sessions)
-                if len(benefit_sessions) != 0:
-                    benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
-                    max_benefit_session = max(benefit_sessions)
-                else:
-                    benefits_session_avarage_duration = 0
-                    max_benefit_session = 0
-
-            parkings_array.append(Park(
-                    park.address, how_much_people_used, people_used_free_time, 
-                    total_time, session_avarage_duration, min_session, max_session, 
-                    with_benefits, benefits_session_avarage_duration, max_benefit_session
-                )) 
-            
-            for park in parkings_array:
-                parking = Parking.objects.get(address=park.address)
-                price_per_minute = parking.price_per_minute
-                total_price = price_per_minute * minutes
-                how_much_people_used = park.how_much_people_used
-                with_benefits = park.with_benefits
-                benefits_price = with_benefits * price_per_minute
-
-                fins_parkings_array.append(
-                    Fin(
-                        parking.address, total_price, how_much_people_used, 
-                        with_benefits, benefits_price
-                        )
-                )
-            try:
-                start = request.COOKIES['period_start']
-                end = request.COOKIES['period_end']
-            except:
-                start = ''
-                end = ''
-            context = {
-                'parkings': parkings_array,
-                'fins': fins_parkings_array,
-                'start': start, 
-                'end': end
-            }
-
-            rsn = render(request, 'panel.html', context)
-
-            rsn.set_cookie('period_start', period_start)
-            rsn.set_cookie('period_end', period_end)
-            
-            return rsn
     try:
-        start = request.COOKIES['period_start']
-        end = request.COOKIES['period_end']
-        print(start[:10], end)
-    except:
-        start = ''
-        end = ''
+        if request.method == 'POST':
 
-    return render(request, 'panel.html', {'start': start, 'end': end})
+            period_start = request.POST.get('period_start')
+            period_end = request.POST.get('period_end')
+
+
+            period_start = [i for i in period_start.split('-')]
+            period_end = [i for i in period_end.split('-')]
+
+            period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
+            period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
+
+            parkings = Parking.objects.all()
+            parkings_array = []
+            fins_parkings_array = []
+            for park in parkings:
+                reciepts = Reciept.objects.filter(parking_id=park.pk)
+
+                how_much_people_used = 0
+                people_used_free_time = 0
+                minutes = 0
+                sessions = []
+                benefit_sessions = []
+                with_benefits = 0
+
+                for reciept in reciepts:
+                    if reciept.start_time >= period_start and reciept.finish_time <= period_end:
+                        parking = reciept.parking_id
+                        parking_id = parking.pk
+
+                        how_much_people_used += 1
+
+                        difference = (reciept.finish_time - reciept.start_time)
+                        seconds = difference.total_seconds()
+                        minutes = seconds // 60
+
+                        sessions.append(minutes)
+
+                        if minutes <= parking.free_time:
+                            people_used_free_time += 1
+
+                        if reciept.benefit == True:
+                            with_benefits += 1
+                            benefit_sessions.append(minutes)
+
+                if len(sessions) != 0:
+                    session_avarage_duration = int(sum(sessions)) // len(sessions)
+                    total_time = sum(sessions)
+                    min_session = min(sessions)
+                    max_session = max(sessions)
+                    if len(benefit_sessions) != 0:
+                        benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
+                        max_benefit_session = max(benefit_sessions)
+                    else:
+                        benefits_session_avarage_duration = 0
+                        max_benefit_session = 0
+
+                parkings_array.append(Park(
+                        park.address, how_much_people_used, people_used_free_time, 
+                        total_time, session_avarage_duration, min_session, max_session, 
+                        with_benefits, benefits_session_avarage_duration, max_benefit_session
+                    )) 
+                
+                for park in parkings_array:
+                    parking = Parking.objects.get(address=park.address)
+                    price_per_minute = parking.price_per_minute
+                    total_price = price_per_minute * minutes
+                    how_much_people_used = park.how_much_people_used
+                    with_benefits = park.with_benefits
+                    benefits_price = with_benefits * price_per_minute
+
+                    fins_parkings_array.append(
+                        Fin(
+                            parking.address, total_price, how_much_people_used, 
+                            with_benefits, benefits_price
+                            )
+                    )
+                try:
+                    start = request.COOKIES['period_start']
+                    end = request.COOKIES['period_end']
+                except:
+                    start = ''
+                    end = ''
+                context = {
+                    'parkings': parkings_array,
+                    'fins': fins_parkings_array,
+                    'start': start, 
+                    'end': end
+                }
+
+                rsn = render(request, 'panel.html', context)
+                rsn.set_cookie('period_start', str(period_start)[:10])
+                rsn.set_cookie('period_end', str(period_end)[:10])
+                
+                return rsn
+        else:
+            start = request.COOKIES['period_start']
+            end = request.COOKIES['period_end']
+
+            period_start = [i for i in period_start.split('-')]
+            period_end = [i for i in period_end.split('-')]
+
+            period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
+            period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
+
+            parkings = Parking.objects.all()
+            parkings_array = []
+            fins_parkings_array = []
+            for park in parkings:
+                reciepts = Reciept.objects.filter(parking_id=park.pk)
+
+                how_much_people_used = 0
+                people_used_free_time = 0
+                minutes = 0
+                sessions = []
+                benefit_sessions = []
+                with_benefits = 0
+
+                for reciept in reciepts:
+                    if reciept.start_time >= period_start and reciept.finish_time <= period_end:
+                        parking = reciept.parking_id
+                        parking_id = parking.pk
+
+                        how_much_people_used += 1
+
+                        difference = (reciept.finish_time - reciept.start_time)
+                        seconds = difference.total_seconds()
+                        minutes = seconds // 60
+
+                        sessions.append(minutes)
+
+                        if minutes <= parking.free_time:
+                            people_used_free_time += 1
+
+                        if reciept.benefit == True:
+                            with_benefits += 1
+                            benefit_sessions.append(minutes)
+
+                if len(sessions) != 0:
+                    session_avarage_duration = int(sum(sessions)) // len(sessions)
+                    total_time = sum(sessions)
+                    min_session = min(sessions)
+                    max_session = max(sessions)
+                    if len(benefit_sessions) != 0:
+                        benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
+                        max_benefit_session = max(benefit_sessions)
+                    else:
+                        benefits_session_avarage_duration = 0
+                        max_benefit_session = 0
+
+                parkings_array.append(Park(
+                        park.address, how_much_people_used, people_used_free_time, 
+                        total_time, session_avarage_duration, min_session, max_session, 
+                        with_benefits, benefits_session_avarage_duration, max_benefit_session
+                    )) 
+                
+                for park in parkings_array:
+                    parking = Parking.objects.get(address=park.address)
+                    price_per_minute = parking.price_per_minute
+                    total_price = price_per_minute * minutes
+                    how_much_people_used = park.how_much_people_used
+                    with_benefits = park.with_benefits
+                    benefits_price = with_benefits * price_per_minute
+
+                    fins_parkings_array.append(
+                        Fin(
+                            parking.address, total_price, how_much_people_used, 
+                            with_benefits, benefits_price
+                            )
+                    )
+                try:
+                    start = request.COOKIES['period_start']
+                    end = request.COOKIES['period_end']
+                except:
+                    start = ''
+                    end = ''
+                context = {
+                    'parkings': parkings_array,
+                    'fins': fins_parkings_array,
+                    'start': start, 
+                    'end': end
+                }
+
+                rsn = render(request, 'panel.html', context)
+                rsn.set_cookie('period_start', str(period_start)[:10])
+                rsn.set_cookie('period_end', str(period_end)[:10])
+                
+                return rsn
+        
+            start = request.COOKIES['period_start']
+            end = request.COOKIES['period_end']
+    except:
+        return render(request, 'panel.html')
+
+
+    start = ''
+    end = ''
+    
+    return render(request, 'panel.html', {'start': start, 'end': end, 'lat': lat, 'lon': lon})
 
