@@ -4,6 +4,11 @@ from django.urls import reverse
 from datetime import datetime, timezone, timedelta
 from django.shortcuts import render, redirect, HttpResponseRedirect
 
+def check_logged(request):
+    if request.user:
+        return True
+    return False
+
 def index(request):
     if request.method == 'POST':
         if 'create_park' in request.POST:
@@ -40,7 +45,10 @@ def index(request):
 
 
             reciept = Reciept.objects.get(pk=reciept_id)
-            return render(request, 'endparking.html', {'reciept': reciept})
+            logged = False
+            if request.user.pk:
+                logged = True
+            return render(request, 'endparking.html', {'reciept': reciept, 'logged': check_logged(request)})
 
     reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
     parkings = []
@@ -52,7 +60,7 @@ def index(request):
         parkings.append(el.price_per_minute)
         parkings.append(99999)
 
-    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'parkings':parkings})
+    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'parkings':parkings, 'logged':check_logged(request)})
 
 def create_parking(request):
     if request.method == 'POST':
@@ -63,7 +71,7 @@ def create_parking(request):
         price_per_minute = 70
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
-    return render(request, 'create_parking.html')
+    return render(request, 'create_parking.html', {'logged': check_logged})
 
 def sign(request):
     if request.method == 'POST':
@@ -75,11 +83,11 @@ def sign(request):
         try :
             User.objects.get(username=username)
         except:
-            return render(request, 'sign.html', {'error': 'Такой пользователь уже существует!'})
+            return render(request, 'sign.html', {'error': 'Такой пользователь уже существует!', 'logged':check_logged(request)})
         User.objects.create(username=username, card_num=card_num, card_period=card_period, card_cvv=card_cvv, password=user_password)
         return redirect(reverse('parkingapp:enter'))
 
-    return render(request, 'sign.html')
+    return render(request, 'sign.html', {'logged':check_logged(request)})
 
 def enter(request):
     if request.method == 'POST':
@@ -91,12 +99,12 @@ def enter(request):
                 auth.login(request, user)
                 return redirect(reverse('parkingapp:index'))
         except:
-            return render(request, 'enter.html', {'error': 'ДУРА!!! ПОШЛА НАХУЙ!'})
+            return render(request, 'enter.html', {'error': 'ДУРА!!! ПОШЛА НАХУЙ!', 'logged':check_logged(request)})
 
     return render(request, 'enter.html')
     
 def addparking(request):
-    return render(request, 'addparking.html')
+    return render(request, 'addparking.html', {'logged':check_logged(request)})
 
 def signadmin(request):
     if request.method == 'POST':
@@ -112,8 +120,8 @@ def signadmin(request):
             User.objects.create(username=username, password=password, rights=2)
             return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html')
-    return render(request, 'signadmin.html')
+            return render(request, 'error.html', {'logged':check_logged(request)})
+    return render(request, 'signadmin.html', {'logged':check_logged(request)})
 
 def signcoupon(request):
     if request.method == 'POST':
@@ -130,8 +138,8 @@ def signcoupon(request):
             User.objects.create(username=username, password=password, park_id=park_id, rights=1)
             return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html')
-    return render(request, 'signcoupon.html')
+            return render(request, 'error.html', {'logged':check_logged})
+    return render(request, 'signcoupon.html', {'logged':check_logged})
    
 
 def coupon(request):
@@ -141,19 +149,19 @@ def coupon(request):
         reciept.benefit = True
         reciept.save()
     
-    return render(request, 'coupon.html')
+    return render(request, 'coupon.html', {'logged':check_logged})
 
 
 def endparking(request):
-    return render(request, 'endparking.html')
+    return render(request, 'endparking.html', {'logged':check_logged})
 
 
 def esp(request):
-    return render(request, 'esp.html')
+    return render(request, 'esp.html', {'logged':check_logged})
 
 
 def error(request):
-    return render(request, 'error.html')
+    return render(request, 'error.html', {'logged':check_logged})
 
 
 class Park: 
@@ -292,5 +300,5 @@ def panel(request):
         start = ''
         end = ''
 
-    return render(request, 'panel.html', {'start': start, 'end': end})
+    return render(request, 'panel.html', {'start': start, 'end': end, 'logged':check_logged(request)})
 
