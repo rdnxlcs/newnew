@@ -27,7 +27,6 @@ def index(request):
 
             else:
                 reciept.final_price = int(parking.price_per_minute * dif // 60)
-            print(reciept.final_price)
             reciept.save()
 
 
@@ -161,8 +160,11 @@ def panel(request):
 
     if request.method == 'POST':
 
-        period_start = str(request.POST.get('period_start'))[:10]
-        period_end = str(request.POST.get('period_end'))[:10]
+        period_start = str(request.POST.get('period_start'))
+        period_start = period_start[:10]
+        period_end = str(request.POST.get('period_end'))
+        period_end = period_end[:10]
+
 
         period_start = [i for i in period_start.split('-')]
         period_end = [i for i in period_end.split('-')]
@@ -195,7 +197,6 @@ def panel(request):
                     minutes = seconds // 60
 
                     sessions.append(minutes)
-                    print(minutes, sessions)
 
                     if minutes <= parking.free_time:
                         people_used_free_time += 1
@@ -258,6 +259,7 @@ def panel(request):
     try:
         start = request.COOKIES['period_start']
         end = request.COOKIES['period_end']
+        print(start[:10], end)
     except:
         start = ''
         end = ''
