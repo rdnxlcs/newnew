@@ -23,7 +23,6 @@ class Parking(models.Model):
     max_parking_spaces = models.PositiveIntegerField(default=0)
     occupied_places = models.PositiveIntegerField(default=0)
     price_per_minute = models.PositiveIntegerField(default=0)
-    free_time = models.PositiveIntegerField(default=15)
 
     def __str__(self) -> str:
         return f'{self.address} | {self.max_parking_spaces}'

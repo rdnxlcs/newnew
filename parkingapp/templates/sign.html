@@ -31,8 +31,8 @@
                 <input type="text" class="form-control rounded-3" id="a" placeholder="" name="user_password">
                 <label for="a">Пароль</label>
             </div>
-            {{ errors }}
             <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Зарегистрироваться</button>
+            <small class="text-danger">{{ error }}</small>
           </form>
         </div>
       </div>
