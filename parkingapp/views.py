@@ -40,6 +40,17 @@ def index(request):
     reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts})
 
+def create_parking(request):
+    if request.method == 'POST':
+        lat = request.POST.get('latitude')
+        lng = request.POST.get('longitude')
+        address = request.POST.get('address')
+        max_parking_spaces = request.POST.get('max_parking_spaces')
+        price_per_minute = 70
+        occupied_places = 0
+        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
+    return render(request, 'create_parking.html')
+
 def sign(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -52,7 +63,7 @@ def sign(request):
         except:
             return render(request, 'sign.html', {'error': 'Такой пользователь уже существует!'})
         User.objects.create(username=username, card_num=card_num, card_period=card_period, card_cvv=card_cvv, password=user_password)
-        return HttpResponseRedirect(reverse('parkingapp:enter'))
+        return redirect(reverse('parkingapp:enter'))
 
     return render(request, 'sign.html')
 
