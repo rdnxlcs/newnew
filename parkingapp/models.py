@@ -16,8 +16,8 @@ class User(AbstractUser):
     
 
 class Parking(models.Model):
-    lattitude = models.IntegerField(default=0)
-    longitude = models.IntegerField(default=0)
+    lattitude = models.FloatField(default=0)
+    longitude = models.FloatField(default=0)
     address = models.CharField(max_length=120, default='')
     registry_nubmer = models.PositiveIntegerField(default=0)
     max_parking_spaces = models.PositiveIntegerField(default=0)

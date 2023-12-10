@@ -38,7 +38,14 @@ def index(request):
             return render(request, 'endparking.html', {'reciept': reciept})
 
     reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
-    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts})
+    parkings = []
+    for el in Parking.objects.all():
+        parkings.append(el.lattitude)
+        parkings.append(el.longitude)
+        parkings.append(el.pk)
+        parkings.append(99999)
+
+    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'parkings':parkings})
 
 def create_parking(request):
     if request.method == 'POST':
