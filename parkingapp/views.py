@@ -67,7 +67,7 @@ def index(request):
 
     except:
         reciepts = []
-    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings})
+    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
 def create_parking(request):
     if request.method == 'POST':
@@ -110,7 +110,7 @@ def enter(request):
         except:
             return render(request, 'enter.html', {'error': 'ДУРА!!! ПОШЛА НАХУЙ!', 'logged':check_logged(request)})
 
-    return render(request, 'enter.html')
+    return render(request, 'enter.html', {'logged':check_logged(request)})
     
 def addparking(request):
     if request.method == 'POST':
@@ -170,17 +170,17 @@ def coupon(request):
             reciept.benefit = True
             reciept.save()
         
-        return render(request, 'coupon.html', {'logged':check_logged})
+        return render(request, 'coupon.html', {'logged':check_logged(request)})
     else:
         return redirect(reverse('parkingapp:index'))
 
 
 def endparking(request):
-    return render(request, 'endparking.html', {'logged':check_logged})
+    return render(request, 'endparking.html', {'logged':check_logged(request)})
 
 
 def esp(request):
-    return render(request, 'esp.html')
+    return render(request, 'esp.html', {'logged':check_logged(request)})
 
 
 def error(request):
@@ -314,7 +314,8 @@ def panel(request):
                 'parkings': parks,
                 'fins': fins,
                 'start':  str(period_start)[:10], 
-                'end': str(period_end)[:10]
+                'end': str(period_end)[:10],
+                'logged':check_logged(request)
             }
 
             rsn = render(request, 'panel.html', context)
