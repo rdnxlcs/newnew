@@ -12,6 +12,8 @@ def index(request):
             parkings = Parking.objects.filter(pk=park_id)
             if parkings:
                 parking = parkings[0]
+                parking.occupied_places += 1
+                parking.save()
                 starttime = datetime.now()
                 Reciept.objects.create(parking_id=parking, user_id=user, start_time=starttime, finish_time=starttime)
         elif 'end_park' in request.POST:
@@ -19,6 +21,8 @@ def index(request):
             reciept = Reciept.objects.get(pk=reciept_id)
             reciept.finish_time = datetime.now()
             parking = Parking.objects.get(pk=reciept.parking_id.pk)
+            parking.occupied_places -= 1
+            parking.save()
             dif = (reciept.finish_time.replace(tzinfo=None) - reciept.start_time.replace(tzinfo=None))
             dif = dif.total_seconds()
             minutes = int(parking.price_per_minute * dif // 60)
