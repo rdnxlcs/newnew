@@ -1,8 +1,10 @@
 from django.contrib import auth
 from parkingapp.models import *
 from django.urls import reverse
-from datetime import datetime, timezone, timedelta
+from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.conf import settings
+from django.utils.timezone import make_aware
 
 def check_logged(request):
     if request.user:
@@ -29,6 +31,7 @@ def index(request):
         elif 'end_park' in request.POST:
             reciept_id = request.POST.get('end_park')
             reciept = Reciept.objects.get(pk=reciept_id)
+
             reciept.finish_time = datetime.now()
             parking = Parking.objects.get(pk=reciept.parking_id.pk)
             parking.occupied_places -= 1
@@ -50,17 +53,21 @@ def index(request):
                 logged = True
             return render(request, 'endparking.html', {'reciept': reciept, 'logged': check_logged(request)})
 
-    reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
-    parkings = []
-    for el in Parking.objects.all():
-        parkings.append(el.lattitude)
-        parkings.append(el.longitude)
-        parkings.append(el.pk)
-        parkings.append(el.max_parking_spaces - el.occupied_places)
-        parkings.append(el.price_per_minute)
-        parkings.append(99999)
 
-    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'parkings':parkings, 'logged':check_logged(request)})
+    try:
+        reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
+        parkings = []
+        for el in Parking.objects.all():
+            parkings.append(el.lattitude)
+            parkings.append(el.longitude)
+            parkings.append(el.pk)
+            parkings.append(el.max_parking_spaces - el.occupied_places)
+            parkings.append(el.price_per_minute)
+            parkings.append(99999)
+
+    except:
+        reciepts = []
+    return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request)})
 
 def create_parking(request):
     if request.method == 'POST':
@@ -104,6 +111,16 @@ def enter(request):
     return render(request, 'enter.html')
     
 def addparking(request):
+    if request.method == 'POST':
+        lat = request.POST.get('latitude')
+        lng = request.POST.get('longitude')
+        address = request.POST.get('address')
+        max_parking_spaces = request.POST.get('max_parking_spaces')
+        price_per_minute = 70
+        occupied_places = 0
+        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
+        return render(request, 'admin.html', {'logged':check_logged(request)})
+
     return render(request, 'addparking.html', {'logged':check_logged(request)})
 
 def signadmin(request):
@@ -143,13 +160,17 @@ def signcoupon(request):
    
 
 def coupon(request):
-    if request.method == 'POST':
-        checkid = request.POST.get('benifit')
-        reciept = Reciept.objects.get(pk=checkid)
-        reciept.benefit = True
-        reciept.save()
-    
-    return render(request, 'coupon.html', {'logged':check_logged})
+    user = request.user
+    if user.rights == 1:
+        if request.method == 'POST':
+            checkid = request.POST.get('benifit')
+            reciept = Reciept.objects.get(pk=checkid)
+            reciept.benefit = True
+            reciept.save()
+        
+        return render(request, 'coupon.html', {'logged':check_logged})
+    else:
+        return redirect(reverse('parkingapp:index'))
 
 
 def endparking(request):
@@ -157,7 +178,7 @@ def endparking(request):
 
 
 def esp(request):
-    return render(request, 'esp.html', {'logged':check_logged})
+    return render(request, 'esp.html')
 
 
 def error(request):
@@ -192,113 +213,122 @@ class Fin:
         self.with_benbefits = with_benefits
         self.benefits_price = benefits_price
 
-def panel(request):
+def data(period_start, period_end):
+    period_start = [i for i in period_start.split('-')]
+    period_end = [i for i in period_end.split('-')]
+
+    period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
+    period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
+
     parkings = Parking.objects.all()
+    parkings_array = []
+    fins_parkings_array = []
+    for park in parkings:
+        reciepts = Reciept.objects.filter(parking_id=park.pk)
 
-    if request.method == 'POST':
+        how_much_people_used = 0
+        people_used_free_time = 0
+        minutes = 0
+        sessions = []
+        benefit_sessions = []
+        with_benefits = 0
 
-        period_start = str(request.POST.get('period_start'))
-        period_start = period_start[:10]
-        period_end = str(request.POST.get('period_end'))
-        period_end = period_end[:10]
+        for reciept in reciepts:
+            if reciept.start_time >= period_start and reciept.finish_time <= period_end:
+                parking = reciept.parking_id
+                parking_id = parking.pk
 
+                how_much_people_used += 1
 
-        period_start = [i for i in period_start.split('-')]
-        period_end = [i for i in period_end.split('-')]
+                difference = (reciept.finish_time - reciept.start_time)
+                seconds = difference.total_seconds()
+                minutes = seconds // 60
 
-        period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
-        period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
+                sessions.append(minutes)
 
+                if minutes <= parking.free_time:
+                    people_used_free_time += 1
+
+                if reciept.benefit == True:
+                    with_benefits += 1
+                    benefit_sessions.append(minutes)
+
+        if len(sessions) != 0:
+            session_avarage_duration = int(sum(sessions)) // len(sessions)
+            total_time = int(sum(sessions))
+            min_session = min(sessions)
+            max_session = max(sessions)
+            if len(benefit_sessions) != 0:
+                benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
+                max_benefit_session = int(max(benefit_sessions))
+            else:
+                benefits_session_avarage_duration = 0
+                max_benefit_session = 0
+
+        parkings_array.append(Park(
+                park.address, how_much_people_used, people_used_free_time, 
+                total_time, session_avarage_duration, min_session, max_session, 
+                with_benefits, benefits_session_avarage_duration, max_benefit_session
+            )) 
+        
+        for park in parkings_array:
+            parking = Parking.objects.get(address=park.address)
+            price_per_minute = parking.price_per_minute
+            total_price = price_per_minute * minutes
+            how_much_people_used = park.how_much_people_used
+            with_benefits = park.with_benefits
+            benefits_price = with_benefits * price_per_minute
+
+            fins_parkings_array.append(
+                Fin(
+                    parking.address, total_price, how_much_people_used, 
+                    with_benefits, benefits_price
+                    )
+            )
+
+        return parkings_array, fins_parkings_array
+
+def panel(request):
+    user = request.user
+    print(user)
+    if user.rights == 2:
         parkings = Parking.objects.all()
-        parkings_array = []
-        fins_parkings_array = []
-        for park in parkings:
-            reciepts = Reciept.objects.filter(parking_id=park.pk)
 
-            how_much_people_used = 0
-            people_used_free_time = 0
-            minutes = 0
-            sessions = []
-            benefit_sessions = []
-            with_benefits = 0
+        if request.method == 'POST':
 
-            for reciept in reciepts:
-                if reciept.start_time >= period_start and reciept.finish_time <= period_end:
-                    parking = reciept.parking_id
-                    parking_id = parking.pk
+            period_start = request.POST.get('period_start')
+            period_end = request.POST.get('period_end')
 
-                    how_much_people_used += 1
+            parks, fins = data(period_start, period_end)
 
-                    difference = (reciept.finish_time - reciept.start_time)
-                    seconds = difference.total_seconds()
-                    minutes = seconds // 60
-
-                    sessions.append(minutes)
-
-                    if minutes <= parking.free_time:
-                        people_used_free_time += 1
-
-                    if reciept.benefit == True:
-                        with_benefits += 1
-                        benefit_sessions.append(minutes)
-
-            if len(sessions) != 0:
-                session_avarage_duration = int(sum(sessions)) // len(sessions)
-                total_time = sum(sessions)
-                min_session = min(sessions)
-                max_session = max(sessions)
-                if len(benefit_sessions) != 0:
-                    benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
-                    max_benefit_session = max(benefit_sessions)
-                else:
-                    benefits_session_avarage_duration = 0
-                    max_benefit_session = 0
-
-            parkings_array.append(Park(
-                    park.address, how_much_people_used, people_used_free_time, 
-                    total_time, session_avarage_duration, min_session, max_session, 
-                    with_benefits, benefits_session_avarage_duration, max_benefit_session
-                )) 
-            
-            for park in parkings_array:
-                parking = Parking.objects.get(address=park.address)
-                price_per_minute = parking.price_per_minute
-                total_price = price_per_minute * minutes
-                how_much_people_used = park.how_much_people_used
-                with_benefits = park.with_benefits
-                benefits_price = with_benefits * price_per_minute
-
-                fins_parkings_array.append(
-                    Fin(
-                        parking.address, total_price, how_much_people_used, 
-                        with_benefits, benefits_price
-                        )
-                )
-            try:
-                start = request.COOKIES['period_start']
-                end = request.COOKIES['period_end']
-            except:
-                start = ''
-                end = ''
             context = {
-                'parkings': parkings_array,
-                'fins': fins_parkings_array,
-                'start': start, 
-                'end': end
+                'parkings': parks,
+                'fins': fins,
+                'start':  str(period_start)[:10], 
+                'end': str(period_end)[:10]
             }
 
             rsn = render(request, 'panel.html', context)
-
-            rsn.set_cookie('period_start', period_start)
-            rsn.set_cookie('period_end', period_end)
+            rsn.set_cookie('period_start', str(period_start)[:10])
+            rsn.set_cookie('period_end', str(period_end)[:10])
             
             return rsn
-    try:
-        start = request.COOKIES['period_start']
-        end = request.COOKIES['period_end']
-    except:
-        start = ''
-        end = ''
+        try:
+            period_start = request.COOKIES['period_start']
+            period_end = request.COOKIES['period_end']
+            parks, fins = data(period_start, period_end)
+        except:
+            period_start = ''
+            period_end = ''
 
-    return render(request, 'panel.html', {'start': start, 'end': end, 'logged':check_logged(request)})
+        context = {
+            'parkings': parks,
+            'fins': fins,
+            'start':  str(period_start)[:10], 
+            'end': str(period_end)[:10]
+        }
+
+        return render(request, 'panel.html', context, {'logged':check_logged(request)})
+    else: 
+        return redirect(reverse('parkingapp:index'))
 
