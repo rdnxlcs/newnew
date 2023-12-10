@@ -80,14 +80,16 @@
 
 
 
-      let x=0, y=0, id=0;
+      let x=0, y=0, id=0, places=0, price=0;
       for(let i=0; i<parking.length; i++){
-        if(i%4==0) x=Number(parking[i]);
-        else if(i%4==1) y=Number(parking[i]);
-        else if(i%4==2) id=Number(parking[i]);
-        else if(i%4==3){
+        if(i%6==0) x=Number(parking[i]);
+        else if(i%6==1) y=Number(parking[i]);
+        else if(i%6==2) id=Number(parking[i]);
+        else if(i%6==3) places=Number(parking[i]);
+        else if(i%6==4) price=Number(parking[i]);
+        else if(i%6==5){
           //console.log(x, y, id);
-          DG.marker([x, y]).addTo(map).bindPopup("Айди парковки: "+id);
+          DG.marker([x, y]).addTo(map).bindPopup("Айди парковки: "+id+", Свободные места:"+places+", Цена:"+price);
         }
       }
       console.log(parking)
