@@ -64,10 +64,13 @@ def index(request):
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
             parkings.append(99999)
+        parkings = ' '.join(list(map(str, parkings))[:-1])
 
     except:
         parkings = []
         reciepts = []
+    # url='v1' (on default)
+    # BASE_URL = 'https://static-maps.yandex.ru/v1'
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
 def create_parking(request):
