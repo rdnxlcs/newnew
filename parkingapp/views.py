@@ -403,23 +403,22 @@ def dash_fin(request):
 
 def dash_users(request):
     return render(request, 'dash_users.html')
-def charts(request):
-    p_start = datetime(2023, 12, 25, 0, 0, 0, tzinfo=None)
-    p_end = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
-    if (p_end - p_start).days <= 1:
-        reciepts_to_send = {}
-        reciepts_to_send["parks"] = {}
-        parkings = Parking.objects.all()
-        for park in parkings:
-            reciepts = Reciept.objects.filter(parking_id=park.pk)
-            for reciept in reciepts:
-                print(park, reciept.start_time.day)
-                dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
-                if p_end >= dt >= p_start:
-                    try:
-                        reciepts_to_send['parks'][str(park.pk)] += 1
-                    except:
-                        reciepts_to_send['parks'][str(park.pk)] = 1
-        reciepts_to_send = str(reciepts_to_send)
-        print(json.dumps(reciepts_to_send))
+def compare_parks(request):
+    p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
+    p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)
+    reciepts_to_send = {}
+    reciepts_to_send["parks"] = {}
+    parkings = Parking.objects.all()
+    for park in parkings:
+        reciepts = Reciept.objects.filter(parking_id=park.pk)
+        for reciept in reciepts:
+            print(park, reciept.start_time.day)
+            dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
+            if p_end >= dt >= p_start:
+                try:
+                    reciepts_to_send['parks'][str(park.pk)] += 1
+                except:
+                    reciepts_to_send['parks'][str(park.pk)] = 1
+    reciepts_to_send = str(reciepts_to_send)
+    print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
