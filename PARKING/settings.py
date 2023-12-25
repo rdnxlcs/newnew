@@ -82,7 +82,8 @@ DATABASES = {
     }
 }
 ALLOWED_HOSTS = [
-    '*'
+    'kdhack2023.ru',
+    '127.0.0.1'
 ]
 
 # Password validation

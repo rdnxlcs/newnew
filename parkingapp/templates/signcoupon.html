@@ -11,16 +11,20 @@
           <form method="post">
             {% csrf_token %}
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="c" placeholder="" name="username">
-              <label for="c">Имя пользователя</label>
+              {{ form.username }}
+              <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
             </div>
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="c" placeholder="" name="password">
-              <label for="c">Пароль</label>
+              {{ form.password1 }}
+              <label for="{{ form.password1.id_for_label }}">Пароль</label>
             </div>
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="c" placeholder="" name="park_id">
-              <label for="c">Привязка к парковке</label>
+              {{ form.password2 }}
+              <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
+            </div>
+            <div class="form-floating mb-3">
+              {{ form.park_id }}
+              <label for="{{ form.park_id.id_for_label }}">Привязка к парковке</label>
             </div>
             {{ error }}
             <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Зарегистрироваться</button>

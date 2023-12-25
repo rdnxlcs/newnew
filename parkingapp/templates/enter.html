@@ -12,12 +12,12 @@
           <form method="post">
             {% csrf_token %}
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="b" placeholder="" name="username"> 
-              <label for="b">Имя пользователя</label>
+              {{ form.username }}
+              <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="text" class="form-control rounded-3" id="b" placeholder="" name="password">
-                <label for="b">Пароль</label>
+              {{ form.password }}
+              <label for="{{ form.password.id_for_label }}">Пароль</label>
             </div>
             <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Войти</button>
             <small>{{ error }}</small>

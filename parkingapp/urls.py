@@ -4,7 +4,9 @@ from . import views
 app_name="parkingapp"
 
 urlpatterns = [
-    path('index', views.index, name='index'),
+    path('', views.index, name='index'),
+    path('logout/', views.logout, name='logout'),
+    path('dont_have_access/', views.dont_have_access, name='dont_have_access'),
     path('sign', views.sign, name='sign'),
     path('enter', views.enter, name='enter'),
     path('panel', views.panel, name='panel'),
@@ -15,7 +17,6 @@ urlpatterns = [
     path('endparking', views.endparking, name='endparking'),
     path('esp', views.esp, name='esp'),
     path('error', views.error, name='error'),
-    path('create_parking', views.create_parking, name='create_parking'),
     path('dash_full', views.dash_full, name='dash_full'),
     path('dash_coupon', views.dash_coupon, name='dash_coupon'),
     path('dash_fin', views.dash_fin, name='dash_fin'),

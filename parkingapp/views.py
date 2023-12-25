@@ -4,12 +4,23 @@ from django.urls import reverse
 from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils.timezone import make_aware
+import ymaps
+
+from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm
 
 def check_logged(request):
+    #print(request.user.is_authenticated)
     if request.user.is_authenticated:
         return True
     return False
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect(reverse('parkingapp:index'))
+
 
 def index(request):
     if request.method == 'POST':
@@ -58,113 +69,140 @@ def index(request):
         reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
         parkings = []
         for el in Parking.objects.all():
-            parkings.append(el.lattitude)
             parkings.append(el.longitude)
+            parkings.append(el.lattitude)
             parkings.append(el.pk)
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
+            parkings.append(el.address)
             parkings.append(99999)
+        parkings = ' '.join(list(map(str, parkings))[:-1])
 
     except:
         parkings = []
         reciepts = []
+    # url='v1' (on default)
+    # BASE_URL = 'https://static-maps.yandex.ru/v1'
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
-def create_parking(request):
-    if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
-        address = request.POST.get('address')
-        max_parking_spaces = request.POST.get('max_parking_spaces')
-        price_per_minute = 70
-        occupied_places = 0
-        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
-    return render(request, 'create_parking.html', {'logged': check_logged})
+def dont_have_access(request):
+    return render(request, 'dont_have_access.html')
+
 
 def sign(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        card_num = request.POST.get('card_num')
-        card_period = request.POST.get('card_period')
-        card_cvv = request.POST.get('card_cvv')
-        user_password = request.POST.get('user_password')
-        try:
-            User.objects.get(username=username)
-            return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
-        except:
-            User.objects.create(username=username, card_num=card_num, card_period=card_period, card_cvv=card_cvv, password=user_password)
-            return redirect(reverse('parkingapp:enter'))
-        
-        
+        form = UserRegistrationForm(data=request.POST)
+        if form.is_valid():
+            password1 = make_password(request.POST['password1'])
+            created_form = form.save(commit=False)
+            created_form.password1 = password1
+            created_form.password2 = password1
+            created_form.righs = 0
+            created_form.save()
 
-    return render(request, 'sign.html', {'logged':check_logged(request)})
+            return HttpResponseRedirect(reverse('parkingapp:enter'))
+    else:
+        form = UserRegistrationForm()
+
+    context = {
+        'logged': check_logged(request),
+        'form': form,
+    }
+    return render(request, 'sign.html', context)
 
 def enter(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        try:
-            user = User.objects.get(username=username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(reverse('parkingapp:index'))
-        except:
-            return render(request, 'enter.html', {'error': 'Не туда!', 'logged':check_logged(request)})
+        if 'username' in request.POST:
+            # print('hereherehere')
+            form = UserLoginForm(data=request.POST)
+            username = request.POST['username']
+            password = request.POST['password']
+            try:
+                user = User.objects.get(username=username)
+                if user.check_password(password):
+                    auth.login(request, user)
+                    return HttpResponseRedirect(reverse('parkingapp:index'))
+            except:
+                print('зуй')
+    else:
+        form = UserLoginForm()
 
-    return render(request, 'enter.html', {'logged':check_logged(request)})
+    context = {
+        'logged': check_logged(request),
+        'form': form,
+    }
+    return render(request, 'enter.html', context)
     
 def addparking(request):
     if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
         address = request.POST.get('address')
+        client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+        lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+
         max_parking_spaces = request.POST.get('max_parking_spaces')
         price_per_minute = 1
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
         return render(request, 'panel.html', {'logged':check_logged(request)})
-
-    return render(request, 'addparking.html', {'logged':check_logged(request)})
-
+    user = request.user
+    if user.is_authenticated and user.rights == 2:
+        return render(request, 'addparking.html', {'logged':check_logged(request)})
+    else:
+        return redirect(reverse('parkingapp:dont_have_access'))
+    
 def signadmin(request):
-    if request.method == 'POST':
-        user = request.user
-        admins = User.objects.filter(rights=2)
-        if user in admins:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            try :
-                User.objects.get(username=username)
-                return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
-            except:
-                User.objects.create(username=username, password=password, rights=2)
+    current_user = request.user
+    all_admins = User.objects.filter(rights=2)
+    if current_user in all_admins:
+        if request.method == 'POST':    
+            form = AdminRegistrationForm(data=request.POST)
+            password1 = make_password(request.POST['password1'])
+            if form.is_valid():
+                created_form = form.save(commit=False)
+                created_form.password1 = password1
+                created_form.rights = 2
+                created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html', {'logged':check_logged(request)})
-    return render(request, 'signadmin.html', {'logged':check_logged(request)})
+            form = AdminRegistrationForm()
+
+        context = {
+            'logged': check_logged(request),
+            'form': form
+        }
+        return render(request, 'signadmin.html', context)
+    else:
+        return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
 
 def signcoupon(request):
-    if request.method == 'POST':
-        user = request.user
-        admins = User.objects.filter(rights=2)
-        if user in admins:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            park_id = request.POST.get('park_id')
-            try :
-                User.objects.get(username=username)
-                return render(request, 'signcoupon.html', {'error': 'Такой пользователь уже существует!', 'logged':check_logged(request)})
-            except:
-                User.objects.create(username=username, password=password, park_id=park_id, rights=1)
+    current_user = request.user
+    all_admins = User.objects.filter(rights=2)
+    if current_user in all_admins:
+        if request.method == 'POST':    
+            form = CouponerRegistrationForm(data=request.POST)
+            password1 = make_password(request.POST['password1'])
+            if form.is_valid():
+                created_form = form.save(commit=False)
+                created_form.password1 = password1
+                created_form.rights = 1
+                created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html', {'logged':check_logged(request)})
-    return render(request, 'signcoupon.html', {'logged':check_logged(request)})
+            form = CouponerRegistrationForm()
+
+        context = {
+            'logged': check_logged(request),
+            'form': form
+        }
+        return render(request, 'signcoupon.html', context)
+    
+    else:
+        return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))   
    
 
 def coupon(request):
     user = request.user
-    if user.rights == 1:
+    if user.is_authenticated and user.rights == 1:
         if request.method == 'POST':
             checkid = request.POST.get('benifit')
             reciept = Reciept.objects.get(pk=checkid)
@@ -299,9 +337,13 @@ def data(period_start, period_end):
         )
     return parkings_array, fins_parkings_array
 
+def abc(start_time, finish_time):
+    #do shit 
+    pass
+
 def panel(request):
     user = request.user
-    if user.rights == 2:
+    if user.is_authenticated and user.rights == 2:
         parkings = Parking.objects.all()
 
         if request.method == 'POST':
@@ -343,7 +385,7 @@ def panel(request):
 
         return render(request, 'panel.html', context)
     else: 
-        return redirect(reverse('parkingapp:index'))
+        return redirect(reverse('parkingapp:dont_have_access'))
 
 
 
