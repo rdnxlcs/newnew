@@ -4,6 +4,7 @@ from django.urls import reverse
 from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils.timezone import make_aware
 import ymaps
 
@@ -92,7 +93,7 @@ def sign(request):
         card_num = request.POST.get('card_num')
         card_period = request.POST.get('card_period')
         card_cvv = request.POST.get('card_cvv')
-        user_password = request.POST.get('user_password')
+        user_password = make_password(request.POST.get('user_password'))
         try:
             User.objects.get(username=username)
             return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
@@ -110,14 +111,14 @@ def enter(request):
             username = request.POST.get('username')
             password = request.POST.get('password')
             try:
-                user = User.objects.get(username=username, password=password)
-                if user:
+                user = User.objects.get(username=username)
+                if user.check_password(password):
                     auth.login(request, user)
                     return redirect(reverse('parkingapp:index'))
             except:
                 return render(request, 'enter.html', {'error': 'Не туда!', 'logged':check_logged(request)})
         elif 'logout' in request.POST:
-            print('here')
+            #print('here')
             auth.logout(request)
     return render(request, 'enter.html', {'logged':check_logged(request)})
 from pprint import *
@@ -132,7 +133,7 @@ def addparking(request):
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
         return render(request, 'panel.html', {'logged':check_logged(request)})
-
+        
     return render(request, 'addparking.html', {'logged':check_logged(request)})
     
 def signadmin(request):
