@@ -66,6 +66,7 @@ def index(request):
             parkings.append(el.pk)
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
+            parkings.append(el.address)
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1])
 
@@ -144,7 +145,7 @@ def signadmin(request):
         admins = User.objects.filter(rights=2)
         if user in admins:
             username = request.POST.get('username')
-            password = request.POST.get('password')
+            password = make_password(request.POST.get('password'))
             try:
                 User.objects.get(username=username)
                 return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
@@ -161,7 +162,7 @@ def signcoupon(request):
         admins = User.objects.filter(rights=2)
         if user in admins:
             username = request.POST.get('username')
-            password = request.POST.get('password')
+            password = make_password(request.POST.get('password'))
             park_id = request.POST.get('park_id')
             try :
                 User.objects.get(username=username)

@@ -54,10 +54,14 @@
   let parkings = "{{parkings}}".split(" 99999 ");
   for(let i=0; i<parkings.length; i++){
     parkings[i] = parkings[i].split(" ");
-    for(let j=0; j<parkings[i].length; j++){
+    for(let j=0; j<5; j++){
       parkings[i][j] = Number(parkings[i][j]);
     }
+    for(let j=6; j<parkings[i].length; j++){
+      parkings[i][5]+=" "+parkings[i][j];
+    }
   }
+  console.log(parkings);
 
   ymaps.ready(init);
   function init() {
@@ -70,7 +74,7 @@
       // lng lat pk lots price
       var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], { 
           iconContent: 'Стоянка номер '+parkings[i][2], 
-          balloonContent: 'Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+' | Цена: '+parkings[i][4]
+          balloonContent: parkings[i][5]+' | Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+' | Цена: '+parkings[i][4]
       }, {
           preset: 'twirl#blueStretchyIcon'
       });
