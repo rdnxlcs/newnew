@@ -6,7 +6,9 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils.timezone import make_aware
+from django.http import JsonResponse
 import ymaps
+import json
 
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm
 
@@ -343,6 +345,7 @@ def abc(start_time, finish_time):
 
 def panel(request):
     user = request.user
+
     if user.is_authenticated and user.rights == 2:
         parkings = Parking.objects.all()
 
@@ -387,3 +390,23 @@ def panel(request):
     else: 
         return redirect(reverse('parkingapp:dont_have_access'))
 
+def charts(request):
+    p_start = datetime(2023, 12, 25, 0, 0, 0, tzinfo=None)
+    p_end = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
+    if (p_end - p_start).days <= 1:
+        reciepts_to_send = {}
+        reciepts_to_send["parks"] = {}
+        parkings = Parking.objects.all()
+        for park in parkings:
+            reciepts = Reciept.objects.filter(parking_id=park.pk)
+            for reciept in reciepts:
+                print(park, reciept.start_time.day)
+                dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
+                if p_end >= dt >= p_start:
+                    try:
+                        reciepts_to_send['parks'][str(park.pk)] += 1
+                    except:
+                        reciepts_to_send['parks'][str(park.pk)] = 1
+        reciepts_to_send = str(reciepts_to_send)
+        print(json.dumps(reciepts_to_send))
+    return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})

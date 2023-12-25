@@ -17,4 +17,5 @@ urlpatterns = [
     path('endparking', views.endparking, name='endparking'),
     path('esp', views.esp, name='esp'),
     path('error', views.error, name='error'),
+    path('charts', views.charts, name='charts'),
 ]
