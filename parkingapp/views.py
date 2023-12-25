@@ -142,7 +142,7 @@ def signadmin(request):
         if user in admins:
             username = request.POST.get('username')
             password = request.POST.get('password')
-            try :
+            try:
                 User.objects.get(username=username)
                 return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
             except:
