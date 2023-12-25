@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.timezone import make_aware
 
 def check_logged(request):
+    #print(request.user.is_authenticated)
     if request.user.is_authenticated:
         return True
     return False
@@ -104,16 +105,19 @@ def sign(request):
 
 def enter(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        try:
-            user = User.objects.get(username=username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(reverse('parkingapp:index'))
-        except:
-            return render(request, 'enter.html', {'error': 'Не туда!', 'logged':check_logged(request)})
-
+        if 'username' in request.POST:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            try:
+                user = User.objects.get(username=username, password=password)
+                if user:
+                    auth.login(request, user)
+                    return redirect(reverse('parkingapp:index'))
+            except:
+                return render(request, 'enter.html', {'error': 'Не туда!', 'logged':check_logged(request)})
+        elif 'logout' in request.POST:
+            print('here')
+            auth.logout(request)
     return render(request, 'enter.html', {'logged':check_logged(request)})
     
 def addparking(request):
