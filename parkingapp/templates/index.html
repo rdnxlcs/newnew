@@ -67,10 +67,10 @@
       });
       myMap.controls.add('mapTools', {left:5, bottom:35}).add('typeSelector', {left:5, top:5}).add('zoomControl', {right:5, top:15});  
     for(let i=0; i<parkings.length; i++){
-      // lat lon pk lots price
+      // lng lat pk lots price
       var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], { 
           iconContent: 'Стоянка номер '+parkings[i][2], 
-          balloonContent: 'Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+'Цена: '+parkings[i][4] 
+          balloonContent: 'Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+'Цена: '+parkings[i][4]
       }, {
           preset: 'twirl#blueStretchyIcon'
       });

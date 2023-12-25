@@ -5,6 +5,7 @@ from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
 from django.utils.timezone import make_aware
+import ymaps
 
 def check_logged(request):
     #print(request.user.is_authenticated)
@@ -59,8 +60,8 @@ def index(request):
         reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
         parkings = []
         for el in Parking.objects.all():
-            parkings.append(el.lattitude)
             parkings.append(el.longitude)
+            parkings.append(el.lattitude)
             parkings.append(el.pk)
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
@@ -119,12 +120,13 @@ def enter(request):
             print('here')
             auth.logout(request)
     return render(request, 'enter.html', {'logged':check_logged(request)})
-    
+from pprint import *
 def addparking(request):
     if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
         address = request.POST.get('address')
+        client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+        lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+
         max_parking_spaces = request.POST.get('max_parking_spaces')
         price_per_minute = 1
         occupied_places = 0
@@ -132,7 +134,7 @@ def addparking(request):
         return render(request, 'panel.html', {'logged':check_logged(request)})
 
     return render(request, 'addparking.html', {'logged':check_logged(request)})
-
+    
 def signadmin(request):
     if request.method == 'POST':
         user = request.user
