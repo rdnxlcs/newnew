@@ -345,3 +345,16 @@ def panel(request):
     else: 
         return redirect(reverse('parkingapp:index'))
 
+
+
+def dash_full(request):
+    return render(request, 'dash_full.html')
+
+def dash_coupon(request):
+    return render(request, 'dash_coupon.html')
+
+def dash_fin(request):
+    return render(request, 'dash_fin.html')
+
+def dash_users(request):
+    return render(request, 'dash_users.html')

@@ -7,13 +7,11 @@
             <div class="px-4 my-3 text-center">
                 <h1 class="display-5 fw-bold text-body-emphasis">Парковка завершена</h1>
                 <hr>
-                <p class="lead">{{ reciept.final_price }}</p>
+                <p class="lead my-0">{{ reciept.final_price }} ₽</p>
+                <p class="lead my-0">ул. Тарановой 5</p>
+                <p class="lead">id чека: {{ reciept.pk }}</p>
                 <hr>
-                <div class="mx-auto">
-                    <p class="lead my-0">id парковки: {{ reciept.parking_id.pk }}</p>
-                    <p class="lead">id чека: {{ reciept.pk }}</p>
-                </div>
-                <a class="btn btn-primary" href="index">Вернуться назад</a>
+                <a class="btn btn-lg btn-primary" href="index">Вернуться назад</a>
             </div>
         </div>
       </div>

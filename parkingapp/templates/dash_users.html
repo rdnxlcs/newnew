@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Dashboard - Brand</title>
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-dark p-0">
+            <div class="container-fluid d-flex flex-column p-0">
+                <a class="d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+                    <div class="fw-bold mx-3"><span>есп</span></div>
+                </a>
+                <hr class="sidebar-divider my-0">
+                <ul class="navbar-nav text-light" id="accordionSidebar">
+                    <li class="nav-item"><a class="nav-link" href="dash_full"><span>Наполняемость</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="dash_coupon"><span>Льготные места</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="dash_fin"><span>Финансовый отчет</span></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="dash_users"><span>Пользователи</span></a></li>
+                    <li class="nav-item"></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid mt-3">
+                    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-dark mb-0">Пользователи</h3>
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="date" class="form-control btn btn-sm btn-outline-secondary" value="{{ start }}" name="period_start">
+                            <input type="date" class="form-control btn btn-sm btn-outline-secondary" value="{{ end }}" name="period_end">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Получить данные</button>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="row">
+                            <div class="card shadow p-0">
+                                <div class="d-sm-flex card-header py-3 justify-content-between align-items-center">
+                                    <p class="text-primary m-0 fw-bold">Пользователи</p>
+                                    <div>
+                                        <button class="btn btn-primary rounded-pill mx-1" type="button">Добавить администартора</button>
+                                        <button class="btn btn-primary rounded-pill mx-1" type="button">Добавить партнера</button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                    <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                                        <table class="table my-0" id="dataTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Имя пользователя</th>
+                                                    <th>Права</th>
+                                                    <th>Прикреплен к парковке</th>
+                                                    <th>Действие</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Integration Specialist</td>
+                                                    <td>New York</td>
+                                                    <td>61</td>
+                                                    <td><button class="btn btn-danger rounded-pill" type="button">Удалить</button></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Software Engineer</td>
+                                                    <td>London</td>
+                                                    <td>38</td>
+                                                    <td><button class="btn btn-danger rounded-pill" type="button">Удалить</button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="{% static 'assets/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/chart.min.js' %}"></script>
+    <script src="{% static 'assets/js/bs-init.js' %}"></script>
+    <script src="{% static 'assets/js/theme.js' %}"></script>
+</body>
+
+</html>
