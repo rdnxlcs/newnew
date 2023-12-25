@@ -5,6 +5,7 @@ app_name="parkingapp"
 
 urlpatterns = [
     path('index', views.index, name='index'),
+    path('dont_have_access/', views.dont_have_access, name='dont_have_access'),
     path('sign', views.sign, name='sign'),
     path('enter', views.enter, name='enter'),
     path('panel', views.panel, name='panel'),

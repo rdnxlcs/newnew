@@ -6,6 +6,8 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
 from django.utils.timezone import make_aware
 
+from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm
+
 def check_logged(request):
     if request.user:
         return True
@@ -80,37 +82,46 @@ def create_parking(request):
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
     return render(request, 'create_parking.html', {'logged': check_logged})
 
+
+def dont_have_access(request):
+    return render(request, 'dont_have_access.html')
+
+
 def sign(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        card_num = request.POST.get('card_num')
-        card_period = request.POST.get('card_period')
-        card_cvv = request.POST.get('card_cvv')
-        user_password = request.POST.get('user_password')
-        try:
-            User.objects.get(username=username)
-            return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
-        except:
-            User.objects.create(username=username, card_num=card_num, card_period=card_period, card_cvv=card_cvv, password=user_password)
-            return redirect(reverse('parkingapp:enter'))
-        
-        
+        form = UserRegistrationForm(data=request.POST)
+        if form.is_valid():
+            created_form = form.save(commit=False)
+            created_form.righs = 0
+            created_form.save()
 
-    return render(request, 'sign.html', {'logged':check_logged(request)})
+            return HttpResponseRedirect(reverse('parkingapp:enter'))
+    else:
+        form = UserRegistrationForm()
+
+    context = {
+        'logged': check_logged(request),
+        'form': form,
+    }
+    return render(request, 'sign.html', context)
 
 def enter(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        try:
-            user = User.objects.get(username=username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(reverse('parkingapp:index'))
-        except:
-            return render(request, 'enter.html', {'error': 'ДУРА!!! ПОШЛА НАХУЙ!', 'logged':check_logged(request)})
+        form = UserLoginForm(data=request.POST)
+        username = request.POST['username']
+        password = request.POST['password']
+        user = auth.authenticate(username=username, password=password)
+        if user:
+            auth.login(request, user)
+            return HttpResponseRedirect(reverse('parkingapp:index'))
+    else:
+        form = UserLoginForm()
 
-    return render(request, 'enter.html', {'logged':check_logged(request)})
+    context = {
+        'logged': check_logged(request),
+        'form': form,
+    }
+    return render(request, 'enter.html', context)
     
 def addparking(request):
     if request.method == 'POST':
@@ -126,39 +137,49 @@ def addparking(request):
     return render(request, 'addparking.html', {'logged':check_logged(request)})
 
 def signadmin(request):
-    if request.method == 'POST':
-        user = request.user
-        admins = User.objects.filter(rights=2)
-        if user in admins:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            try :
-                User.objects.get(username=username)
-                return render(request, 'sign.html', {'error': 'Такой пользователь уже существует', 'logged':check_logged(request)})
-            except:
-                User.objects.create(username=username, password=password, rights=2)
+    current_user = request.user
+    all_admins = User.objects.filter(rights=2)
+    if current_user in all_admins:
+        if request.method == 'POST':    
+            form = AdminRegistrationForm(data=request.POST)
+            if form.is_valid():
+                created_form = form.save(commit=False)
+                created_form.rights = 2
+                created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html', {'logged':check_logged(request)})
-    return render(request, 'signadmin.html', {'logged':check_logged(request)})
+            form = AdminRegistrationForm()
+
+        context = {
+            'logged': check_logged(request),
+            'form': form
+        }
+        return render(request, 'signadmin.html', context)
+    else:
+        return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
 
 def signcoupon(request):
-    if request.method == 'POST':
-        user = request.user
-        admins = User.objects.filter(rights=2)
-        if user in admins:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            park_id = request.POST.get('park_id')
-            try :
-                User.objects.get(username=username)
-                return render(request, 'signcoupon.html', {'error': 'Такой пользователь уже существует!', 'logged':check_logged(request)})
-            except:
-                User.objects.create(username=username, password=password, park_id=park_id, rights=1)
+    current_user = request.user
+    all_admins = User.objects.filter(rights=2)
+    if current_user in all_admins:
+        if request.method == 'POST':    
+            form = CouponerRegistrationForm(data=request.POST)
+            if form.is_valid():
+                created_form = form.save(commit=False)
+                created_form.rights = 1
+                created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            return render(request, 'error.html', {'logged':check_logged(request)})
-    return render(request, 'signcoupon.html', {'logged':check_logged(request)})
+            form = CouponerRegistrationForm()
+
+        context = {
+            'logged': check_logged(request),
+            'form': form
+        }
+        return render(request, 'signcoupon.html', context)
+    
+    else:
+        return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))   
    
 
 def coupon(request):
