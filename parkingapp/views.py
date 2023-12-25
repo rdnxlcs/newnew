@@ -85,18 +85,6 @@ def index(request):
     # BASE_URL = 'https://static-maps.yandex.ru/v1'
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
-def create_parking(request):
-    if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
-        address = request.POST.get('address')
-        max_parking_spaces = request.POST.get('max_parking_spaces')
-        price_per_minute = 70
-        occupied_places = 0
-        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
-    return render(request, 'create_parking.html', {'logged': check_logged})
-
-
 def dont_have_access(request):
     return render(request, 'dont_have_access.html')
 
@@ -135,10 +123,7 @@ def enter(request):
                     auth.login(request, user)
                     return HttpResponseRedirect(reverse('parkingapp:index'))
             except:
-                print('хуй')
-        elif 'logout' in request.POST:
-            print('here')
-            auth.logout(request)
+                print('зуй')
     else:
         form = UserLoginForm()
 
@@ -159,8 +144,11 @@ def addparking(request):
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
         return render(request, 'panel.html', {'logged':check_logged(request)})
-        
-    return render(request, 'addparking.html', {'logged':check_logged(request)})
+    user = request.user
+    if user.is_authenticated and user.rights == 2:
+        return render(request, 'addparking.html', {'logged':check_logged(request)})
+    else:
+        return redirect(reverse('parkingapp:dont_have_access'))
     
 def signadmin(request):
     current_user = request.user
@@ -214,7 +202,7 @@ def signcoupon(request):
 
 def coupon(request):
     user = request.user
-    if user.rights == 1:
+    if user.is_authenticated and user.rights == 1:
         if request.method == 'POST':
             checkid = request.POST.get('benifit')
             reciept = Reciept.objects.get(pk=checkid)
@@ -349,9 +337,13 @@ def data(period_start, period_end):
         )
     return parkings_array, fins_parkings_array
 
+def abc(start_time, finish_time):
+    #do shit 
+    pass
+
 def panel(request):
     user = request.user
-    if user.rights == 2:
+    if user.is_authenticated and user.rights == 2:
         parkings = Parking.objects.all()
 
         if request.method == 'POST':
@@ -393,5 +385,5 @@ def panel(request):
 
         return render(request, 'panel.html', context)
     else: 
-        return redirect(reverse('parkingapp:index'))
+        return redirect(reverse('parkingapp:dont_have_access'))
 

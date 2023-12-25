@@ -18,5 +18,4 @@ urlpatterns = [
     path('endparking', views.endparking, name='endparking'),
     path('esp', views.esp, name='esp'),
     path('error', views.error, name='error'),
-    path('create_parking', views.create_parking, name='create_parking'),
 ]
