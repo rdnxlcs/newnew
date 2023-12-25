@@ -16,6 +16,12 @@ def check_logged(request):
         return True
     return False
 
+
+def logout(request):
+    auth.logout(request)
+    return redirect(reverse('parkingapp:index'))
+
+
 def index(request):
     if request.method == 'POST':
         if 'create_park' in request.POST:
