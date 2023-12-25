@@ -29,12 +29,14 @@ class UserRegistrationForm(UserCreationForm):
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-3',
         'placeholder': 'Пароль',
-        'minlenght': 8
+        'minlenght': 8,
+        'maxlength': 100
     }))
     password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-3',
         'placeholder': 'Пароль',
         'minlength': 8,
+        'maxlength': 100
     }))
     card_num = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control rounded-3',

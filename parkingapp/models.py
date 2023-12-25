@@ -8,8 +8,8 @@ class User(AbstractUser):
     card_cvv = models.PositiveIntegerField(default=0)
     rights = models.IntegerField(default=0)
     username = models.CharField(max_length=20, unique=True)
-    password1 = models.CharField(max_length=20)
-    password1 = models.CharField(max_length=20)
+    password1 = models.CharField(max_length=200, default=None)
+    password2 = models.CharField(max_length=200, default=None)
     park_id = models.IntegerField(default=0)
 
     def __str__(self) -> str:

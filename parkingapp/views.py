@@ -98,10 +98,11 @@ def dont_have_access(request):
 def sign(request):
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
-        password1 = make_password(request.POST['password1'])
         if form.is_valid():
+            password1 = make_password(request.POST['password1'])
             created_form = form.save(commit=False)
             created_form.password1 = password1
+            created_form.password2 = password1
             created_form.righs = 0
             created_form.save()
 
@@ -117,13 +118,21 @@ def sign(request):
 
 def enter(request):
     if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
-        username = request.POST['username']
-        password = request.POST['password']
-        user = auth.authenticate(username=username)
-        if user and user.check_password(password):
-            auth.login(request, user)
-            return HttpResponseRedirect(reverse('parkingapp:index'))
+        if 'username' in request.POST:
+            # print('hereherehere')
+            form = UserLoginForm(data=request.POST)
+            username = request.POST['username']
+            password = request.POST['password']
+            try:
+                user = User.objects.get(username=username)
+                if user.check_password(password):
+                    auth.login(request, user)
+                    return HttpResponseRedirect(reverse('parkingapp:index'))
+            except:
+                print('хуй')
+        elif 'logout' in request.POST:
+            print('here')
+            auth.logout(request)
     else:
         form = UserLoginForm()
 
