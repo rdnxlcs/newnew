@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.timezone import make_aware
 
 def check_logged(request):
-    if request.user:
+    if request.user.is_authenticated:
         return True
     return False
 
