@@ -33,7 +33,7 @@
                 <h1 class="display-4 fw-bold text-body-emphasis">Парковка идет<br><span></span></h1>
                 <div class="mx-auto">
                     <div class="mt-5 mb-3">
-                        <img src="https://qrcode.tec-it.com/API/QRCode?data={{ el.pk }}&backcolor=%23ffffff" height="300" width="300"/>
+                        <img src="https://qrcode.tec-it.com/API/QRCode?data={{ el.pk }}&backcolor=%23ffffff" height="250" width="250"/>
                     </div>
                     <p class="lead my-0">id парковки: {{ el.parking_id.id }}</p>
                     <p class="lead">id чека: {{ el.pk }}</p>
@@ -49,10 +49,44 @@
 </div>
 {% endfor %}
 {% endif %}
+<div id="myMap" style="width: 700px; height: 700px;"></div>
+<script type="text/javascript">
+  let parkings = "{{parkings}}".split(" 99999 ");
+  for(let i=0; i<parkings.length; i++){
+    parkings[i] = parkings[i].split(" ");
+    for(let j=0; j<5; j++){
+      parkings[i][j] = Number(parkings[i][j]);
+    }
+    for(let j=6; j<parkings[i].length; j++){
+      parkings[i][5]+=" "+parkings[i][j];
+    }
+  }
+  console.log(parkings);
 
+  ymaps.ready(init);
+  function init() {
+      var myMap = new ymaps.Map ('myMap', {
+          center: [54.7065, 20.511],
+          zoom: 9
+      });
+      myMap.controls.add('mapTools', {left:5, bottom:35}).add('typeSelector', {left:5, top:5}).add('zoomControl', {right:5, top:15});  
+    for(let i=0; i<parkings.length; i++){
+      // lng lat pk lots price
+      var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], { 
+          iconContent: 'Стоянка номер '+parkings[i][2], 
+          balloonContent: parkings[i][5]+' | Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+' | Цена: '+parkings[i][4]
+      }, {
+          preset: 'twirl#blueStretchyIcon'
+      });
+      myMap.geoObjects.add(myPlacemark);
+    }
+  }
+</script>
+<!--
 <div id="map" style="width:500px; height:400px; border-radius: 2rem;" class="shadow mx-auto"></div>
 <script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
 <script type="text/javascript">
+
     var map;
     DG.then(function () {
       map = DG.map('map', {
@@ -98,6 +132,7 @@
       //DG.marker([x, y]).addTo(map).bindPopup("{{el.address}}, {{el.pk}}");
     });
 </script>
+-->
 
 
 {% endblock %}

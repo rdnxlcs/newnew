@@ -4,12 +4,15 @@ from django.urls import reverse
 from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils.timezone import make_aware
+import ymaps
 
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm
 
 def check_logged(request):
-    if request.user:
+    #print(request.user.is_authenticated)
+    if request.user.is_authenticated:
         return True
     return False
 
@@ -60,15 +63,20 @@ def index(request):
         reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
         parkings = []
         for el in Parking.objects.all():
-            parkings.append(el.lattitude)
             parkings.append(el.longitude)
+            parkings.append(el.lattitude)
             parkings.append(el.pk)
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
+            parkings.append(el.address)
             parkings.append(99999)
+        parkings = ' '.join(list(map(str, parkings))[:-1])
 
     except:
+        parkings = []
         reciepts = []
+    # url='v1' (on default)
+    # BASE_URL = 'https://static-maps.yandex.ru/v1'
     return render(request, 'index.html', {'parking': Parking.objects.all(), 'reciepts': reciepts, 'logged':check_logged(request), "parkings":parkings, 'logged':check_logged(request)})
 
 def create_parking(request):
@@ -90,8 +98,10 @@ def dont_have_access(request):
 def sign(request):
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
+        password1 = make_password(request.POST['password1'])
         if form.is_valid():
             created_form = form.save(commit=False)
+            created_form.password1 = password1
             created_form.righs = 0
             created_form.save()
 
@@ -110,8 +120,8 @@ def enter(request):
         form = UserLoginForm(data=request.POST)
         username = request.POST['username']
         password = request.POST['password']
-        user = auth.authenticate(username=username, password=password)
-        if user:
+        user = auth.authenticate(username=username)
+        if user and user.check_password(password):
             auth.login(request, user)
             return HttpResponseRedirect(reverse('parkingapp:index'))
     else:
@@ -125,25 +135,28 @@ def enter(request):
     
 def addparking(request):
     if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
         address = request.POST.get('address')
+        client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+        lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+
         max_parking_spaces = request.POST.get('max_parking_spaces')
         price_per_minute = 1
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
         return render(request, 'panel.html', {'logged':check_logged(request)})
-
+        
     return render(request, 'addparking.html', {'logged':check_logged(request)})
-
+    
 def signadmin(request):
     current_user = request.user
     all_admins = User.objects.filter(rights=2)
     if current_user in all_admins:
         if request.method == 'POST':    
             form = AdminRegistrationForm(data=request.POST)
+            password1 = make_password(request.POST['password1'])
             if form.is_valid():
                 created_form = form.save(commit=False)
+                created_form.password1 = password1
                 created_form.rights = 2
                 created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
@@ -164,8 +177,10 @@ def signcoupon(request):
     if current_user in all_admins:
         if request.method == 'POST':    
             form = CouponerRegistrationForm(data=request.POST)
+            password1 = make_password(request.POST['password1'])
             if form.is_valid():
                 created_form = form.save(commit=False)
+                created_form.password1 = password1
                 created_form.rights = 1
                 created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
