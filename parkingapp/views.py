@@ -55,6 +55,8 @@ def index(request):
 
             reciept = Reciept.objects.get(pk=reciept_id)
             logged = False
+            
+
             if request.user.pk:
                 logged = True
             return render(request, 'endparking.html', {'reciept': reciept, 'logged': check_logged(request)})
@@ -69,6 +71,7 @@ def index(request):
             parkings.append(el.pk)
             parkings.append(el.max_parking_spaces - el.occupied_places)
             parkings.append(el.price_per_minute)
+            parkings.append(el.max_parking_spaces)
             parkings.append(el.address)
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1])
@@ -478,8 +481,8 @@ def dash_full(request):
                    'average_time': park.session_average_duration, 
                    'reciepts': json.dumps(str(reciepts_to_send))}
         return render(request, 'dash_full.html', context)
-
-    return render(request, 'dash_full.html')
+    parking = Parking.objects.all()
+    return render(request, 'dash_full.html', {'defid': parking[0].pk})
 
 def dash_parks(request):
     if request.method == 'POST':
@@ -571,7 +574,8 @@ def dash_coupon(request):
                    'average_time': park.benefits_session_average_duration, 
                    'reciepts': json.dumps(str(reciepts_to_send))}
         return render(request, 'dash_coupon.html', context)
-    return render(request, 'dash_coupon.html')
+    parking = Parking.objects.all()
+    return render(request, 'dash_coupon.html', {'defid': parking[0].pk})
 
 def dash_fin(request):
     if request.method == 'POST':

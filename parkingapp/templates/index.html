@@ -24,15 +24,7 @@
               <h5 class="bi flex-shrink-0">Парковка идет</h5>
             </div>
             <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">ул. Тарановой 5</h5>
-            </div>
-          </li>
-          <li class="row">
-            <div class="col-6">
-              <h5 class="bi flex-shrink-0">Стоимость</h5>
-            </div>
-            <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">0 ₽</h5>
+              <h5 class="mb-0 text-end fw-light">ПОМЕНЯТЬ</h5>
             </div>
           </li>
           <li class="row">
@@ -40,7 +32,7 @@
               <h5 class="bi flex-shrink-0">ID парковки</h5>
             </div>
             <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">0001</h5>
+              <h5 class="mb-0 text-end fw-light">{{ el.parking_id_id }}</h5>
             </div>
           </li>
           <li class="row">
@@ -101,14 +93,14 @@
   let parkings = "{{parkings}}".split(" 99999 ");
   for(let i=0; i<parkings.length; i++){
     parkings[i] = parkings[i].split(" ");
-    for(let j=0; j<5; j++){
+    for(let j=0; j<6; j++){
       parkings[i][j] = Number(parkings[i][j]);
     }
-    for(let j=6; j<parkings[i].length; j++){
-      parkings[i][5]+=" "+parkings[i][j];
+    for(let j=7; j<parkings[i].length; j++){
+      parkings[i][6]+=" "+parkings[i][j];
     }
   }
-
+  console.log(parkings)
   ymaps.ready(init);
   function init() {
       var myMap = new ymaps.Map ('myMap', {
@@ -119,15 +111,17 @@
       });
       
       for(let i=0; i<parkings.length; i++){
+        let proc = parkings[i][3] / parkings[i][5] * 100;
+
         // lng lat pk lots price
         var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {  
-            balloonContentHeader: '<h5 class="fw-bold">ул. Тарановой 5</h5>',
+            balloonContentHeader: '<h5 class="fw-bold">' + parkings[i][6] + '</h5>',
             // Зададим содержимое основной части балуна.
-            balloonContentBody: '<div class="mt-3" style="overflow-x: hidden;"><div class="row"><p class="col-6 mb-1">Мест осталось</p><p class="col-6 mb-1 text-end">23</p></div><div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 10px"><div class="progress-bar" style="width: 25%"></div></div><div class="mt-3 row"><p class="col-6">Цена за час</p><p class="col-6 text-end">50 ₽</p></div></div>',
+            balloonContentBody: '<div class="mt-3" style="overflow-x: hidden;"><div class="row"><p class="col-6 mb-1">Мест осталось</p><p class="col-6 mb-1 text-end">' + parkings[i][3] + '</p></div><div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 10px"><div class="progress-bar" style="width:' +(100 - proc) +'%"></div></div><div class="mt-3 row"><p class="col-6">Цена за час</p><p class="col-6 text-end">' + parkings[i][4] + ' ₽</p></div></div>',
             // Зададим содержимое нижней части балуна.
-            balloonContentFooter: '<small>0001</small>',
+            balloonContentFooter: '<small> ID: ' + parkings[i][2] + '</small>',
             // Зададим содержимое всплывающей подсказки.
-            hintContent: 'Рога и копыта'
+            hintContent: parkings[i][6]
         }, {
             preset: 'twirl#blueStretchyIcon'
         });
