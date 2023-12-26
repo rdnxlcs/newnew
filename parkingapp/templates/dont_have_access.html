@@ -1,3 +1,9 @@
-<h1>У вас нет доступа на эту страницу</h1>
+{% extends 'base.html' %}
+{% block active_parking %}active{% endblock %}
+{% block content %}
+<div class="container text-start">
+    <h1 class="display-6 text-body-emphasis">У вас нет доступа к этой странице</h1>
+    <a class="mt-2 btn btn-primary" href="{% url 'parkingapp:index' %}">На главную</a>
+</div>
 
-<a href="{% url 'parkingapp:index' %}">На главную</a>
+{% endblock %}

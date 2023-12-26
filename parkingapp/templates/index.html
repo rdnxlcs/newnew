@@ -27,10 +27,10 @@
 </div>
 {% endfor %}
 {% endif %}
-<div class="container col-xl-10 col-xxl-8 px-4 py-5">
-    <div class="row align-items-center g-lg-5 py-5">
+<div class="container col-xl-10 col-xxl-8 px-4 py-3 py-lg-5">
+    <div class="row align-items-center g-lg-5 py-3 py-lg-5">
       <div class="col-lg-6 col-12">
-        <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Паркуйтесь быстро и просто</h1>
+        <h1 class="display-5 fw-bold text-body-emphasis lh-1">Паркуйтесь быстро и просто</h1>
         <p class="lead">Введите цифры с шлагбаума в поле "ID парковки", перед этим войдите в аккаунт или зарегестрируйтесь, привязав карту</p>
       </div>
       <div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3">
@@ -45,9 +45,16 @@
       </div>
     </div>
 </div>
-<div id="myMap" style="width: 100vw; height: 300px; border: 1px; border-radius: 1rem;"></div>
-
-
+<hr>
+<style>
+  #myMap {
+      width: 100vw; 
+      height: 100vw;
+      max-width: 550px;
+      max-height: 550px;
+    }
+</style>
+<div id="myMap" class="mx-auto"></div>
 
 <script type="text/javascript">
   let parkings = "{{parkings}}".split(" 99999 ");
@@ -64,73 +71,29 @@
   ymaps.ready(init);
   function init() {
       var myMap = new ymaps.Map ('myMap', {
-          center: [54.7065, 20.511],
-          zoom: 9
-      });
-      myMap.controls.add('zoomControl', {right:5, top:15});  
-    for(let i=0; i<parkings.length; i++){
-      // lng lat pk lots price
-      var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], { 
-          iconContent: 'Стоянка номер '+parkings[i][2], 
-          balloonContent: parkings[i][5]+' | Стоянка номер '+parkings[i][2]+' | Свободных мест: '+parkings[i][3]+' | Цена: '+parkings[i][4]
+        center: [54.7065, 20.511],
+        zoom: 9
       }, {
-          preset: 'twirl#blueStretchyIcon'
+        searchControlProvider: 'yandex#search'
       });
-      myMap.geoObjects.add(myPlacemark);
-    }
+      
+      for(let i=0; i<parkings.length; i++){
+        // lng lat pk lots price
+        var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {  
+            balloonContentHeader: '<h5 class="fw-bold">ул. Тарановой 5</h5>',
+            // Зададим содержимое основной части балуна.
+            balloonContentBody: '<div class="mt-3" style="overflow-x: hidden;"><div class="row"><p class="col-6 mb-1">Мест осталось</p><p class="col-6 mb-1 text-end">23</p></div><div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 10px"><div class="progress-bar" style="width: 25%"></div></div><div class="mt-3 row"><p class="col-6">Цена за час</p><p class="col-6 text-end">50 ₽</p></div></div>',
+            // Зададим содержимое нижней части балуна.
+            balloonContentFooter: '<small>0001</small>',
+            // Зададим содержимое всплывающей подсказки.
+            hintContent: 'Рога и копыта'
+        }, {
+            preset: 'twirl#blueStretchyIcon'
+        });
+        myMap.geoObjects.add(myPlacemark);
+      }
+      
   }
 </script>
-<!--
-<div id="map" style="width:500px; height:400px; border-radius: 2rem;" class="shadow mx-auto"></div>
-<script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
-<script type="text/javascript">
-
-    var map;
-    DG.then(function () {
-      map = DG.map('map', {
-          center: [54.7065, 20.511],
-          zoom: 9
-      });
-      let parking = "{{ parkings }}".replace("[", "").replace("]", "").replace(",", "").split(" ");
-      for(let i=0; i<parking.length; i++){
-        parking[i] = parking[i].replace(",", "")
-      }
-      var myIcon;
-      myIcon = DG.icon({
-        iconUrl: 'https://maps.api.2gis.ru/2.0/example_logo.png',
-        iconSize: [48, 48]
-      })
-      map.locate({setView: true, watch: true})
-                    .on('locationfound', function(e) {
-                        DG.marker([e.latitude, e.longitude], {icon:myIcon}).addTo(map).bindPopup("Ваше местоположение");
-                      }).on('locationerror', function(e) {
-                        DG.popup()
-                          .setLatLng(map.getCenter())
-                          .setContent('Доступ к определению местоположения отключён')
-                          .openOn(map);
-                          });
-
-
-
-      let x=0, y=0, id=0, places=0, price=0;
-      for(let i=0; i<parking.length; i++){
-        if(i%6==0) x=Number(parking[i]);
-        else if(i%6==1) y=Number(parking[i]);
-        else if(i%6==2) id=Number(parking[i]);
-        else if(i%6==3) places=Number(parking[i]);
-        else if(i%6==4) price=Number(parking[i]);
-        else if(i%6==5){
-          console.log(x, y, id, places, price)
-          //console.log(x, y, id);
-          DG.marker([x, y]).addTo(map).bindPopup("ID парковки: "+id+" | Свободные места: "+places+" | Цена: "+price);
-        }
-      }
-      console.log(parking)
-      //for(let i=0; i<)
-      //DG.marker([x, y]).addTo(map).bindPopup("{{el.address}}, {{el.pk}}");
-    });
-</script>
--->
-
 
 {% endblock %}
