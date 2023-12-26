@@ -22,7 +22,7 @@
                             <div class="row align-items-center no-gutters">
                                 <div class="col me-2">
                                     <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Транзакций на сумму</span></div>
-                                    <div class="text-dark fw-bold h5 mb-0"><span>1488</span></div>
+                                    <div class="text-dark fw-bold h5 mb-0"><span>{{Fin.total_price}}</span></div>
                                 </div>
                                 <div class="col-auto"><i class="fas fa-calendar fa-2x text-gray-300"></i></div>
                             </div>
@@ -35,7 +35,7 @@
                             <div class="row align-items-center no-gutters">
                                 <div class="col me-2">
                                     <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Количество транзакций</span></div>
-                                    <div class="text-dark fw-bold h5 mb-0"><span>17</span></div>
+                                    <div class="text-dark fw-bold h5 mb-0"><span>{{Fin.how_much_people_used}}</span></div>
                                 </div>
                                 <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i></div>
                             </div>
@@ -48,7 +48,7 @@
                             <div class="row align-items-center no-gutters">
                                 <div class="col me-2">
                                     <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Льготных транзакций на сумму</span></div>
-                                    <div class="text-dark fw-bold h5 mb-0"><span>17</span></div>
+                                    <div class="text-dark fw-bold h5 mb-0"><span>{{Fin.benefits_price}}</span></div>
                                 </div>
                                 <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i></div>
                             </div>
@@ -61,7 +61,7 @@
                             <div class="row align-items-center no-gutters">
                                 <div class="col me-2">
                                     <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Количество льготных транзакций</span></div>
-                                    <div class="text-dark fw-bold h5 mb-0"><span>17</span></div>
+                                    <div class="text-dark fw-bold h5 mb-0"><span>{{Fin.with_benefits}}</span></div>
                                 </div>
                                 <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i></div>
                             </div>
@@ -88,20 +88,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for el in parkings %}
                                     <tr>
-                                        <td>Integration Specialist</td>
-                                        <td>New York</td>
-                                        <td>61</td>
-                                        <td>2012/12/02<br></td>
-                                        <td>$372,000</td>
+                                        <td>{{el.address}}</td>
+                                        <td>{{el.total_sum}}</td>
+                                        <td>{{el.how_much_people_used}}</td>
+                                        <td>{{el.benefit_sum}}<br></td>
+                                        <td>{{el.with_benefits}}</td>
                                     </tr>
-                                    <tr>
-                                        <td>Software Engineer</td>
-                                        <td>London</td>
-                                        <td>38</td>
-                                        <td>2011/05/03<br></td>
-                                        <td>$163,500</td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
