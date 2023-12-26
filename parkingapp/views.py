@@ -162,6 +162,7 @@ def signadmin(request):
             if form.is_valid():
                 created_form = form.save(commit=False)
                 created_form.password1 = password1
+                created_form.password2 = password1
                 created_form.rights = 2
                 created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
@@ -402,7 +403,20 @@ def dash_fin(request):
     return render(request, 'dash_fin.html')
 
 def dash_users(request):
-    return render(request, 'dash_users.html')
+    if request.method == 'POST':
+        value = request.POST.get('delete')
+        print(value)
+        user = User.objects.get(pk=value)
+        user.delete()
+        #user.save()
+    admins = User.objects.filter(rights=2)
+    couponers = User.objects.filter(rights=1)
+    wise = []
+    for el in admins:
+        wise.append(el)
+    for el in couponers:
+        wise.append(el)
+    return render(request, 'dash_users.html', {'users': wise})
 def compare_parks(request):
     p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
     p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)
@@ -422,3 +436,81 @@ def compare_parks(request):
     reciepts_to_send = str(reciepts_to_send)
     print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
+
+def compare_time(request):
+    p_start = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
+    p_end = datetime(2023, 12, 26, 23, 59, 50, tzinfo=None)
+    if p_end - p_start <= timedelta(days=1):
+        delta = timedelta(hours=1)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        reciepts_to_send = {}
+        reciepts_to_send['name'] = 'часам'
+        reciepts_to_send["period"] = {}
+        reciepts = Reciept.objects.all()
+        while p_start <= ctime <= p_end:
+            reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
+            for el in reciepts:
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                if ctime <= etime <= ctime+delta:
+                    reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+            ctime += delta
+        reciepts_to_send = str(reciepts_to_send)
+        print(json.dumps(reciepts_to_send))
+    elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
+        delta = timedelta(days=1)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        reciepts_to_send = {}
+        reciepts_to_send['name'] = 'дням'
+        reciepts_to_send['period'] = {}
+        reciepts = Reciept.objects.all()
+        while p_start <= ctime <= p_end:
+            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+            for el in reciepts:
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                if ctime <= etime <= ctime+delta:
+                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+            ctime += delta
+        reciepts_to_send = str(reciepts_to_send)
+        
+    elif timedelta(days=90) < p_end-p_start:
+        delta = timedelta(days=7)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        reciepts_to_send = {}
+        reciepts_to_send['name'] = 'неделям'
+        reciepts_to_send['period'] = {}
+        reciepts = Reciept.objects.all()
+        week = 1
+        while p_start <= ctime <= p_end:
+            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+            for el in reciepts:
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                if ctime <= etime <= ctime+delta:
+                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+            ctime += delta
+            week += 1
+        reciepts_to_send = str(reciepts_to_send)
+    print(json.dumps(reciepts_to_send))
+    return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
+
+def parkings(request):
+    if request.method == 'POST':
+        if 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            parking = Parking.objects.get(pk=pk)
+            parking.delete()
+        elif 'change_price' in request.POST:
+            
+            pk = request.POST.get('change_price')
+            new_price = request.POST.get('new_price')
+            parking = Parking.objects.get(pk=pk)
+            now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
+            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+            if now - tm >= timedelta(days=90):    
+                parking.price_per_minute = new_price
+                parking.change = datetime.now()
+                parking.save()
+            else:
+                return redirect(reverse('parkingapp:index'))
+            
+    parkings = Parking.objects.all()
+    return render(request, 'parkings.html', {'parkings':parkings})
