@@ -494,8 +494,23 @@ def compare_time(request):
 
 def parkings(request):
     if request.method == 'POST':
-        pk = request.POST.get('delete')
-        parking = Parking.objects.get(pk=pk)
-        parking.delete()
+        if 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            parking = Parking.objects.get(pk=pk)
+            parking.delete()
+        elif 'change_price' in request.POST:
+            
+            pk = request.POST.get('change_price')
+            new_price = request.POST.get('new_price')
+            parking = Parking.objects.get(pk=pk)
+            now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
+            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+            if now - tm >= timedelta(days=90):    
+                parking.price_per_minute = new_price
+                parking.change = datetime.now()
+                parking.save()
+            else:
+                return redirect(reverse('parkingapp:index'))
+            
     parkings = Parking.objects.all()
     return render(request, 'parkings.html', {'parkings':parkings})
