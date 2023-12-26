@@ -7,22 +7,24 @@
   <script>
     const ctx = document.getElementById('myChart');
     let r = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    console.log(r);
     let reciepts = JSON.parse(r);
     let labels = [];
-    let keys = Object.keys(reciepts["hours"]);
+    let name = reciepts["name"];
+    let keys = Object.keys(reciepts["period"]);
     for(let i=0; i<keys.length; i++){
         labels.push(keys[i]);
     }
     let rec=[];
     for(let i=0; i<keys.length; i++){
-        rec.push(reciepts["hours"][keys[i]]);
+        rec.push(reciepts["period"][keys[i]]);
     }
     new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels,
         datasets: [{
-          label: 'Парковок',
+          label: 'Количество чеков по '+name,
           data: rec,
           borderWidth: 0.5
         }]
