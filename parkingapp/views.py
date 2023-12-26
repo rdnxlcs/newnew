@@ -424,8 +424,8 @@ def compare_parks(request):
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
 def compare_time(request):
-    p_start = datetime(2023, 12, 1, 0, 0, 0, tzinfo=None)
-    p_end = datetime(2023, 12, 26, 23, 59, 59, tzinfo=None)
+    p_start = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
+    p_end = datetime(2023, 12, 26, 23, 59, 50, tzinfo=None)
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
@@ -434,16 +434,15 @@ def compare_time(request):
         reciepts_to_send["period"] = {}
         reciepts = Reciept.objects.all()
         while p_start <= ctime <= p_end:
-            reciepts_to_send["period"][str(ctime.hour)] = 0
+            reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
             for el in reciepts:
                 etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
                 if ctime <= etime <= ctime+delta:
-                    reciepts_to_send["period"][str(ctime.hour)] += 1
+                    reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send)
         print(json.dumps(reciepts_to_send))
     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
-        print('here')
         delta = timedelta(days=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
         reciepts_to_send = {}
@@ -451,14 +450,31 @@ def compare_time(request):
         reciepts_to_send['period'] = {}
         reciepts = Reciept.objects.all()
         while p_start <= ctime <= p_end:
-            reciepts_to_send['period'][str(ctime.day)] = 0
+            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             for el in reciepts:
-                etime = etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
                 if ctime <= etime <= ctime+delta:
-                    reciepts_to_send['period'][str(ctime.day)] += 1
+                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send)
-        print(json.dumps(reciepts_to_send))
         
+    elif timedelta(days=90) < p_end-p_start:
+        delta = timedelta(days=7)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        reciepts_to_send = {}
+        reciepts_to_send['name'] = 'неделям'
+        reciepts_to_send['period'] = {}
+        reciepts = Reciept.objects.all()
+        week = 1
+        while p_start <= ctime <= p_end:
+            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+            for el in reciepts:
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                if ctime <= etime <= ctime+delta:
+                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+            ctime += delta
+            week += 1
+        reciepts_to_send = str(reciepts_to_send)
+    print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
