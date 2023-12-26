@@ -492,3 +492,10 @@ def compare_time(request):
     print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
+def parkings(request):
+    if request.method == 'POST':
+        pk = request.POST.get('delete')
+        parking = Parking.objects.get(pk=pk)
+        parking.delete()
+    parkings = Parking.objects.all()
+    return render(request, 'parkings.html', {'parkings':parkings})

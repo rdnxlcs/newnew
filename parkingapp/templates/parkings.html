@@ -1,0 +1,11 @@
+<form method="post">
+    {% csrf_token %}
+    {% for el in parkings %}
+        <label name="address">{{el.address}}</label>
+        <label name="id">{{el.pk}}</label>
+        <label name="places">{{el.places}}</label>
+        <label name="price">{{el.price_per_minute}}</label>
+        <button type="submit" value="{{el.pk}}" name="delete">удалить</button>
+        <br>
+    {% endfor %}
+</form>
