@@ -31,7 +31,6 @@ def index(request):
             park_id = int(request.POST.get('park_id'))
             try:
                 parking = Parking.objects.get(pk=park_id)
-                print(type(parking))
                 if parking.occupied_places >= parking.max_parking_spaces:
                     return redirect(reverse('parkingapp:error'))
                 else:
@@ -125,7 +124,7 @@ def enter(request):
                     auth.login(request, user)
                     return HttpResponseRedirect(reverse('parkingapp:index'))
             except:
-                print('зуй')
+                pass
     else:
         form = UserLoginForm()
 
@@ -232,18 +231,18 @@ def error(request):
 class Park: 
     def __init__(
                 self, address, how_much_people_used, people_used_free_time,
-                total_time, session_avarage_duration, min_session, max_session, 
-                with_benefits, benefits_session_avarage_duration, max_benefit_session
+                total_time, session_average_duration, min_session, max_session, 
+                with_benefits, benefits_session_average_duration, max_benefit_session
             ):
         self.address = address
         self.how_much_people_used = how_much_people_used
         self.people_used_free_time = people_used_free_time
         self.total_time = total_time
-        self.session_avarage_duration = session_avarage_duration
+        self.session_average_duration = session_average_duration
         self.min_session = min_session
         self.max_session = max_session
         self.with_benefits = with_benefits
-        self.benefits_session_avarage_duration = benefits_session_avarage_duration
+        self.benefits_session_average_duration = benefits_session_average_duration
         self.max_benefit_session = max_benefit_session
 
 class Fin:
@@ -257,19 +256,21 @@ class Fin:
         self.with_benbefits = with_benefits
         self.benefits_price = benefits_price
 
-def data(period_start, period_end):
+def data(period_start, period_end, id=0):
+    
     period_start = [i for i in period_start.split('-')]
     period_end = [i for i in period_end.split('-')]
 
     period_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=timezone(timedelta(hours=0)))
     period_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=timezone(timedelta(hours=0)))
-
-    parkings = Parking.objects.all()
-    print(len(parkings))
+    
+    if id:
+        parking = Parking.objects.get(pk=id)
+    # print(len(parkings))
     parkings_array = []
     fins_parkings_array = []
-    for park in parkings:
-        reciepts = Reciept.objects.filter(parking_id=park.pk)
+    if parking:
+        reciepts = Reciept.objects.filter(parking_id=parking.pk)
 
         how_much_people_used = 0
         people_used_free_time = 0
@@ -299,29 +300,29 @@ def data(period_start, period_end):
                     benefit_sessions.append(minutes)
 
         if len(sessions) != 0:
-            session_avarage_duration = int(sum(sessions)) // len(sessions)
+            session_average_duration = int(sum(sessions)) // len(sessions)
             total_time = int(sum(sessions))
             min_session = min(sessions)
             max_session = max(sessions)
             if len(benefit_sessions) != 0:
-                benefits_session_avarage_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
+                benefits_session_average_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
                 max_benefit_session = int(max(benefit_sessions))
             else:
-                benefits_session_avarage_duration = 0
+                benefits_session_average_duration = 0
                 max_benefit_session = 0
         else:
             total_time = 0
             min_session = 0
             max_session = 0
-            benefits_session_avarage_duration = 0
+            benefits_session_average_duration = 0
             max_benefit_session = 0
-            session_avarage_duration = 0
+            session_average_duration = 0
 
 
         parkings_array.append(Park(
-                park.address, how_much_people_used, people_used_free_time, 
-                total_time, session_avarage_duration, min_session, max_session, 
-                with_benefits, benefits_session_avarage_duration, max_benefit_session
+                parking.address, how_much_people_used, people_used_free_time, 
+                total_time, session_average_duration, min_session, max_session, 
+                with_benefits, benefits_session_average_duration, max_benefit_session
             )) 
         
         for park in parkings_array:
@@ -394,6 +395,83 @@ def panel(request):
 
 
 def dash_full(request):
+    if request.method == 'POST':
+        pk = request.POST.get('id')
+        period_start = request.POST.get('period_start')
+        period_end = request.POST.get('period_end')
+        park = data(period_start, period_end, pk)[0][0]
+        # total_time average_time 
+        period_start = [i for i in period_start.split('-')]
+        period_end = [i for i in period_end.split('-')]
+
+        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+        if p_end - p_start <= timedelta(days=1):
+            delta = timedelta(hours=1)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'часам'
+            reciepts_to_send["period"] = {}
+            reciepts_to_send['free-period'] = {}
+            reciepts = Reciept.objects.all()
+            while p_start <= ctime <= p_end:
+                reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
+                reciepts_to_send['free-period'][str(ctime.hour)+'-'+str(ctime.day)] = 0
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                        reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+                ctime += delta
+            reciepts_to_send = str(reciepts_to_send)
+        elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
+            delta = timedelta(days=1)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'дням'
+            reciepts_to_send['period'] = {}
+            reciepts_to_send['free-period'] = {}
+            reciepts = Reciept.objects.all()
+            while p_start <= ctime <= p_end:
+                reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                ctime += delta
+            reciepts_to_send = str(reciepts_to_send) 
+        elif timedelta(days=90) < p_end-p_start:
+            delta = timedelta(days=7)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'неделям'
+            reciepts_to_send['period'] = {}
+            reciepts_to_send['free_period'] = {}
+            reciepts = Reciept.objects.all()
+            week = 1
+            while p_start <= ctime <= p_end:
+                reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                
+                ctime += delta
+                week += 1
+            reciepts_to_send = str(reciepts_to_send)
+        context = {'total_time': park.with_benefits,
+                   'average_time': park.session_average_duration, 
+                   'reciepts': json.dumps(str(reciepts_to_send))}
+        return render(request, 'dash_full.html', context)
 
     return render(request, 'dash_full.html')
 
@@ -402,6 +480,69 @@ def dash_parks(request):
 
 
 def dash_coupon(request):
+    if request.method == 'POST':    
+        pk = request.POST.get('id')
+        period_start = request.POST.get('period_start')
+        period_end = request.POST.get('period_end')
+        park = data(period_start, period_end, pk)[0][0]
+        
+        period_start = [i for i in period_start.split('-')]
+        period_end = [i for i in period_end.split('-')]
+
+        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+        if p_end - p_start <= timedelta(days=1):
+            delta = timedelta(hours=1)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'часам'
+            reciepts_to_send["period"] = {}
+            reciepts_to_send['free-period'] = {}
+            reciepts = Reciept.objects.all()
+            while p_start <= ctime <= p_end:
+                reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.benefit:
+                        reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+                ctime += delta
+            reciepts_to_send = str(reciepts_to_send)
+        elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
+            delta = timedelta(days=1)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'дням'
+            reciepts_to_send['period'] = {}
+            reciepts = Reciept.objects.all()
+            while p_start <= ctime <= p_end:
+                reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.benefit:
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                ctime += delta
+            reciepts_to_send = str(reciepts_to_send) 
+        elif timedelta(days=90) < p_end-p_start:
+            delta = timedelta(days=7)
+            ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+            reciepts_to_send = {}
+            reciepts_to_send['name'] = 'неделям'
+            reciepts_to_send['period'] = {}
+            reciepts = Reciept.objects.all()
+            while p_start <= ctime <= p_end:
+                reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
+                
+                for el in reciepts:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.benefit:
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                ctime += delta
+            reciepts_to_send = str(reciepts_to_send)
+        context = {'total_time': park.total_time,
+                   'average_time': park.benefits_session_average_duration, 
+                   'reciepts': json.dumps(str(reciepts_to_send))}
+        return render(request, 'dash_coupon.html', context)
     return render(request, 'dash_coupon.html')
 
 def dash_fin(request):
@@ -410,7 +551,6 @@ def dash_fin(request):
 def dash_users(request):
     if request.method == 'POST':
         value = request.POST.get('delete')
-        print(value)
         user = User.objects.get(pk=value)
         user.delete()
         #user.save()
@@ -431,7 +571,6 @@ def compare_parks(request):
     for park in parkings:
         reciepts = Reciept.objects.filter(parking_id=park.pk)
         for reciept in reciepts:
-            print(park, reciept.start_time.day)
             dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
             if p_end >= dt >= p_start:
                 try:
@@ -439,7 +578,6 @@ def compare_parks(request):
                 except:
                     reciepts_to_send['parks'][str(park.pk)] = 1
     reciepts_to_send = str(reciepts_to_send)
-    print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
 def compare_time(request):
@@ -460,7 +598,6 @@ def compare_time(request):
                     reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send)
-        print(json.dumps(reciepts_to_send))
     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
         delta = timedelta(days=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
@@ -494,7 +631,6 @@ def compare_time(request):
             ctime += delta
             week += 1
         reciepts_to_send = str(reciepts_to_send)
-    print(json.dumps(reciepts_to_send))
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
 def parkings(request):
