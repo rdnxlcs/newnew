@@ -42,6 +42,9 @@
                                             <form method="post">
                                             {%csrf_token%}
                                             <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
+                                            </form>
+                                            <form method="post">
+                                            {%csrf_token%}
                                             <td>
                                                 <div class="input-group">
                                                     <input type="number" name="new_price" class="form-control radl" placeholder="Новая цена">

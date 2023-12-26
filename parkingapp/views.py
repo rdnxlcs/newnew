@@ -141,10 +141,10 @@ def addparking(request):
         lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
 
         max_parking_spaces = request.POST.get('max_parking_spaces')
-        price_per_minute = 1
+        price = request.POST.get('price')
         occupied_places = 0
-        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
-        return render(request, 'dash_parks.html', {'logged':check_logged(request)})
+        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price)
+        return redirect(reverse('parkingapp:dash_parks'))
     user = request.user
     if user.is_authenticated and user.rights == 2:
         return render(request, 'addparking.html', {'logged':check_logged(request)})
@@ -317,7 +317,9 @@ def data(period_start, period_end, id=0):
                 max_benefit_session = 0
                 benefit_sum = 0
         else:
+            benefit_sum = 0
             total_time = 0
+            total_sum = 0
             min_session = 0
             max_session = 0
             benefits_session_average_duration = 0
@@ -481,23 +483,24 @@ def dash_full(request):
 
 def dash_parks(request):
     if request.method == 'POST':
-        if 'delete' in request.POST:
-            pk = request.POST.get('delete')
-            parking = Parking.objects.get(pk=pk)
-            parking.delete()
-        elif 'change_price' in request.POST:
-            
+        if 'change_price' in request.POST:
             pk = request.POST.get('change_price')
             new_price = request.POST.get('new_price')
             parking = Parking.objects.get(pk=pk)
             now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
             tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
-            if now - tm >= timedelta(days=90):    
+            if now - tm >= timedelta(days=90):   
+                
+             
                 parking.price_per_minute = new_price
                 parking.change = datetime.now()
                 parking.save()
             else:
-                return redirect(reverse('parkingapp:index'))
+                return redirect(reverse('parkingapp:dash_parks'))
+        elif 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            parking = Parking.objects.get(pk=pk)
+            parking.delete()
             
     parkings = Parking.objects.all()
     return render(request, 'dash_parks.html', {'parkings':parkings})
