@@ -1,20 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="modal modal-sheet position-static d-block">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content rounded-4">
-        <div class="modal-body">
-            <div class="px-4 my-3 text-center">
-                <h1 class="display-5 fw-bold text-body-emphasis">Парковка завершена</h1>
-                <hr>
-                <p class="lead my-0">{{ reciept.final_price }} ₽</p>
-                <p class="lead my-0">ул. Тарановой 5</p>
-                <p class="lead">id чека: {{ reciept.pk }}</p>
-                <hr>
-                <a class="btn btn-lg btn-primary" href="/">Вернуться назад</a>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content rounded-4 shadow border">
+      <div class="modal-body p-5">
+
+        <ul class="d-grid gap-4 my-0 list-unstyled small">
+          <li class="d-flex gap-4">
+            <div class="bi text-warning flex-shrink-0">
+              <img src="https://qrcode.tec-it.com/API/QRCode?data={{ reciept.pk }}&backcolor=%23ffffff" height="48" width="48"/>
             </div>
-        </div>
+            <div class="ps-5 ms-5 text-muted">
+              22.05.30 12:25 <br>
+              22.05.30 13:30
+            </div>
+          </li>
+          <hr class="ms-4">
+          <li class="row">
+            <div class="col-6">
+              <h5 class="bi flex-shrink-0">Парковка завершена</h5>
+            </div>
+            <div class="col-6">
+              <h5 class="mb-0 text-end fw-light">ул. Тарановой 5</h5>
+            </div>
+          </li>
+          <li class="row">
+            <div class="col-6">
+              <h5 class="bi flex-shrink-0">Стоимость</h5>
+            </div>
+            <div class="col-6">
+              <h5 class="mb-0 text-end fw-light">{{ reciept.final_price }} ₽</h5>
+            </div>
+          </li>
+          <li class="row">
+            <div class="col-6">
+              <h5 class="bi flex-shrink-0">ID парковки</h5>
+            </div>
+            <div class="col-6">
+              <h5 class="mb-0 text-end fw-light">0001</h5>
+            </div>
+          </li>
+        </ul>
+        <a href="/" class="btn btn-lg rounded-4 btn-primary mt-5 w-100" data-bs-dismiss="modal">Вернуться на главную</a>
       </div>
     </div>
+  </div>
 </div>
 {% endblock %}

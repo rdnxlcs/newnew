@@ -2,7 +2,7 @@
 {% block content %}
 <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
     <div class="modal-dialog" role="document">
-      <div class="modal-content rounded-4 shadow">
+      <div class="modal-content rounded-4 shadow border">
         <div class="modal-header p-5 pb-4 border-bottom-0">
           <h1 class="fw-bold mb-0 fs-2">Регистрация администратора</h1>
         </div>
@@ -23,7 +23,7 @@
               <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
             </div>
             {{ error }}
-            <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Зарегистрироваться</button>
+            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
           </form>
         </div>
       </div>

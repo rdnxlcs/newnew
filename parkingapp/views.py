@@ -205,7 +205,7 @@ def signcoupon(request):
 
 def coupon(request):
     user = request.user
-    if user.is_authenticated and user.rights == 1:
+    if user.is_authenticated and user.rights == 2:
         if request.method == 'POST':
             checkid = request.POST.get('benifit')
             reciept = Reciept.objects.get(pk=checkid)

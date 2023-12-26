@@ -2,7 +2,7 @@
 {% block content %}
   <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
     <div class="modal-dialog" role="document">
-      <div class="modal-content rounded-4 shadow">
+      <div class="modal-content rounded-4 shadow border">
         <div class="modal-header p-5 pb-4 border-bottom-0">
           <h1 class="fw-bold mb-0 fs-2">Добавить парковку</h1>
         </div>
@@ -11,14 +11,18 @@
           <form method="post">
             {% csrf_token %}
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="a" placeholder="" name="address">
+              <input type="text" class="form-control rounded-4" id="a" placeholder="" name="address">
               <label for="a">Адрес</label>
             </div>
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="a" placeholder="" name="max_parking_spaces">
-              <label for="a">Количество</label>
+              <input type="text" class="form-control rounded-4" id="a" placeholder="" name="max_parking_spaces">
+              <label for="a">Количество мест</label>
             </div>
-            <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Добавить</button>
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control rounded-4" id="a" placeholder="" name="max_parking_spaces">
+              <label for="a">Цена за час</label>
+            </div>
+            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Добавить</button>
           </form>
         </div>
       </div>
