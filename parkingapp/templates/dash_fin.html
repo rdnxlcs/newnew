@@ -6,12 +6,14 @@
         <div class="container-fluid mt-3">
             <div class="d-sm-flex justify-content-between align-items-center mb-4">
                 <h3 class="text-dark mb-0">Финансовый отчет</h3>
-                <div class="input-group" style="max-width: 500px;">
-                    <input type="number" class="form-control btn btn-sm btn-outline-secondary radl" placeholder="id парковки">
-                    <input type="date" class="form-control btn btn-sm btn-outline-secondary" value="{{ start }}" name="period_start">
-                    <input type="date" class="form-control btn btn-sm btn-outline-secondary" value="{{ end }}" name="period_end">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary radr">Получить данные</button>
-                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="input-group" style="max-width: 500px;">
+                        <input type="date" class="form-control  border-secondary radl" style="background: none;" value="2023-12-09" name="period_start">
+                        <input type="date" class="form-control  border-secondary" style="background: none;" value="2023-12-10" name="period_end">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary radr">Получить данные</button>
+                    </div>
+                </form>
             </div>
             <div class="row">
                 <div class="col-auto col-md-6 col-xl-3 mb-4">

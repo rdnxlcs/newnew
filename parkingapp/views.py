@@ -18,12 +18,6 @@ def check_logged(request):
         return True
     return False
 
-
-def logout(request):
-    auth.logout(request)
-    return redirect(reverse('parkingapp:index'))
-
-
 def index(request):
     if request.method == 'POST':
         if 'create_park' in request.POST:
@@ -89,6 +83,11 @@ def index(request):
 def dont_have_access(request):
     return render(request, 'dont_have_access.html')
 
+def logout(request):
+    print('гилер')
+    auth.logout(request)
+    return redirect(reverse('parkingapp:index'))
+
 
 def sign(request):
     if request.method == 'POST':
@@ -133,6 +132,7 @@ def enter(request):
         'form': form,
     }
     return render(request, 'enter.html', context)
+
     
 def addparking(request):
     if request.method == 'POST':
@@ -144,7 +144,7 @@ def addparking(request):
         price_per_minute = 1
         occupied_places = 0
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price_per_minute)
-        return render(request, 'panel.html', {'logged':check_logged(request)})
+        return render(request, 'dash_parks.html', {'logged':check_logged(request)})
     user = request.user
     if user.is_authenticated and user.rights == 2:
         return render(request, 'addparking.html', {'logged':check_logged(request)})
@@ -164,7 +164,7 @@ def signadmin(request):
                 created_form.password2 = password1
                 created_form.rights = 2
                 created_form.save()
-                return HttpResponseRedirect(reverse('parkingapp:enter'))
+                return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
             form = AdminRegistrationForm()
 
@@ -188,7 +188,7 @@ def signcoupon(request):
                 created_form.password1 = password1
                 created_form.rights = 1
                 created_form.save()
-                return HttpResponseRedirect(reverse('parkingapp:enter'))
+                return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
             form = CouponerRegistrationForm()
 
@@ -204,7 +204,7 @@ def signcoupon(request):
 
 def coupon(request):
     user = request.user
-    if user.is_authenticated and user.rights == 2:
+    if user.is_authenticated and user.rights == 1:
         if request.method == 'POST':
             checkid = request.POST.get('benifit')
             reciept = Reciept.objects.get(pk=checkid)
@@ -213,7 +213,7 @@ def coupon(request):
         
         return render(request, 'coupon.html', {'logged':check_logged(request)})
     else:
-        return redirect(reverse('parkingapp:index'))
+        return redirect(reverse('parkingapp:dont_have_access'))
 
 
 def endparking(request):
@@ -476,7 +476,27 @@ def dash_full(request):
     return render(request, 'dash_full.html')
 
 def dash_parks(request):
-    return render(request, 'dash_parks.html')
+    if request.method == 'POST':
+        if 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            parking = Parking.objects.get(pk=pk)
+            parking.delete()
+        elif 'change_price' in request.POST:
+            
+            pk = request.POST.get('change_price')
+            new_price = request.POST.get('new_price')
+            parking = Parking.objects.get(pk=pk)
+            now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
+            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+            if now - tm >= timedelta(days=90):    
+                parking.price_per_minute = new_price
+                parking.change = datetime.now()
+                parking.save()
+            else:
+                return redirect(reverse('parkingapp:index'))
+            
+    parkings = Parking.objects.all()
+    return render(request, 'dash_parks.html', {'parkings':parkings})
 
 
 def dash_coupon(request):

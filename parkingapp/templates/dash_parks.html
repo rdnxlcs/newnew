@@ -27,19 +27,30 @@
                                             <th>Парковка</th>
                                             <th>id</th>
                                             <th>Кол-во мест</th>
+                                            <th>Цена за час</th>
+                                            <th>Действие</th>
                                             <th>Действие</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {% for el in parkings %}
                                         <tr>
-                                            <td>ул. Сучья</td>
-                                            <td>0001</td>
-                                            <td>35</td>
+                                            <td>{{el.address}}</td>
+                                            <td>{{el.pk}}</td>
+                                            <td>{{el.places}}</td>
+                                            <td>{{el.price_per_minute}} ₽</td>
                                             <form method="post">
                                             {%csrf_token%}
                                             <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
+                                            <td>
+                                                <div class="input-group">
+                                                    <input type="number" name="new_price" class="form-control radl" placeholder="Новая цена">
+                                                    <button type="submit" name="change_price" value="{{el.pk}}" class="btn btn-sm btn-primary btn-primary radr">Сменить цену</button>
+                                                </div>
+                                            </td>
                                             </form>
                                         </tr>
+                                        {% endfor %}
                                 </table>
                             </div>
                         </div>
