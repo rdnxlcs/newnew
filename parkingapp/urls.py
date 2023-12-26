@@ -22,5 +22,6 @@ urlpatterns = [
     path('dash_coupon', views.dash_coupon, name='dash_coupon'),
     path('dash_fin', views.dash_fin, name='dash_fin'),
     path('dash_users', views.dash_users, name='dash_users'),
+    path('dash_parks', views.dash_parks, name='dash_parks'),
     path('parkings', views.parkings, name='parkings'),
 ]

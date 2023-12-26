@@ -13,7 +13,7 @@
             {% csrf_token %}
             <div class="form-floating mb-3">
               {{ form.username }}
-              <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+              <label for="{{ form.username.id_for_label }}">Имя владельца</label>
             </div>
             <div class="form-floating mb-3">
               {{ form.card_num }}
@@ -27,6 +27,8 @@
               {{ form.card_cvv }}
               <label for="{{ form.card_cvv.id_for_label }}">CVV/CVC</label>
             </div>
+            <small class="text-body-secondary">Регистрация возможна только по данным карты</small>
+            <hr class="my-4">
             <div class="form-floating mb-3">
               {{ form.password1 }}
               <label for="{{ form.password1.id_for_label }}">Пароль</label>
@@ -35,6 +37,7 @@
               {{ form.password2 }}
               <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
             </div>
+            
             <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Зарегистрироваться</button>
             <small class="text-danger">{{ error }}</small>
           </form>

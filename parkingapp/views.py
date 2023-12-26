@@ -394,7 +394,12 @@ def panel(request):
 
 
 def dash_full(request):
+
     return render(request, 'dash_full.html')
+
+def dash_parks(request):
+    return render(request, 'dash_parks.html')
+
 
 def dash_coupon(request):
     return render(request, 'dash_coupon.html')
