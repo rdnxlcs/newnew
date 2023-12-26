@@ -118,9 +118,6 @@
                                             }
                                         });
                                     </script>
-                                    
-                                    <div><canvas id="freeChart"></canvas></div>
-                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -147,6 +144,9 @@
 {% endblock %}
 
 <!--
+    
+                                    <div><canvas id="freeChart"></canvas></div>
+                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
                                         const ctx2 = document.getElementById('freeChart');
                                         let r2 = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
