@@ -162,6 +162,7 @@ def signadmin(request):
             if form.is_valid():
                 created_form = form.save(commit=False)
                 created_form.password1 = password1
+                created_form.password2 = password1
                 created_form.rights = 2
                 created_form.save()
                 return HttpResponseRedirect(reverse('parkingapp:enter'))
@@ -402,7 +403,20 @@ def dash_fin(request):
     return render(request, 'dash_fin.html')
 
 def dash_users(request):
-    return render(request, 'dash_users.html')
+    if request.method == 'POST':
+        value = request.POST.get('delete')
+        print(value)
+        user = User.objects.get(pk=value)
+        user.delete()
+        #user.save()
+    admins = User.objects.filter(rights=2)
+    couponers = User.objects.filter(rights=1)
+    wise = []
+    for el in admins:
+        wise.append(el)
+    for el in couponers:
+        wise.append(el)
+    return render(request, 'dash_users.html', {'users': wise})
 def compare_parks(request):
     p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
     p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)

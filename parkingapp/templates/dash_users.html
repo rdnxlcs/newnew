@@ -62,19 +62,21 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {% for el in users %}
                                                 <tr>
-                                                    <td>Integration Specialist</td>
-                                                    <td>New York</td>
-                                                    <td>61</td>
-                                                    <td><button class="btn btn-danger rounded-pill" type="button">Удалить</button></td>
+                                                    <td>{{ el.username }}</td>
+                                                    <td>{{ el.rights }}</td>
+                                                    {% if el.rights == 1 %}
+                                                    <td>{{ el.park_id }}</td>
+                                                    {% else %}
+                                                    <td></td>
+                                                    {% endif %}
+                                                    <form method="post">
+                                                    {%csrf_token%}
+                                                    <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
+                                                    </form>
                                                 </tr>
-                                                <tr>
-                                                    <td>Software Engineer</td>
-                                                    <td>London</td>
-                                                    <td>38</td>
-                                                    <td><button class="btn btn-danger rounded-pill" type="button">Удалить</button></td>
-                                                </tr>
-                                            </tbody>
+                                                {% endfor %}
                                         </table>
                                     </div>
                                 </div>
