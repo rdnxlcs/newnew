@@ -29,7 +29,7 @@ class UserRegistrationForm(UserCreationForm):
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
-        'minlenght': 8,
+        'minlength': 8,
         'maxlength': 100
     }))
     password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
@@ -39,22 +39,28 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 100
     }))
     card_num = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+        'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
-        'minlenght': 16,
-        'maxlenght': 16,
+        'minlength': 16,
+        'maxlength': 16,
+        'inputmode': 'numeric',
     }))
     card_period = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+        'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Срок действия',
-        'minlenght': 4,
-        'maxlengh': 4,
+        'minlength': 4,
+        'maxlength': 4,
+        'inputmode': 'numeric',
     }))
     card_cvv = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+        'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'CVV код',
         'minlength': 3,
-        'maxlenght': 3,
+        'maxlength': 3,
+        'inputmode': 'numeric',
     }))
 
     class Meta:
@@ -72,12 +78,12 @@ class AdminRegistrationForm(UserCreationForm):
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
-        'minlenght': 8
+        'minlength': 8
     }))
     password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
-        'minlenght': 8
+        'minlength': 8
     }))
 
     class Meta:
@@ -99,12 +105,12 @@ class CouponerRegistrationForm(UserCreationForm):
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
-        'minlenght': 8
+        'minlength': 8
     }))
     password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
-        'minlenght': 8
+        'minlength': 8
     }))
 
     class Meta:

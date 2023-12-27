@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="px-4 pt-5 my-5 text-center container">
-    <h1 class="display-4 fw-bold text-body-emphasis">Единая система паркинга</h1>
-    <div class="col-lg-6 mx-auto">
-      <p class="lead mb-4">Единая система паркинга в Калининграде предоставляет удобные и безопасные места для стоянки автомобилей в центре города. Мы обеспечиваем доступ к парковочным местам через мобильное приложение, что делает процесс нахождения и оплаты парковки максимально удобным. Наша современная инфраструктура паркингов соответствует высоким стандартам и помогает улучшить транспортную инфраструктуру города.</p>
-    </div>
-    <div>
-      <div class="container px-5">
-        <img src="https://im.kommersant.ru/Issues.photo/CORP/2017/08/16/KMO_160118_00130_1_t218_182425.jpg" class="img-fluid border rounded-3 mb-4" alt="Example image" width="700" height="500" loading="lazy">
+<div class="container col-xxl-8 px-4">
+      <div class="row flex-lg-row-reverse align-items-center g-5 py-2">
+        <div class="col-10 col-sm-8 col-lg-6">
+          <img src="https://3.assets.klops.ru/media/W1siZiIsIjIwMjNcLzEyXC8wN1wvZjEyNDFhZjktNGUwYy00NjZiLTk4MWYtMGMzYmQyYTE2YjNhX2ZpbGUuanBlZyJdLFsicCIsInRodW1iIiwiMTIwMHg2NzUrMCs2MyJdLFsicCIsInRodW1iIiwiMTkyMHgxMDgwPiJdLFsicCIsImxvZ28iXSxbInAiLCJlbmNvZGUiLCJqcGciLCItcXVhbGl0eSA4NSAtc3RyaXAgLWludGVybGFjZSBQbGFuZSJdXQ==?sha=e49a455db01090c8" class="d-block mx-lg-auto border rounded-4 img-fluid" alt="Bootstrap Themes" width="700" height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+          <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Единая Система Паркинга</h1>
+          <p class="lead">Единая система паркинга в Калининграде предоставляет удобные и безопасные места для стоянки автомобилей в центре города. Мы обеспечиваем доступ к парковочным местам через мобильное приложение, что делает процесс нахождения и оплаты парковки максимально удобным.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="enter" class="btn btn-primary rounded-4 btn-lg px-4 me-md-2">Вход</a>
+            <a href="sign" class="btn btn-outline-secondary rounded-4 btn-lg px-4">Регистрация</a>
+          </div>
+
+        </div>
+
       </div>
-    </div>
 </div>
 {% endblock %}
