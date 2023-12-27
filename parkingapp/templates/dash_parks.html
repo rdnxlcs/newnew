@@ -47,7 +47,7 @@
                                             {%csrf_token%}
                                             <td>
                                                 <div class="input-group">
-                                                    <input type="number" name="new_price" class="form-control radl" placeholder="Новая цена">
+                                                    {{form.newprice}}
                                                     <button type="submit" name="change_price" value="{{el.pk}}" class="btn btn-sm btn-primary btn-primary radr">Сменить цену</button>
                                                 </div>
                                             </td>

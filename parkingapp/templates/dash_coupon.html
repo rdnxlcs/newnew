@@ -9,9 +9,9 @@
                 <form method="POST">
                     {% csrf_token %}
                     <div class="input-group" style="max-width: 500px;">
-                        <input type="number" class="form-control radl border-secondary" value="{{ defid }}" style="background: none;" placeholder="id парковки" name="id">
-                        <input type="date" class="form-control  border-secondary" style="background: none;" value="2023-12-09" name="period_start">
-                        <input type="date" class="form-control  border-secondary" style="background: none;" value="2023-12-10" name="period_end">
+                        {{form.pk}}
+                        {{form.date1}}
+                        {{form.date2}}
                         <button type="submit" class="btn btn-sm btn-primary radr">Получить данные</button>
                     </div>
                 </form>

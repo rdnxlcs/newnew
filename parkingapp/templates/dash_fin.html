@@ -9,8 +9,8 @@
                 <form method="POST">
                     {% csrf_token %}
                     <div class="input-group" style="max-width: 500px;">
-                        <input type="date" class="form-control  border-secondary radl" style="background: none;" value="2023-12-09" name="period_start">
-                        <input type="date" class="form-control  border-secondary" style="background: none;" value="2023-12-10" name="period_end">
+                        {{form.date1}}
+                        {{form.date2}}
                         <button type="submit" class="btn btn-sm btn-primary radr">Получить данные</button>
                     </div>
                 </form>
