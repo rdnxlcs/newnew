@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block active_parking %}active{% endblock %}
 {% block content %}
-{% if bdsm %}
-{% for sex in bdsm %}
+{% if data %}
+{% for el in data %}
 <div class="modal modal-sheet pb-5 position-static d-block">
   <div class="modal-dialog" role="document">
     <div class="modal-content rounded-4 shadow border">
@@ -11,10 +11,10 @@
         <ul class="d-grid gap-4 my-0 list-unstyled small">
           <li class="d-flex gap-4">
             <div class="bi text-warning flex-shrink-0">
-              <img src="https://qrcode.tec-it.com/API/QRCode?data={{ sex.0.pk }}&backcolor=%23ffffff" height="48" width="48"/>
+              <img src="https://qrcode.tec-it.com/API/QRCode?data={{ el.0.pk }}&backcolor=%23ffffff" height="48" width="48"/>
             </div>
             <div class="ps-5 ms-5 text-muted">
-              {{ sex.0.start_time }} <br>
+              {{ el.0.start_time }} <br>
             </div>
           </li>
           <hr class="ms-4">
@@ -23,7 +23,7 @@
               <h5 class="bi flex-shrink-0">Парковка идет</h5>
             </div>
             <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.1 }}</h5>
+              <h5 class="mb-0 text-end fw-light">{{ el.1 }}</h5>
             </div>
           </li>
           <li class="row">
@@ -31,7 +31,7 @@
               <h5 class="bi flex-shrink-0">ID парковки</h5>
             </div>
             <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.0.parking_id_id }}</h5>
+              <h5 class="mb-0 text-end fw-light">{{ el.0.parking_id_id }}</h5>
             </div>
           </li>
           <li class="row">
@@ -39,13 +39,13 @@
               <h5 class="bi flex-shrink-0">ID чека</h5>
             </div>
             <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.0.pk }}</h5>
+              <h5 class="mb-0 text-end fw-light">{{ el.0.pk }}</h5>
             </div>
           </li>
         </ul>
         <form method="post">
           {% csrf_token %}
-          <button type="submit" name="end_park" value="{{ sex.0.pk }}" class="btn btn-lg rounded-4 mt-5 btn-primary w-100">Завершить парковку</button>
+          <button type="submit" name="end_park" value="{{ el.0.pk }}" class="btn btn-lg rounded-4 mt-5 btn-primary w-100">Завершить парковку</button>
         </form>
       </div>
     </div>

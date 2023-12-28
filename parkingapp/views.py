@@ -12,12 +12,6 @@ import json
 
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashfullForm, DashcouponForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 
-def check_logged(request):
-    #print(request.user.is_authenticated)
-    if request.user.is_authenticated:
-        return True
-    return False
-
 def index(request):
     if request.method == 'POST':
         if 'create_park' in request.POST:
@@ -60,15 +54,14 @@ def index(request):
             reciept = Reciept.objects.get(pk=reciept_id)
             logged = False
             
-            bdsm = []
+            data = []
             
             parkingxd = Parking.objects.get(pk=reciept.parking_id_id)
-            bdsm = [reciept, parkingxd.address]
-            print(bdsm)
+            data = [reciept, parkingxd.address]
 
             if request.user.pk:
                 logged = True
-            return render(request, 'endparking.html', {'reciept': bdsm, 'logged': check_logged(request)})
+            return render(request, 'endparking.html', {'reciept': data, })
         
     try:
         reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
@@ -83,24 +76,22 @@ def index(request):
             parkings.append(el.address)
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1]);
-        bdsm = []
+        data = []
         for el in reciepts:
             parkingxd = Parking.objects.get(pk=el.parking_id_id)
-            bdsm.append([el, parkingxd.address])
+            data.append([el, parkingxd.address])
         
     except:
         parkings = []
         reciepts = []
-        bdsm = []
+        data = []
         # BASE_URL = 'https://static-maps.yandex.ru/v1'
-        print('СУКАААА')
     form = CommitParkingForm()
     context = {
        'parking': Parking.objects.all(),
         'reciepts': reciepts, 
-        'logged':check_logged(request), 
         "parkings":parkings, 
-        'bdsm': bdsm,
+        'data': data,
         'form': form
     }
     return render(request, 'index.html', context)
@@ -109,12 +100,11 @@ def dont_have_access(request):
     return render(request, 'dont_have_access.html')
 
 def logout(request):
-    print('гилер')
     auth.logout(request)
     return redirect(reverse('parkingapp:enter'))
 
 def endparking(request):
-    return render('endparking.html', request, {'logged': check_logged(request)})
+    return render('endparking.html', request, {})
 
 def sign(request):
     if request.method == 'POST':
@@ -132,7 +122,6 @@ def sign(request):
         form = UserRegistrationForm()
 
     context = {
-        'logged': check_logged(request),
         'form': form,
     }
     return render(request, 'sign.html', context)
@@ -140,7 +129,6 @@ def sign(request):
 def enter(request):
     if request.method == 'POST':
         if 'username' in request.POST:
-            # print('hereherehere')
             form = UserLoginForm(data=request.POST)
             username = request.POST['username']
             password = request.POST['password']
@@ -155,7 +143,6 @@ def enter(request):
         form = UserLoginForm()
 
     context = {
-        'logged': check_logged(request),
         'form': form,
     }
     return render(request, 'enter.html', context)
@@ -202,7 +189,6 @@ def signadmin(request):
             form = AdminRegistrationForm()
 
         context = {
-            'logged': check_logged(request),
             'form': form
         }
         return render(request, 'signadmin.html', context)
@@ -226,7 +212,6 @@ def signcoupon(request):
             form = CouponerRegistrationForm()
 
         context = {
-            'logged': check_logged(request),
             'form': form
         }
         return render(request, 'signcoupon.html', context)
@@ -236,7 +221,6 @@ def signcoupon(request):
    
 
 def coupon(request):
-    print('here')
     user = request.user
     if user.is_authenticated and user.rights == 1:
         if request.method == 'POST':
@@ -244,28 +228,31 @@ def coupon(request):
             if form.is_valid():
                 pk = request.POST['pk']
                 reciept = Reciept.objects.filter(pk=pk)
-                if reciept:
+                if reciept: 
                     reciept = reciept[0]
-                    reciept.benefit = True
-                    reciept.save()
-                    form = CouponForm()
+                    if reciept.final_price == -1:
+                        reciept.benefit = True
+                        reciept.save()
+                        form = CouponForm()
+                    else:
+                        return redirect(reverse('parkingapp:error'))
                 else:
                     return redirect(reverse('parkingapp:error'))
             else:
                 return redirect(reverse('parkingapp:error'))
         else:
             form = CouponForm()
-        return render(request, 'coupon.html', {'logged':check_logged(request), 'form':form})
+        return render(request, 'coupon.html', {'form':form})
     else:
         return redirect(reverse('parkingapp:dont_have_access'))
 
 
 def esp(request):
-    return render(request, 'esp.html', {'logged':check_logged(request)})
+    return render(request, 'esp.html', {})
 
 
 def error(request):
-    return render(request, 'error.html', {'logged':check_logged})
+    return render(request, 'error.html')
 
 
 class Park: 
@@ -313,7 +300,6 @@ def data(period_start, period_end, id=0):
     parkings_array = []
     fins_parkings_array = []
     for parking in parkings:
-        # print(len(parkings))
         reciepts = Reciept.objects.filter(parking_id=parking.pk)
         how_much_people_used = 0
         people_used_free_time = 0
@@ -349,7 +335,6 @@ def data(period_start, period_end, id=0):
             total_sum = sum(filter(lambda x: x>15, sessions))*parking.price_per_minute
             if len(benefit_sessions) != 0:
                 benefit_sum = sum(benefit_sessions)
-                print(benefit_sessions)
                 benefits_session_average_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
                 max_benefit_session = int(max(benefit_sessions))
             else:
@@ -381,7 +366,6 @@ def data(period_start, period_end, id=0):
         with_benefits = park.with_benefits
         total_with_benefits += with_benefits
         benefits_price += park.benefit_sum
-    #print(benefits_price, total_with_benefits)
     fins_parkings_array.append(
         Fin(
             total_price, how_much_people_used, 
@@ -409,7 +393,7 @@ def panel(request):
                 'fins': fins,
                 'start':  str(period_start)[:10], 
                 'end': str(period_end)[:10],
-                'logged':check_logged(request)
+                
             }
 
             rsn = render(request, 'panel.html', context)
@@ -431,7 +415,7 @@ def panel(request):
             'fins': fins,
             'start':  str(period_start)[:10], 
             'end': str(period_end)[:10],
-            'logged':check_logged(request)
+            
         }
 
         return render(request, 'panel.html', context)
@@ -450,8 +434,7 @@ def dash_full(request):
                 period_start = request.POST['date1']
                 period_end = request.POST['date2']
                 try:
-                    parking = User.objects.get(pk=pk)
-                    print(data(period_start, period_end, pk))
+                    parking = Parking.objects.get(pk=pk)
                     park = data(period_start, period_end, pk)[0][0]
                     # total_time average_time 
                     period_start = [i for i in period_start.split('-')]
