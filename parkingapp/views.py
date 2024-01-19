@@ -442,12 +442,12 @@ def dash_full(request):
                 period_start = request.POST['date1']
                 period_end = request.POST['date2']
                 try:
-                    parking = Parking.objects.get(pk=pk)
+
                     park = data(period_start, period_end, pk)[0][0]
                     # total_time average_time 
                     period_start = [i for i in period_start.split('-')]
                     period_end = [i for i in period_end.split('-')]
-
+                    sm = 0
                     p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
                     p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
                     if p_end - p_start <= timedelta(days=1):
@@ -512,7 +512,7 @@ def dash_full(request):
                             ctime += delta
                             week += 1
                         reciepts_to_send = str(reciepts_to_send)
-                    context = {'total_time': park.with_benefits,
+                    context = {'total_time': park.total_time,
                             'average_time': park.session_average_duration, 
                             'reciepts': json.dumps(str(reciepts_to_send)),
                             'form': form}
@@ -626,7 +626,7 @@ def dash_coupon(request):
                                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                             ctime += delta
                         reciepts_to_send = str(reciepts_to_send)
-                    context = {'total_time': park.total_time,
+                    context = {'total_time': park.with_benefits,
                             'average_time': park.benefits_session_average_duration, 
                             'reciepts': json.dumps(str(reciepts_to_send)),
                             'form': form}
