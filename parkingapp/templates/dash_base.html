@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -23,16 +24,16 @@
     <div id="wrapper">
         <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-dark p-0" id="hidza">
             <div class="container-fluid d-flex flex-column p-0">
-                <a class="d-flex justify-content-center align-items-center sidebar-brand m-0" href="/">
-                    <div class="fw-bold mx-3"><span>есп</span></div>
+                <a class="d-flex justify-content-center align-items-center sidebar-brand m-0" href="{% url 'parkingapp:index' %}">
+                    <div class="fw-bold mx-3"><span>ЕСП</span></div>
                 </a>
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light" id="accordionSidebar">
-                    <li class="nav-item"><a class="nav-link {% block actfull %}{% endblock %}" href="dash_full"><span>Наполняемость</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% block actcoupon %}{% endblock %}" href="dash_coupon"><span>Льготные места</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% block actfin %}{% endblock %}" href="dash_fin"><span>Финансовый отчет</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% block actusers %}{% endblock %}" href="dash_users"><span>Пользователи</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% block actparks %}{% endblock %}" href="dash_parks"><span>Парковки</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% block actfull %}{% endblock %}" href="{% url 'parkingapp:dash_full' %}"><span>Наполняемость</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% block actcoupon %}{% endblock %}" href="{% url 'parkingapp:dash_coupon' %}"><span>Льготные места</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% block actfin %}{% endblock %}" href="{% url 'parkingapp:dash_fin' %}"><span>Финансовый отчет</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% block actusers %}{% endblock %}" href="{% url 'parkingapp:dash_users' %}"><span>Пользователи</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% block actparks %}{% endblock %}" href="{% url 'parkingapp:dash_parks' %}"><span>Парковки</span></a></li>
                 </ul>
             </div>
         </nav>

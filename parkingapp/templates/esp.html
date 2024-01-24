@@ -9,8 +9,8 @@
           <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Единая Система Паркинга</h1>
           <p class="lead">Единая система паркинга в Калининграде предоставляет удобные и безопасные места для стоянки автомобилей в центре города. Мы обеспечиваем доступ к парковочным местам через мобильное приложение, что делает процесс нахождения и оплаты парковки максимально удобным.</p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-            <a href="enter" class="btn btn-primary rounded-4 btn-lg px-4 me-md-2">Вход</a>
-            <a href="sign" class="btn btn-outline-secondary rounded-4 btn-lg px-4">Регистрация</a>
+            <a href="{% url 'parkingapp:enter' %}" class="btn btn-primary rounded-4 btn-lg px-4 me-md-2">Вход</a>
+            <a href="{% url 'parkingapp:sign' %}" class="btn btn-outline-secondary rounded-4 btn-lg px-4">Регистрация</a>
           </div>
 
         </div>

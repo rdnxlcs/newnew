@@ -117,15 +117,18 @@ class CouponerRegistrationForm(UserCreationForm):
         model = User
         fields = ['username', 'password1', 'password2', 'park_id']
 
+
 class CouponForm(forms.Form):
-    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    user_reciept_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'id парковки для предоставления льготы',
         'inputmode': 'numeric'
     }))
+
     class Meta:
         model = Reciept
-        fields = ['pk']
+        fields = ['user_reciept_id']
+
 
 class DashfullForm(forms.Form):
     pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
@@ -199,10 +202,16 @@ class AddParkingForm(forms.Form):
         'id': 'a',
     }))
 
+
+
 class CommitParkingForm(forms.Form):
-    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    parking_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control rounded-4',
         'id': 'floatingInput',
         'inputmode': 'numeric',
         'placeholder': 'ID парковки'
     }))
+
+    class Meta:
+        model = Parking
+        fields = ['parking_id']
