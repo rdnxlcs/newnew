@@ -122,4 +122,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Users
 AUTH_USER_MODEL = "parkingapp.User"
+LOGIN_URL = '/enter/'

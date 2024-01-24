@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
-{% block active_sign %}active{% endblock %}
+
+
+{% block active_sign %}
+  active
+{% endblock %}
+
+
 {% block content %}
 <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
     <div class="modal-dialog" role="document">
@@ -39,7 +45,7 @@
             </div>
             
             <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
-            <small class="text-danger">{{ error }}</small>
+            <small class="text-danger">{{ form.errors }}</small>
           </form>
         </div>
       </div>

@@ -10,10 +10,11 @@
             <form class="p-4 p-md-5 shadow border bg-white rounded-4" method="post">
               {% csrf_token %}
               <div class="form-floating mb-3 rounded-4">
-                {{form.pk}}
-                <label for="floatingInput">Введите ID чека</label>
+                {{ form.user_reciept_id }}
+                <label for="{{ form.user_reciept_id.id_for_label }}">ID чека</label>
               </div>
               <button class="w-100 btn btn-lg rounded-4 btn-primary" type="submit">Обнулить чек</button>
+              <small>{{ form.errors }}</small>
             </form>
           </div>
         </div>
