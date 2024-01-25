@@ -7,8 +7,12 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('logout/', views.logout, name='logout'),
     path('dont_have_access/', views.dont_have_access, name='dont_have_access'),
+
     path('sign/', views.sign, name='sign'),
     path('enter/', views.enter, name='enter'),
+    path('profile/', views.profile, name='profile'),
+    path('card/', views.user_card, name='user_card'),
+
     path('panel/', views.panel, name='panel'),
     path('addparking/', views.addparking, name='addparking'),
     path('signadmin/', views.signadmin, name='signadmin'),

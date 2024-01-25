@@ -26,6 +26,22 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 4,
         'maxlength': 20,
     }))
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Почта',
+    }))
+    first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Имя',
+        'minlength': 2,
+        'maxlength': 20,
+    }))
+    last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Фамилия',
+        'minlength': 2,
+        'maxlength': 30,
+    }))
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
@@ -38,34 +54,65 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 8,
         'maxlength': 100
     }))
-    card_num = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'text',
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'password1', 'password2', 'email']
+
+
+class UserProfileForm(UserChangeForm):
+    username = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'class': 'form-control rounded-4',
-        'placeholder': 'Номер карты',
-        'minlength': 16,
-        'maxlength': 16,
-        'inputmode': 'numeric',
-    }))
-    card_period = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'text',
-        'class': 'form-control rounded-4',
-        'placeholder': 'Срок действия',
+        'placeholder': 'Имя пользователя',
         'minlength': 4,
-        'maxlength': 4,
-        'inputmode': 'numeric',
+        'maxlength': 20,
+        'readonly': True
     }))
-    card_cvv = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'text',
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
         'class': 'form-control rounded-4',
-        'placeholder': 'CVV код',
-        'minlength': 3,
-        'maxlength': 3,
-        'inputmode': 'numeric',
+        'placeholder': 'Почта',
+    }))
+    first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Имя',
+        'minlength': 2,
+        'maxlength': 20,
+    }))
+    last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Фамилия',
+        'minlength': 2,
+        'maxlength': 30,
     }))
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'card_num', 'card_period', 'card_cvv']
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+
+class UserCardForm(UserChangeForm):
+    card_num = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Номер карты',
+        'minlength': 16,
+        'maxlength': 16,
+    }))
+    card_period = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'Срок действия',
+        'minlength': 4,
+        'maxlength': 4,
+    }))
+    card_cvv = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control rounded-4',
+        'placeholder': 'CVV код',
+        'minlength': 3,
+        'maxlength': 3,
+    }))
+    
+    class Meta:
+        model = User
+        fields = ['card_num', 'card_period', 'card_cvv']
 
 
 class AdminRegistrationForm(UserCreationForm):
@@ -215,3 +262,4 @@ class CommitParkingForm(forms.Form):
     class Meta:
         model = Parking
         fields = ['parking_id']
+

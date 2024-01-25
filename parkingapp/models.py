@@ -3,14 +3,11 @@ from django.contrib.auth.models import AbstractUser
 from datetime import *
 
 class User(AbstractUser):
-    card_num = models.PositiveBigIntegerField(default=0)
-    card_period = models.PositiveIntegerField(default=0)
-    card_cvv = models.PositiveIntegerField(default=0)
-    rights = models.IntegerField(default=0)
-    username = models.CharField(max_length=20, unique=True)
-    password1 = models.CharField(max_length=200, default=" ")
-    password2 = models.CharField(max_length=200, default=" ")
-    park_id = models.IntegerField(default=0)
+    card_num = models.CharField(max_length=16, null=True, blank=True)
+    card_period = models.CharField(max_length=4, null=True, blank=True)
+    card_cvv = models.CharField(max_length=3, null=True, blank=True)
+    rights = models.IntegerField(default=0, null=True)
+    park_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.username} | {self.rights}'

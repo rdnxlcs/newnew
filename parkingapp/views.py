@@ -1,17 +1,17 @@
 from django.contrib import auth
-from parkingapp.models import *
 from django.urls import reverse
 from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
-# from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import make_aware
 from django.http import JsonResponse
+
 import ymaps
 import json
 
-from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashfullForm, DashcouponForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
+from parkingapp.forms import *
+from parkingapp.models import *
 
 
 def check_logged(request):
@@ -168,6 +168,42 @@ def enter(request):
     }
 
     return render(request, 'enter.html', context)
+
+
+@login_required(redirect_field_name=None)
+def profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(data=request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    context = {
+        'title': f'Профиль - {request.user}',
+        'form': form,
+    }
+    return render(request, 'profile.html', context)
+
+
+@login_required(redirect_field_name=None)
+def user_card(request):
+    if request.method == 'POST':
+        form = UserCardForm(data=request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    else:
+        form = UserCardForm(instance=request.user)
+
+    context = {
+        'title': 'Данные карты',
+        'form': form,
+    }
+    return render(request, 'user_card.html', context)
 
 
 @login_required(redirect_field_name=None)
@@ -447,6 +483,7 @@ def panel(request):
             rsn.set_cookie('period_end', str(period_end)[:10])
             
             return rsn
+        
         try:
             period_start = request.COOKIES['period_start']
             period_end = request.COOKIES['period_end']
