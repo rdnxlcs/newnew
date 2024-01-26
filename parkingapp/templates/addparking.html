@@ -12,15 +12,15 @@
             {% csrf_token %}
             <div class="form-floating mb-3">
               {{form.address}}
-              <label for="a">Адрес</label>
+              <label for="{{ form.address.id_for_label }}">Адрес</label>
             </div>
             <div class="form-floating mb-3">
-              {{form.max_parking_spaces}}
-              <label for="a">Количество мест</label>
+              {{form.max_parking_lots}}
+              <label for="{{ form.max_parking_lots.id_for_label }}">Количество мест</label>
             </div>
             <div class="form-floating mb-3">
               {{form.price}}
-              <label for="a">Цена за час</label>
+              <label for="{{ form.price.id_for_label }}">Цена за час</label>
             </div>
             <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Добавить</button>
           </form>

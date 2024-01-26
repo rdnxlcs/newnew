@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+
+
 {% block content %}
 <div class="container text-center">
     <h1 class="display-6 text-body-emphasis">У вас нет доступа к этой странице</h1>
-    <a class="mt-2" href="/">На главную</a>
+    <a class="mt-2" href="{% url 'parkingapp:index' %}">На главную</a>
 </div>
 {% endblock %}
