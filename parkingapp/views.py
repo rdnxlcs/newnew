@@ -559,13 +559,15 @@ def dash_parks(request):
     
     else:
         if request.method == 'POST':
+            print(request.POST)
             if 'change_price' in request.POST:
                 form = ChangePriceForm(data=request.POST)
                 if form.is_valid():
                     pk = request.POST.get('change_price')
                     new_price = request.POST['newprice']
+                    print(new_price)
                     parking = Parking.objects.get(pk=pk)
-                    now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
+                    now = datetime.now().replace(tzinfo=None)
                     tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
                     if now - tm >= timedelta(days=90):
                         parking.price_per_hour = new_price
@@ -577,6 +579,7 @@ def dash_parks(request):
                 else:
                     return redirect(reverse('parkingapp:error'))
             elif 'delete' in request.POST:
+                print(request.POST)
                 pk = request.POST.get('delete')
                 parking = Parking.objects.get(pk=pk)
                 parking.delete()
