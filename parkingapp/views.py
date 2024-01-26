@@ -35,8 +35,9 @@ def index(request):
                         parking.occupied_lots += 1
                         parking.save()
                         starttime = datetime.now()
-                        Reciept.objects.create(parking_id=parking, user_id=user, start_time=starttime, finish_time=starttime)
-                except:
+                        Reciept.objects.create(parking_id=park_id, user_id=user.pk, start_time=starttime, finish_time=starttime)
+                except Exception as e:
+                    print(e)
                     return redirect(reverse('parkingapp:error'))
             else:
                 return redirect(reverse('parkingapp:error'))
@@ -45,9 +46,10 @@ def index(request):
             reciept = Reciept.objects.get(pk=reciept_id)
 
             reciept.finish_time = datetime.now()
-            parking = Parking.objects.get(pk=reciept.parking_id.pk)
+            parking = Parking.objects.get(pk=reciept.parking_id)
             parking.occupied_lots -= 1
             parking.save()
+            print(parking.max_parking_lots - parking.occupied_lots)
             dif = (reciept.finish_time.replace(tzinfo=None) - reciept.start_time.replace(tzinfo=None))
             dif = dif.total_seconds()
             minutes = dif // 60
@@ -55,7 +57,7 @@ def index(request):
                 reciept.final_price = 0
 
             else:
-                reciept.final_price = minutes * parking.price_per_minute // 60
+                reciept.final_price = minutes * parking.price_per_hour // 60
             reciept.save()
 
 
@@ -64,38 +66,41 @@ def index(request):
             
             bdsm = []
             
-            parkingxd = Parking.objects.get(pk=reciept.parking_id_id)
+            parkingxd = Parking.objects.get(pk=reciept.parking_id)
             bdsm = [reciept, parkingxd.address]
 
             if request.user.pk:
                 logged = True
             return render(request, 'endparking.html', {'reciept': bdsm, 'logged': check_logged(request)})
-        
+    
     try:
-        reciepts = Reciept.objects.filter(user_id=request.user, final_price=-1)
         parkings = []
+        print('HERE BLYAT')
         for el in Parking.objects.all():
             parkings.append(el.longitude)
             parkings.append(el.lattitude)
             parkings.append(el.pk)
             parkings.append(el.max_parking_lots - el.occupied_lots)
-            parkings.append(el.price_per_minute)
+            parkings.append(el.price_per_hour)
             parkings.append(el.max_parking_lots)
             parkings.append(el.address)
             parkings.append(99999)
-        parkings = ' '.join(list(map(str, parkings))[:-1]);
+        parkings = ' '.join(list(map(str, parkings))[:-1])
+        print(parkings)
+    except:
+        parkings = []
+    try:
         bdsm = []
+        reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
         for el in reciepts:
-            parkingxd = Parking.objects.get(pk=el.parking_id_id)
+            parkingxd = Parking.objects.get(pk=el.parking_id)
             bdsm.append([el, parkingxd.address])
         
     except:
-        parkings = []
         reciepts = []
         bdsm = []
-        # BASE_URL = 'https://static-maps.yandex.ru/v1'
-    form = CommitParkingForm()
 
+    form = CommitParkingForm()
     context = {
         'title': 'Главная',
         'parking': Parking.objects.all(),
@@ -185,7 +190,7 @@ def addparking(request):
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
-                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_minute=price)
+                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price)
                 return redirect(reverse('parkingapp:dash_parks'))
             else:
                 return redirect(reverse('parkingapp:error'))
@@ -251,7 +256,6 @@ def signcoupon(request):
 def coupon(request):
     if not request.user.coupon_control:
         return redirect(reverse('parkingapp:dont_have_access'))
-    
     else:
         if request.method == 'POST':
             form = CouponForm(data=request.POST)
@@ -374,7 +378,7 @@ def data(period_start, period_end, id=0):
             total_time = int(sum(sessions))
             min_session = min(sessions)
             max_session = max(sessions)
-            total_sum = sum(filter(lambda x: x>15, sessions))*parking.price_per_minute
+            total_sum = sum(filter(lambda x: x>15, sessions))*parking.price_per_hour
             if len(benefit_sessions) != 0:
                 benefit_sum = sum(benefit_sessions)
                 benefits_session_average_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
@@ -586,7 +590,7 @@ def dash_parks(request):
                     now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
                     tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
                     if now - tm >= timedelta(days=90):
-                        parking.price_per_minute = new_price
+                        parking.price_per_hour = new_price
                         parking.change = datetime.now()
                         parking.save()
                         form = ChangePriceForm()
@@ -834,7 +838,7 @@ def parkings(request):
             now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
             tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
             if now - tm >= timedelta(days=90):    
-                parking.price_per_minute = new_price
+                parking.price_per_hour = new_price
                 parking.change = datetime.now()
                 parking.save()
             else:

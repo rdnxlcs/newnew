@@ -31,7 +31,7 @@ class Parking(models.Model):
     change = models.DateTimeField(default=datetime(1, 1, 1, 0, 0, 0, tzinfo=None))
 
     def __str__(self) -> str:
-        return f'{self.address} | {self.max_parking_spaces}'
+        return f'{self.address} | {self.max_parking_lots}'
 
 class Reciept(models.Model):
     parking_id = models.IntegerField(default=0)

@@ -37,8 +37,8 @@
                                         <tr>
                                             <td>{{el.address}}</td>
                                             <td>{{el.pk}}</td>
-                                            <td>{{el.places}}</td>
-                                            <td>{{el.price_per_minute}} ₽</td>
+                                            <td>{{el.max_parking_lots}}</td>
+                                            <td>{{el.price_per_hour}} ₽</td>
                                             <form method="post">
                                             {%csrf_token%}
                                             <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
