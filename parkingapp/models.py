@@ -1,19 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import *
+# from phonenumber_field.modelfields import PhoneNumberField
 
 class User(AbstractUser):
-    card_num = models.PositiveBigIntegerField(default=0)
-    card_period = models.PositiveIntegerField(default=0)
-    card_cvv = models.PositiveIntegerField(default=0)
-    rights = models.IntegerField(default=0)
+    card_num = models.PositiveBigIntegerField(default=1111)
     username = models.CharField(max_length=20, unique=True)
     password1 = models.CharField(max_length=200, default=" ")
     password2 = models.CharField(max_length=200, default=" ")
+    phone_number = models.IntegerField(default=-1, max_length=12)
     park_id = models.IntegerField(default=0)
-
+    car_num = models.CharField(max_length=12, default='')
+    user_control = models.BooleanField(default=False)
+    parking_control = models.BooleanField(default=False)
+    barrier_control = models.BooleanField(default=False)
+    coupon_control = models.BooleanField(default=False)
+    admin_view = models.BooleanField(default=False)
     def __str__(self) -> str:
-        return f'{self.username} | {self.rights}'
+        return f'{self.username} | user control {self.user_control} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.admin_view}'
     
 
 class Parking(models.Model):
@@ -21,17 +25,17 @@ class Parking(models.Model):
     longitude = models.FloatField(default=0)
     address = models.CharField(max_length=120, default='')
     registry_nubmer = models.PositiveIntegerField(default=0)
-    max_parking_spaces = models.PositiveIntegerField(default=0)
-    occupied_places = models.PositiveIntegerField(default=0)
-    price_per_minute = models.PositiveIntegerField(default=0)
+    max_parking_lots = models.PositiveIntegerField(default=0)
+    occupied_lots = models.PositiveIntegerField(default=0)
+    price_per_hour = models.PositiveIntegerField(default=0)
     change = models.DateTimeField(default=datetime(1, 1, 1, 0, 0, 0, tzinfo=None))
 
     def __str__(self) -> str:
         return f'{self.address} | {self.max_parking_spaces}'
 
 class Reciept(models.Model):
-    parking_id = models.ForeignKey(Parking, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    parking_id = models.IntegerField(default=0)
+    user_id = models.IntegerField(default=0)
     start_time = models.DateTimeField(default=None)
     finish_time = models.DateTimeField(default=None)
     final_price = models.BigIntegerField(default=-1)

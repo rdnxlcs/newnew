@@ -29,10 +29,10 @@ def index(request):
                 park_id = request.POST['parking_id']
                 try:
                     parking = Parking.objects.get(pk=park_id)
-                    if parking.occupied_places >= parking.max_parking_spaces:
+                    if parking.occupied_lots >= parking.max_parking_lots:
                         return redirect(reverse('parkingapp:error'))
                     else:
-                        parking.occupied_places += 1
+                        parking.occupied_lots += 1
                         parking.save()
                         starttime = datetime.now()
                         Reciept.objects.create(parking_id=parking, user_id=user, start_time=starttime, finish_time=starttime)
@@ -46,7 +46,7 @@ def index(request):
 
             reciept.finish_time = datetime.now()
             parking = Parking.objects.get(pk=reciept.parking_id.pk)
-            parking.occupied_places -= 1
+            parking.occupied_lots -= 1
             parking.save()
             dif = (reciept.finish_time.replace(tzinfo=None) - reciept.start_time.replace(tzinfo=None))
             dif = dif.total_seconds()
@@ -78,9 +78,9 @@ def index(request):
             parkings.append(el.longitude)
             parkings.append(el.lattitude)
             parkings.append(el.pk)
-            parkings.append(el.max_parking_spaces - el.occupied_places)
+            parkings.append(el.max_parking_lots - el.occupied_lots)
             parkings.append(el.price_per_minute)
-            parkings.append(el.max_parking_spaces)
+            parkings.append(el.max_parking_lots)
             parkings.append(el.address)
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1]);
@@ -172,7 +172,7 @@ def enter(request):
 
 @login_required(redirect_field_name=None)
 def addparking(request):
-    if request.user.rights != 2:
+    if not request.user.parking_control:
         return redirect(reverse('parkingapp:dont_have_access'))
     else:
         if request.method == 'POST':
@@ -182,10 +182,10 @@ def addparking(request):
                 client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
                 lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
 
-                max_parking_spaces = request.POST['max_parking_spaces']
+                max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
-                occupied_places = 0
-                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_spaces=max_parking_spaces, occupied_places=occupied_places, price_per_minute=price)
+                occupied_lots = 0
+                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_minute=price)
                 return redirect(reverse('parkingapp:dash_parks'))
             else:
                 return redirect(reverse('parkingapp:error'))
@@ -249,7 +249,7 @@ def signcoupon(request):
 
 @login_required(redirect_field_name=None)
 def coupon(request):
-    if request.user.rights == 1:
+    if not request.user.coupon_control:
         return redirect(reverse('parkingapp:dont_have_access'))
     
     else:
@@ -470,7 +470,7 @@ def panel(request):
 
 @login_required(redirect_field_name=None)
 def dash_full(request):
-    if request.user.rights != 2: 
+    if not request.user.admin_view: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
     else:
@@ -572,7 +572,7 @@ def dash_full(request):
 
 @login_required(redirect_field_name=None)
 def dash_parks(request):
-    if request.user.rights != 2: 
+    if not request.user.parking_control: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
     else:
@@ -607,7 +607,7 @@ def dash_parks(request):
 
 @login_required(redirect_field_name=None)
 def dash_coupon(request):
-    if request.user.rights != 2:
+    if not request.user.admin_view:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     else:
@@ -686,13 +686,13 @@ def dash_coupon(request):
         else:
             form = DashcouponForm()
         parking = Parking.objects.all()
-
-        return render(request, 'dash_coupon.html', {'form':form, 'defid': parking[0].pk})
+        parking = [parking[0].pk if parking else 0][0]
+        return render(request, 'dash_coupon.html', {'form':form, 'defid': parking})
 
 
 @login_required(redirect_field_name=None)
 def dash_fin(request):
-    if request.user.rights != 2:
+    if not request.user.admin_view:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     else:
@@ -722,7 +722,7 @@ def dash_fin(request):
 
 @login_required(redirect_field_name=None)
 def dash_users(request):
-    if request.user.rights != 2:
+    if not request.user.user_control:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     else:
@@ -731,15 +731,15 @@ def dash_users(request):
             user = User.objects.get(pk=value)
             user.delete()
 
-        admins = User.objects.filter(rights=2)
-        couponers = User.objects.filter(rights=1)
-
+        admins = User.objects.filter(admin_view=True)
+        couponers = User.objects.filter(coupon_control=True)
+        
         wise = []
         for el in admins:
             wise.append(el)
         for el in couponers:
             wise.append(el)
-
+        wise = list(set(wise))
         context = {
             'title': '',
             'users': wise,
