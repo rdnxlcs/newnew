@@ -470,7 +470,6 @@ def panel(request):
         }
 
         return render(request, 'panel.html', context)
-    
 
 @login_required(redirect_field_name=None)
 def dash_full(request):
@@ -610,7 +609,7 @@ def dash_coupon(request):
     else:
         if request.method == 'POST': 
             form = DashForm(data=request.POST)
-            if form.is_valid():   
+            if form.is_valid():
                 pk = request.POST['pk']
                 period_start = request.POST['date1']
                 period_end = request.POST['date2']
