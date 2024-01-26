@@ -19,7 +19,6 @@ urlpatterns = [
     path('error/', views.error, name='error'),
     path('charts/', views.compare_time, name='charts'),
     path('dash_full/', views.dash_full, name='dash_full'),
-    path('dash_coupon/', views.dash_coupon, name='dash_coupon'),
     path('dash_fin/', views.dash_fin, name='dash_fin'),
     path('dash_users/', views.dash_users, name='dash_users'),
     path('dash_parks/', views.dash_parks, name='dash_parks'),

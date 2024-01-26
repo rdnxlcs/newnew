@@ -83,7 +83,7 @@
     <div class="col-sm-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title fw-bolder">12340 минут</h5>
+          <h5 class="card-title fw-bolder">{{total_benefit_time}} минут</h5>
           <p class="card-text">Суммарный период пребывания</p>
         </div>
       </div>
@@ -91,7 +91,7 @@
     <div class="col-sm-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title fw-bolder">50 минут</h5>
+          <h5 class="card-title fw-bolder">{{average_benefits}} минут</h5>
           <p class="card-text">Средний период пребывания</p>
         </div>
       </div>
@@ -101,7 +101,7 @@
   <canvas class="my-4 w-100" id="myChartC" width="900" height="380"></canvas>
   <script>
     const ctxC = document.getElementById('myChartC');
-    let rC = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    let rC = "{{reciepts_benefit}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
     console.log(r);
     let recieptsC = JSON.parse(rC);
     let labelsC = [], recC = [];
