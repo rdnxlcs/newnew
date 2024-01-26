@@ -366,13 +366,12 @@ def data(period_start, period_end, id=0):
                 sessions.append(minutes)
                 prices.append(reciept.final_price)
                 if reciept.benefit:
+                    if minutes > 15:
+                        benefit_prices.append(minutes * reciept.price_per_hour / 60)
                     benefit_sessions.append(minutes)
-                    benefit_prices.append(minutes * reciept.price_per_hour / 60)
                     with_benefits += 1
                 if minutes <= 15:
                     people_used_free_time += 1
-                
-
         if len(sessions) != 0:
             session_average_duration = int(sum(sessions)) // len(sessions)
             total_time = int(sum(sessions))
