@@ -1,132 +1,168 @@
 {% extends 'base.html' %}
 {% block active_parking %}active{% endblock %}
 {% block content %}
+{% load static %}
+
+<style>
+  #myMap {
+    width: 100vw;
+    height: calc(100vh - 73px);
+    max-width: 100vw;
+  }
+
+  .suk {
+    position: absolute;
+    top: calc(73px + 1rem);
+    width: calc(100vw - 2rem);
+    left: calc(50% - 50vw + 1rem);
+    transition: .35s;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  .group-second {
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  .group-first {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 1rem;
+    border-top-left-radius: 1rem;
+  }
+
+  .bla {
+    position: absolute;
+    bottom: 0;
+    width: calc(100vw - 2rem);
+    left: calc(50% - 50vw + 1rem);
+    transition: .35s;
+  }
+
+  #circ {
+    background: white;
+    border: 0.25rem solid;
+    border-radius: 1rem;
+  }
+</style>
+<div>
+  <div id="myMap" class="mx-auto"></div>
+  {% if reciepts %}
+
+  {% else %}
+  <form class="suk" method="post">
+    {% csrf_token %}
+    <div class="input-group shadow rounded-4">
+      <div class="form-floating">
+        {{ form.pk }}
+        <label for="floatingInput">ID парковки</label>
+      </div>
+      <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
 {% if bdsm %}
 {% for sex in bdsm %}
-<div class="modal modal-sheet pb-5 position-static d-block">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content rounded-4 shadow border">
-      <div class="modal-body p-5">
-
-        <ul class="d-grid gap-4 my-0 list-unstyled small">
-          <li class="d-flex gap-4">
-            <div class="bi text-warning flex-shrink-0">
-              <img src="https://qrcode.tec-it.com/API/QRCode?data={{ sex.0.pk }}&backcolor=%23ffffff" height="48" width="48"/>
-            </div>
-            <div class="ps-5 ms-5 text-muted">
-              {{ sex.0.start_time }} <br>
-            </div>
-          </li>
-          <hr class="ms-4">
-          <li class="row">
-            <div class="col-6">
-              <h5 class="bi flex-shrink-0">Парковка идет</h5>
-            </div>
-            <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.1 }}</h5>
-            </div>
-          </li>
-          <li class="row">
-            <div class="col-6">
-              <h5 class="bi flex-shrink-0">ID парковки</h5>
-            </div>
-            <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.0.parking_id_id }}</h5>
-            </div>
-          </li>
-          <li class="row">
-            <div class="col-6">
-              <h5 class="bi flex-shrink-0">ID чека</h5>
-            </div>
-            <div class="col-6">
-              <h5 class="mb-0 text-end fw-light">{{ sex.0.pk }}</h5>
-            </div>
-          </li>
-        </ul>
-        <form method="post">
-          {% csrf_token %}
-          <button type="submit" name="end_park" value="{{ sex.0.pk }}" class="btn btn-lg rounded-4 mt-5 btn-primary w-100">Завершить парковку</button>
-        </form>
-      </div>
+<div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3 bla">
+  <div class="p-4 p-md-5 border bg-white rounded-4 shadow">
+    <div class="row text-center mb-3">
+      <small class="col-4 text-secondary">Длительность</small>
+      <small class="col-4 text-secondary">Стоимость</small>
+      <small class="col-4 text-secondary">ID чека</small>
     </div>
+    <div class="row text-center mb-4">
+      <h5 class="col-4">75 минут</h5>
+      <h5 class="col-4">123 ₽</h5>
+      <h5 class="col-4">{{ sex.0.pk }}</h5>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="end_park" value="{{ sex.0.pk }}"
+        class="w-100 btn btn-lg btn-primary rounded-4">Завершить парковку</button>
+    </form>
   </div>
 </div>
 {% endfor %}
 {% endif %}
-{% if reciepts %}
 
-{% else %}
-<div class="container col-xl-10 col-xxl-8 px-4 py-3 py-lg-5">
-  <div class="row align-items-center g-lg-5 py-3 py-lg-5">
-    <div class="col-lg-6 col-12">
-      <h1 class="display-5 fw-bold text-body-emphasis lh-1">Паркуйтесь быстро и просто</h1>
-      <p class="lead">Введите цифры с шлагбаума в поле "ID парковки", перед этим войдите в аккаунт или зарегестрируйтесь, привязав карту</p>
-    </div>
-    <div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3">
-      <form class="p-4 p-md-5 border bg-white rounded-4 shadow" method="post">
-        {% csrf_token %}
-        <div class="form-floating mb-3">
-          {{form.pk}}
-          <label for="floatingInput">ID парковки</label>
-        </div>
-        <button name="create_park" class="w-100 btn btn-lg btn-primary rounded-4" type="submit">Начать парковку</button>
-      </form>
-    </div>
-  </div>
-</div>
-{% endif %}
 
-<style>
-  #myMap {
-      width: 100vw; 
-      height: 100vw;
-      max-width: 100vw;
-      max-height: 576px;
-    }
-</style>
-<div id="myMap" class="mx-auto"></div>
 
 <script type="text/javascript">
+  let isclosed = true
+  function pos() {
+    if (isclosed) {
+      document.getElementsByClassName('suk')[0].style.top = 'calc(193px + 1rem)'
+      isclosed = false
+    } else {
+      document.getElementsByClassName('suk')[0].style.top = 'calc(73px + 1rem)'
+      isclosed = true
+    }
+  }
+
+
   let parkings = "{{parkings}}".split(" 99999 ");
-  for(let i=0; i<parkings.length; i++){
+  for (let i = 0; i < parkings.length; i++) {
     parkings[i] = parkings[i].split(" ");
-    for(let j=0; j<6; j++){
+    for (let j = 0; j < 6; j++) {
       parkings[i][j] = Number(parkings[i][j]);
     }
-    for(let j=7; j<parkings[i].length; j++){
-      parkings[i][6]+=" "+parkings[i][j];
+    for (let j = 7; j < parkings[i].length; j++) {
+      parkings[i][6] += " " + parkings[i][j];
     }
   }
   console.log(parkings)
   ymaps.ready(init);
   function init() {
-      var myMap = new ymaps.Map ('myMap', {
-        center: [54.7065, 20.511],
-        zoom: 15,
-        controls: ['geolocationControl', 'trafficControl'],
-       
-      }, {
-        searchControlProvider: 'yandex#search'
-      });
-      
-      for(let i=0; i<parkings.length; i++){
-        let proc = parkings[i][3] / parkings[i][5] * 100;
+    var myMap = new ymaps.Map('myMap', {
+      center: [54.7065, 20.511],
+      zoom: 15,
+      controls: [],
 
-        // lng lat pk lots price
-        var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {  
-            balloonContentHeader: '<h5 class="fw-bold">' + parkings[i][6] + '</h5>',
-            // Зададим содержимое основной части балуна.
-            balloonContentBody: '<div class="mt-3" style="overflow-x: hidden;"><div class="row"><p class="col-6 mb-1">Мест осталось</p><p class="col-6 mb-1 text-end">' + parkings[i][3] + '</p></div><div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 10px"><div class="progress-bar" style="width:' +(100 - proc) +'%"></div></div><div class="mt-3 row"><p class="col-6">Цена за час</p><p class="col-6 text-end">' + parkings[i][4] + ' ₽</p></div></div>',
-            // Зададим содержимое нижней части балуна.
-            balloonContentFooter: '<small> ID парковки: ' + parkings[i][2] + '</small>',
-            // Зададим содержимое всплывающей подсказки.
-            hintContent: parkings[i][6]
-        }, {
-            preset: 'twirl#blueStretchyIcon'
-        });
-        myMap.geoObjects.add(myPlacemark);
+    }, {
+      searchControlProvider: 'yandex#search',
+      yandexMapDisablePoiInteractivity: true
+    });
+
+    MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
+      '<button disabled id="circ" class="text-center p-2 text-dark fw-bolder border-$[properties.border]">$[properties.iconContent]</button>'
+    )
+
+    for (let i = 0; i < parkings.length; i++) {
+      let proc = parkings[i][3] / parkings[i][5] * 100;
+      if (proc > 70) {
+        var blar = 'success'
+      } else if (proc > 40) {
+        var blar = 'warning'
+      } else {
+        var blar = 'danger'
       }
-      
+
+      var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {
+        iconContent: String(parkings[i][4]) + '_Р',
+        border: String(blar)
+      }, {
+        // Опции.
+        // Необходимо указать данный тип макета. Показываем что это изображение.
+        iconLayout: 'default#imageWithContent',
+        // Своё изображение иконки метки. Указываем путь до картинки
+        iconImageHref: '',
+        // Размеры метки. 
+        iconImageSize: [0, 0],
+        // Смещение левого верхнего угла иконки относительно её "ножки" (точки привязки).
+        iconImageOffset: [0, 0],
+        iconContentOffset: [0, 0],
+        iconContentLayout: MyIconContentLayout
+      });
+      myMap.geoObjects.add(myPlacemark);
+    }
+    myMap.geoObjects.add(myPlacemark);
+    myMap.behaviors.disable('scrollZoom');
   }
 </script>
 

@@ -2,47 +2,59 @@
 {% block active_sign %}active{% endblock %}
 {% block content %}
 <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content rounded-4 shadow border">
-        <div class="modal-header p-5 pb-4 border-bottom-0">
-          <h1 class="fw-bold mb-0 fs-2">Регистрация</h1>
-        </div>
-  
-        <div class="modal-body p-5 pt-0 rounded-4">
-          <form method="post">
-            {% csrf_token %}
-            <div class="form-floating mb-3">
-              {{ form.username }}
-              <label for="{{ form.username.id_for_label }}">Имя владельца</label>
-            </div>
-            <div class="form-floating mb-3">
-              {{ form.card_num }}
-              <label for="{{ form.card_num_id_for_label }}">Номер карты</label>         
-            </div>
-            <div class="form-floating mb-3">
-              {{ form.card_period }}  
-              <label for="{{ form.card_period.id_for_label }}">Срок действия</label>
-            </div>
-            <div class="form-floating mb-3">
-              {{ form.card_cvv }}
-              <label for="{{ form.card_cvv.id_for_label }}">CVV/CVC</label>
-            </div>
-            <small class="text-body-secondary">Регистрация возможна только по данным карты</small>
-            <hr class="my-4">
-            <div class="form-floating mb-3">
-              {{ form.password1 }}
-              <label for="{{ form.password1.id_for_label }}">Пароль</label>
-            </div>
-            <div class="form-floating mb-3">
-              {{ form.password2 }}
-              <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
-            </div>
-            
-            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
-            <small class="text-danger">{{ error }}</small>
-          </form>
-        </div>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content rounded-4 shadow border">
+      <div class="modal-header p-5 pb-4 border-bottom-0">
+        <h1 class="fw-bold mb-0 fs-2">Регистрация</h1>
+      </div>
+
+      <div class="modal-body p-5 pt-0 rounded-4">
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-floating mb-3">
+            {{ form.username }}
+            <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+          </div>
+          <div class="form-floating mb-3">
+            {{ form.tel }}
+            <label for="{{ form.card_num_id_for_label }}">Номер телефона</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            {{ form.car }}
+            <label for="{{ form.card_num_id_for_label }}">Автомобильный номер</label>
+          </div>
+          <div class="form-floating mb-3">
+            {{ form.card }}
+            <label for="{{ form.card_num_id_for_label }}">Данные карты</label>
+          </div>
+          <small class="text-body-secondary">Введите 4 последние цифры номера банковской карты</small>
+          <hr class="my-4">
+          <div class="form-floating mb-3">
+            {{ form.password1 }}
+            <label for="{{ form.password1.id_for_label }}">Пароль</label>
+          </div>
+          <div class="form-floating mb-3">
+            {{ form.password2 }}
+            <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
+          </div>
+
+          <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
+          <small class="text-danger">{{ error }}</small>
+        </form>
       </div>
     </div>
+  </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const inputElement = document.getElementById('tel') // ищем наш единственный input
+    const maskOptions = { // создаем объект параметров
+      mask: '+{7}(000)000-00-00' // задаем единственный параметр mask
+    }
+    IMask(inputElement, maskOptions) // запускаем плагин с переданными параметрами
+
+  })
+</script>
 {% endblock %}

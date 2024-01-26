@@ -38,34 +38,33 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 8,
         'maxlength': 100
     }))
-    card_num = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    card = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
-        'minlength': 16,
-        'maxlength': 16,
-        'inputmode': 'numeric',
-    }))
-    card_period = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'text',
-        'class': 'form-control rounded-4',
-        'placeholder': 'Срок действия',
         'minlength': 4,
         'maxlength': 4,
         'inputmode': 'numeric',
     }))
-    card_cvv = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    car = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
-        'placeholder': 'CVV код',
-        'minlength': 3,
-        'maxlength': 3,
-        'inputmode': 'numeric',
+        'placeholder': 'Автомобильный номер',
+        'minlength': 6,
+        'maxlength': 12,
+        'style': 'text-transform: uppercase;',
+    }))
+    tel = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+        'type': 'text',
+        'class': 'form-control rounded-4',
+        'placeholder': 'Номер телефона',
+        'id': 'tel',
+        'inputmode': 'tel',
     }))
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'card_num', 'card_period', 'card_cvv']
+        fields = ['username', 'password1', 'password2', 'card', 'car', 'tel']
 
 
 class AdminRegistrationForm(UserCreationForm):
@@ -127,38 +126,20 @@ class CouponForm(forms.Form):
         model = Reciept
         fields = ['pk']
 
-class DashfullForm(forms.Form):
+class DashForm(forms.Form):
     pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control radl border-secondary',
+        'class': 'form-control form-control-sm',
         'inputmode': 'numeric',
-        'placeholder': 'id парковки'
+        'placeholder': 'id парковки',
     }))
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary',
+        'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
         'value': '2023-12-09',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary',
-        'type': 'date',
-        'style': 'background: none;',
-        'value': '2023-12-10',
-    }))
-class DashcouponForm(forms.Form):
-    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control radl border-secondary',
-        'inputmode': 'numeric',
-        'placeholder': 'id парковки'
-    }))
-    date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary',
-        'type': 'date',
-        'style': 'background: none;',
-        'value': '2023-12-09',
-    }))
-    date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary',
+        'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
         'value': '2023-12-10',
@@ -201,8 +182,8 @@ class AddParkingForm(forms.Form):
 
 class CommitParkingForm(forms.Form):
     pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control rounded-4',
+        'class': 'form-control group-first',
         'id': 'floatingInput',
         'inputmode': 'numeric',
-        'placeholder': 'ID парковки'
+        'placeholder': 'ID парковки',
     }))

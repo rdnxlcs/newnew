@@ -4,7 +4,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content rounded-4 shadow border">
         <div class="modal-header p-5 pb-4 border-bottom-0">
-          <h1 class="fw-bold mb-0 fs-2">Регистрация администратора</h1>
+          <h1 class="fw-bold mb-0 fs-2">Новый пользователь</h1>
         </div>
   
         <div class="modal-body p-5 pt-0">
@@ -18,11 +18,37 @@
               {{ form.password1 }}
               <label for="{{ form.password1.id_for_label }}">Пароль</label>
             </div>
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-4">
               {{ form.password2 }}
               <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
             </div>
             {{ error }}
+            <hr class="m-0 mb-2">
+            <small class="text-secondary">Установите права для пользователя</small>
+            <div class="form-check my-3">
+              <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+              <label class="form-check-label" for="flexCheckChecked">
+                Управление пользователями
+              </label>
+            </div>
+            <div class="form-check my-3">
+              <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+              <label class="form-check-label" for="flexCheckChecked">
+                Управление парковками
+              </label>
+            </div>
+            <div class="form-check my-3">
+              <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+              <label class="form-check-label" for="flexCheckChecked">
+                Управление шлагбаумами
+              </label>
+            </div>
+            <div class="form-check my-3 mb-4">
+              <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+              <label class="form-check-label" for="flexCheckChecked">
+                Обнуление чеков
+              </label>
+            </div>
             <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
           </form>
         </div>

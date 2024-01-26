@@ -10,7 +10,7 @@ from django.http import JsonResponse
 import ymaps
 import json
 
-from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashfullForm, DashcouponForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
+from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 
 def check_logged(request):
     
@@ -111,7 +111,7 @@ def logout(request):
     return redirect(reverse('parkingapp:enter'))
 
 def endparking(request):
-    return render('endparking.html', request, {'logged': check_logged(request)})
+    return render(request, 'endparking.html', {'logged': check_logged(request)})
 
 def sign(request):
     if request.method == 'POST':
@@ -522,7 +522,7 @@ def dash_full(request):
             else:
                 return redirect(reverse('parkingapp:error'))
         else:
-            form = DashfullForm()
+            form = DashForm()
         return render(request, 'dash_full.html', {'form':form})
     else: 
         return redirect(reverse('parkingapp:dont_have_access'))

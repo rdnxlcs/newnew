@@ -1,150 +1,141 @@
 {% extends 'dash_base.html' %}
 {% block actfull %}active{% endblock %}
 {% block content %}
-<div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid mt-3">
-                    <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0">Наполняемость</h3>
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="input-group" style="max-width: 500px;">
-                                {{form.pk}}
-                                {{form.date1}}
-                                {{form.date2}}
-                                <button type="submit" class="btn btn-sm btn-primary radr">Получить данные</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="row">
-                        <div class="col-auto col-md-6 col-xl-4 mb-4">
-                            <div class="card shadow border-start-primary py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>сумм. период пребывания</span></div>
-                                            <div class="text-dark fw-bold h5 mb-0"><span>{{total_time}}</span></div>
-                                        </div>
-                                        <div class="col-auto"><i class="fas fa-calendar fa-2x text-gray-300"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-auto col-md-6 col-xl-4 mb-4">
-                            <div class="card shadow border-start-success py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Средний период пребывания</span></div>
-                                            <div class="text-dark fw-bold h5 mb-0"><span>{{average_time}}</span></div>
-                                        </div>
-                                        <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Наполняемость</h1>
+    <div class="mb-2 mb-md-0">
+      <div class="input-group me-2">
+        {{form.pk}}
+        {{form.date1}}
+        {{form.date2}}
+        <button type="submit" class="btn btm-sm btn-primary radr"><i class="bi bi-arrow-return-left"></i></button>
+      </div>
+    </div>
+  </div>
 
+  <div class="row g-3">
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">{{total_time}} минут</h5>
+          <p class="card-text">Суммарный период пребывания</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">{{average_time}} минут</h5>
+          <p class="card-text">Средний период пребывания</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                    <div class="row">
-                        <div class="col-lg-7 col-xl-8">
-                            <div class="card shadow mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="text-primary fw-bold m-0 py-3">Кол-во ТС</h6>
-                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
-                                        <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
-                                            <p class="text-center dropdown-header">dropdown header:</p><a class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item" href="#">&nbsp;Another action</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item" href="#">&nbsp;Something else here</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div>
-                                        <canvas id="myChart"></canvas>
-                                    </div>
-                                    
-                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                                    <script>
-                                        const ctx = document.getElementById('myChart');
-                                        let r = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
-                                        console.log(r);
-                                        let reciepts = JSON.parse(r);
-                                        let labels = [], rec=[];
-                                        let name = reciepts["name"];
-                                        let keys = Object.keys(reciepts["period"]);
-                                        for(let i=0; i<keys.length; i++){
-                                            labels.push(keys[i]);
-                                            rec.push(reciepts["period"][keys[i]]);
-                                        }
-                                        
-                                        new Chart(ctx, {
-                                            type: 'line',
-                                            data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                label: 'Количество чеков по '+name,
-                                                data: rec,
-                                                borderWidth: 0.5
-                                            }]
-                                            },
-                                            options: {
-                                            scales: {
-                                                x: {
-                                                grid: {
-                                                    display: false
-                                                }
-                                                },
-                                                y: {
-                                                    beginAtZero: true,
-                                                grid: {
-                                                    display: false
-                                                }
-                                                }
-                                            }
-                                            }
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+  <script>
+    const ctx = document.getElementById('myChart');
+    let r = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    console.log(r);
+    let reciepts = JSON.parse(r);
+    let labels = [], rec = [];
+    let name = reciepts["name"];
+    let keys = Object.keys(reciepts["period"]);
+    for (let i = 0; i < keys.length; i++) {
+      labels.push(keys[i]);
+      rec.push(reciepts["period"][keys[i]]);
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: rec,
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#007bff',
+          borderWidth: 4,
+          pointBackgroundColor: '#007bff'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            boxPadding: 3
+          }
+        }
+      }
+    })
+  </script>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Льготные места</h1>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">12340 минут</h5>
+          <p class="card-text">Суммарный период пребывания</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">50 минут</h5>
+          <p class="card-text">Средний период пребывания</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <canvas class="my-4 w-100" id="myChartC" width="900" height="380"></canvas>
+  <script>
+    const ctxC = document.getElementById('myChartC');
+    let rC = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    console.log(r);
+    let recieptsC = JSON.parse(rC);
+    let labelsC = [], recC = [];
+    let nameC = recieptsC["name"];
+    let keysC = Object.keys(recieptsC["period"]);
+    for (let i = 0; i < keys.length; i++) {
+      labelsC.push(keys[i]);
+      recC.push(recieptsC["period"][keys[i]]);
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    const myChartC = new Chart(ctxC, {
+      type: 'line',
+      data: {
+        labels: labelsC,
+        datasets: [{
+          data: recC,
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#dc3545',
+          borderWidth: 4,
+          pointBackgroundColor: '#dc3545'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            boxPadding: 3
+          }
+        }
+      }
+    })
+  </script>
+
+</main>
 {% endblock %}
-
-<!--
-    
-                                    <div><canvas id="freeChart"></canvas></div>
-                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-                                        const ctx2 = document.getElementById('freeChart');
-                                        let r2 = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
-                                        console.log(r);
-                                        let reciepts2 = JSON.parse(r);
-                                        let free_labels = [], free_rec=[];
-                                        let name2 = reciepts["name"];;
-                                        let freekeys = Object.keys(reciepts["free-period"]);
-                                        for(let i=0; i<freekeys.length; i++){
-                                            free_labels.push(freekeys[i]);
-                                            free_rec.push(reciepts["free-period"][freekeys[i]]);
-                                        }
-                                        new Chart(ctx, {
-                                            type: 'line',
-                                            data: {
-                                            labels: free_labels,
-                                            datasets: [{
-                                                label: 'Количество чеков по '+name,
-                                                data: free_rec, 
-                                                borderWidth: 0.5
-                                            }]
-                                            },
-                                            options: {
-                                            scales: {
-                                                y: {
-                                                beginAtZero: true
-                                                }
-                                            }
-                                            }
-                                        });
-                                    </script>
--->
