@@ -1,60 +1,42 @@
 {% extends 'dash_base.html' %}
 {% block actusers %}active{% endblock %}
 {% block content %}
-<div class="d-flex flex-column" id="content-wrapper">
-    <div id="content">
-        <div class="container-fluid mt-3">
-            <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                <h3 class="text-dark mb-0">Пользователи</h3>
-            </div>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
 
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Пользователи</h1>
+  </div>
 
-            <div class="row">
-                <div class="row">
-                    <div class="card shadow p-0">
-                        <div class="d-sm-flex card-header py-3 justify-content-between align-items-center">
-                            <p class="text-primary m-0 fw-bold">Пользователи</p>
-                            <div>
-                                <a class="btn btn-primary rounded-pill mx-1 my-1" href="{% url 'parkingapp:signadmin' %}" type="button">Новый админ</a>
-                                <a class="btn btn-primary rounded-pill mx-1 my-1" href="{% url 'parkingapp:signcoupon' %}" type="button">Новый партнер</a>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-                                <table class="table my-0" id="dataTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Имя пользователя</th>
-                                            <th>Права</th>
-                                            <th>Прикреплен к парковке</th>
-                                            <th>Действие</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for el in users %}
-                                        <tr>
-                                            <td>{{ el.username }}</td>
-                                            <td>{{ el.rights }}</td>
-                                            {% if el.rights == 1 %}
-                                            <td>{{ el.park_id }}</td>
-                                            {% else %}
-                                            <td></td>
-                                            {% endif %}
-                                            <form method="post">
-                                            {%csrf_token%}
-                                            <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
-                                            </form>
-                                        </tr>
-                                        {% endfor %}
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">Имя пользователя</th>
+          <th scope="col">Управление пользователями</th>
+          <th scope="col">Управление парковками</th>
+          <th scope="col">Управление шлагбаумами</th>
+          <th scope="col">Обнуление чеков</th>
+          <th scope="col">Действие</th>
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        {% for el in users %}
+        <tr>
+            <td>{{ el.username }}</td>
+            <td class="{% if el.user_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.user_control }}</td>
+            <td class="{% if el.parking_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.parking_control }}</td>
+            <td class="{% if el.barrier_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.barrier_control }}</td>
+            <td class="{% if el.coupon_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.coupon_control }}</td>
+            <form method="post">
+            {%csrf_token%}
+            <td><button class="text-danger" value="{{el.pk}}" type="submit" name="delete" style="border: none; background: none;">Удалить</button></td>
+            </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</main>
 {% endblock %}
