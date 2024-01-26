@@ -17,6 +17,7 @@
           <th scope="col">Управление парковками</th>
           <th scope="col">Управление шлагбаумами</th>
           <th scope="col">Обнуление чеков</th>
+          <th scope="col">Просмотр панели администратора</th>
           <th scope="col">Действие</th>
         </tr>
       </thead>
@@ -28,9 +29,25 @@
             <td class="{% if el.parking_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.parking_control }}</td>
             <td class="{% if el.barrier_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.barrier_control }}</td>
             <td class="{% if el.coupon_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.coupon_control }}</td>
+            <td class="{% if el.coupon_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{ el.admin_view }}</td>
             <form method="post">
             {%csrf_token%}
-            <td><button class="text-danger" value="{{el.pk}}" type="submit" name="delete" style="border: none; background: none;">Удалить</button></td>
+            <td><button class="text-danger" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" style="border: none; background: none;">Удалить</button></td>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Подтвердите удаление</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button class="btn btn-primary" value="{{el.pk}}" name="delete" type="submit">Удалить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             </form>
         </tr>
         {% endfor %}

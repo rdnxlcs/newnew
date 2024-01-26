@@ -28,24 +28,71 @@
           <td>{{el.price_per_hour}} ₽</td>
           <form method="post">
             {%csrf_token%}
-            <td><button class="text-danger" value="{{el.pk}}" style="background: none; border: none;" type="submit"
-                name="delete">Удалить</button></td>
+            <td><button class="text-danger" value="{{el.pk}}" style="background: none; border: none;" type="button"
+                name="delete" data-bs-toggle="modal" data-bs-target="#exampleModalD">Удалить</button></td>
+            <div class="modal fade" id="exampleModalD" tabindex="-1" aria-labelledby="exampleModalLabelD"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabelD">Подтвердите удаление</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button class="btn btn-primary" value="{{el.pk}}" name="delete" type="submit">Удалить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
           <form method="post">
             {%csrf_token%}
             <td>
               <div class="input-group">
                 {{form.newprice}}
-                <button type="submit" name="change_price" value="{{el.pk}}"
-                  class="btn btn-sm btn-outline-primary radr"><i class="bi bi-arrow-return-left"></i></button>
+                <button type="button" name="change_price" value="{{el.pk}}" class="btn btn-sm btn-outline-primary radr"
+                  data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="show()"><i
+                    class="bi bi-arrow-return-left"></i></button>
               </div>
             </td>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Подтвердите изменение цены (<span
+                        id="sex"></span> ₽)</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Изменение цены доступно один раз в три месяца
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button class="btn btn-primary" type="submit">Изменить цену</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
+  <script>
+    function show() {
+      document.getElementById('sex').innerHTML = document.getElementById('fucksubmit').value
+    }
+    $(document).ready(function () {
+      $("input[id=fucksubmit]").keydown(function (event) {
+        if (event.keyCode == 13) {
+          event.preventDefault();
+          return false;
+        }
+      });
+    });
+  </script>
 </main>
 {% endblock %}

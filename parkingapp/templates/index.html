@@ -46,9 +46,7 @@
   }
 
   #circ {
-    background: white;
     border: 0.25rem solid;
-    border-radius: 1rem;
   }
 </style>
 <div>
@@ -61,7 +59,7 @@
     <div class="input-group shadow rounded-4">
       <div class="form-floating">
         {{ form.parking_id }}
-        <label for="floatingInput">ID парковки</label>
+        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %} ID парковки {% endif %}</label>
       </div>
       <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
     </div>
@@ -131,7 +129,7 @@
     });
 
     MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
-      '<button disabled id="circ" class="text-center p-2 text-dark fw-bolder border-$[properties.border]">$[properties.iconContent]</button>'
+      '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
 
     for (let i = 0; i < parkings.length; i++) {
@@ -145,7 +143,7 @@
       }
 
       var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {
-        iconContent: String(parkings[i][4]) + '_Р',
+        iconContent: String(parkings[i][4]),
         border: String(blar)
       }, {
         // Опции.

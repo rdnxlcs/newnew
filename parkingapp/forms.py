@@ -39,7 +39,7 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 100
     }))
     card = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'text',
+        'type': 'number',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
         'minlength': 4,
@@ -84,10 +84,30 @@ class AdminRegistrationForm(UserCreationForm):
         'placeholder': 'Пароль',
         'minlength': 8
     }))
+    user_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+    }))
+    parking_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+    }))
+    barrier_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+    }))
+    coupon_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+    }))
+    admin_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+    }))
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2']
+        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view']
 
 
 class CouponerRegistrationForm(UserCreationForm):
@@ -134,18 +154,19 @@ class DashForm(forms.Form):
         'class': 'form-control form-control-sm',
         'inputmode': 'numeric',
         'placeholder': 'id парковки',
+        'value': ''
     }))
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2023-12-09',
+        'value': '2024-01-16',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2023-12-10',
+        'value': '2024-01-26',
     }))
 
 class DashfinForm(forms.Form):
@@ -153,20 +174,22 @@ class DashfinForm(forms.Form):
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2023-12-09',
+        'value': '2024-01-16',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2023-12-10',
+        'value': '2024-01-26',
     }))
 
 class ChangePriceForm(forms.Form):
     newprice = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': '',
+        'id': 'fucksubmit',
         'placeholder': 'Новая цена',
-        'style': "background: none; border: none; border-bottom: 1px solid #0d6efd;"
+        'style': "background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;",
+        'type': 'number',
+        'inputmode': 'numeric',
     }))
 
 class AddParkingForm(forms.Form):
