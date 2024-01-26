@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import *
+from dateutil import tz
 # from phonenumber_field.modelfields import PhoneNumberField
-
+tzname = datetime.now().astimezone().tzname()
 class User(AbstractUser):
     card_num = models.PositiveBigIntegerField(default=1111)
     username = models.CharField(max_length=20, unique=True)
@@ -28,7 +29,7 @@ class Parking(models.Model):
     max_parking_lots = models.PositiveIntegerField(default=0)
     occupied_lots = models.PositiveIntegerField(default=0)
     price_per_hour = models.PositiveIntegerField(default=0)
-    change = models.DateTimeField(default=datetime(1, 1, 1, 0, 0, 0, tzinfo=None))
+    change = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
 
     def __str__(self) -> str:
         return f'{self.address} | {self.max_parking_lots}'
@@ -36,8 +37,9 @@ class Parking(models.Model):
 class Reciept(models.Model):
     parking_id = models.IntegerField(default=0)
     user_id = models.IntegerField(default=0)
-    start_time = models.DateTimeField(default=None)
-    finish_time = models.DateTimeField(default=None)
+    start_time = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
+    final_start_time = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
+    finish_time = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
     final_price = models.BigIntegerField(default=-1)
     benefit = models.BooleanField(default=False)
     price_per_hour = models.IntegerField(default=-1)
