@@ -187,7 +187,7 @@ class AddParkingForm(forms.Form):
 
 
 class CommitParkingForm(forms.Form):
-    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    parking_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control group-first',
         'id': 'floatingInput',
         'inputmode': 'numeric',
