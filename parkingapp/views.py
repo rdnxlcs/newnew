@@ -477,7 +477,7 @@ def dash_full(request):
     
     else:
         if request.method == 'POST':
-            form = DashfullForm(data=request.POST)
+            form = DashForm(data=request.POST)
             if form.is_valid():
                 pk = request.POST['pk']
                 period_start = request.POST['date1']
@@ -682,7 +682,7 @@ def dash_coupon(request):
             else:
                 return redirect(reverse('parkingapp:error'))
         else:
-            form = DashcouponForm()
+            form = DashForm()
         parking = Parking.objects.all()
         parking = [parking[0].pk if parking else 0][0]
         return render(request, 'dash_coupon.html', {'form':form, 'defid': parking})
@@ -729,18 +729,11 @@ def dash_users(request):
             user = User.objects.get(pk=value)
             user.delete()
 
-        admins = User.objects.filter(admin_view=True)
-        couponers = User.objects.filter(coupon_control=True)
-        
-        wise = []
-        for el in admins:
-            wise.append(el)
-        for el in couponers:
-            wise.append(el)
-        wise = list(set(wise))
+        users = User.objects.all()
+
         context = {
             'title': '',
-            'users': wise,
+            'users': list(users),
         }
         return render(request, 'dash_users.html', context)
 

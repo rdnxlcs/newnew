@@ -1,67 +1,59 @@
 {% extends 'dash_base.html' %}
-{% block actpaarks %}active{% endblock %}
+{% block actusers %}active{% endblock %}
 {% block content %}
-<div class="d-flex flex-column" id="content-wrapper">
-    <div id="content">
-        <div class="container-fluid mt-3">
-            <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                <h3 class="text-dark mb-0">Пользователи</h3>
-            </div>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
 
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Парковки</h1>
+  </div>
 
-            <div class="row">
-                <div class="row">
-                    <div class="card shadow p-0">
-                        <div class="d-sm-flex card-header py-3 justify-content-between align-items-center">
-                            <p class="text-primary m-0 fw-bold">Парковки</p>
-                            <div>
-                                <a class="btn btn-primary rounded-pill mx-1 my-1" href="{% url 'parkingapp:addparking' %}" type="button">Новая парковка</a>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-                                <table class="table my-0" id="dataTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Парковка</th>
-                                            <th>id</th>
-                                            <th>Кол-во мест</th>
-                                            <th>Цена за час</th>
-                                            <th>Действие</th>
-                                            <th>Действие</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for el in parkings %}
-                                        <tr>
-                                            <td>{{el.address}}</td>
-                                            <td>{{el.pk}}</td>
-                                            <td>{{el.max_parking_lots}}</td>
-                                            <td>{{el.price_per_hour}} ₽</td>
-                                            <form method="post">
-                                            {%csrf_token%}
-                                            <td><button class="btn btn-danger rounded-pill" value="{{el.pk}}" type="submit" name="delete">Удалить</button></td>
-                                            </form>
-                                            <form method="post">
-                                            {%csrf_token%}
-                                            <td>
-                                                <div class="input-group">
-                                                    {{form.newprice}}
-                                                    <button type="submit" name="change_price" value="{{el.pk}}" class="btn btn-sm btn-primary btn-primary radr">Сменить цену</button>
-                                                </div>
-                                            </td>
-                                            </form>
-                                        </tr>
-                                        {% endfor %}
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Улица</th>
+          <th scope="col">Кол-во мест</th>
+          <th scope="col">Цена за час</th>
+          <th scope="col">Действие</th>
+          <th scope="col">Сменить цену</th>
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        {% for el in parkings %}
+        <tr>
+          <td>{{el.pk}}</td>
+          <td>{{el.address}}</td>
+          <td>{{el.max_parking_lots}}</td>
+          <td>{{el.price_per_hour}} ₽</td>
+          <form method="post">
+            {%csrf_token%}
+            <td><button class="text-danger" value="{{el.pk}}" style="background: none; border: none" type="submit"
+                name="delete">Удалить</button></td>
+          </form>
+          <form method="post">
+            {%csrf_token%}
+            <td>
+              <div class="input-group">
+                {{form.newprice}}
+                <button type="submit" name="change_price" value="{{el.pk}}"
+                  class="btn btn-sm btn-primary btn-primary radr">Сменить цену</button>
+              </div>
+            </td>
+          </form>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td>1</td>
+          <td>Ул. Юлии Тарановой 1</td>
+          <td>130</td>
+          <td>50 ₽</td>
+          <td><input type="submit" value="Удалить" class="text-danger" style="background: none; border: none"></td>
+          <td><input type="text" placeholder="Новая цена" style="background: none; border: none"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
 {% endblock %}

@@ -150,13 +150,13 @@ class DashForm(forms.Form):
 
 class DashfinForm(forms.Form):
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary radl',
+        'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
         'value': '2023-12-09',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
-        'class': 'form-control  border-secondary',
+        'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
         'value': '2023-12-10',
@@ -164,8 +164,9 @@ class DashfinForm(forms.Form):
 
 class ChangePriceForm(forms.Form):
     newprice = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control radl',
-        'placeholder': 'Новая цена'
+        'class': '',
+        'placeholder': 'Новая цена',
+        'style': "background: none; border: none"
     }))
 
 class AddParkingForm(forms.Form):
@@ -186,7 +187,7 @@ class AddParkingForm(forms.Form):
 
 
 class CommitParkingForm(forms.Form):
-    parking_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control group-first',
         'id': 'floatingInput',
         'inputmode': 'numeric',
