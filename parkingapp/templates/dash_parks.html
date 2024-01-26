@@ -28,7 +28,7 @@
           <td>{{el.price_per_hour}} ₽</td>
           <form method="post">
             {%csrf_token%}
-            <td><button class="text-danger" value="{{el.pk}}" style="background: none; border: none" type="submit"
+            <td><button class="text-danger" value="{{el.pk}}" style="background: none; border: none;" type="submit"
                 name="delete">Удалить</button></td>
           </form>
           <form method="post">
@@ -37,20 +37,12 @@
               <div class="input-group">
                 {{form.newprice}}
                 <button type="submit" name="change_price" value="{{el.pk}}"
-                  class="btn btn-sm btn-primary btn-primary radr">Сменить цену</button>
+                  class="btn btn-sm btn-outline-primary radr"><i class="bi bi-arrow-return-left"></i></button>
               </div>
             </td>
           </form>
         </tr>
         {% endfor %}
-        <tr>
-          <td>1</td>
-          <td>Ул. Юлии Тарановой 1</td>
-          <td>130</td>
-          <td>50 ₽</td>
-          <td><input type="submit" value="Удалить" class="text-danger" style="background: none; border: none"></td>
-          <td><input type="text" placeholder="Новая цена" style="background: none; border: none"></td>
-        </tr>
       </tbody>
     </table>
   </div>

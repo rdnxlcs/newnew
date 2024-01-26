@@ -166,7 +166,7 @@ class ChangePriceForm(forms.Form):
     newprice = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': '',
         'placeholder': 'Новая цена',
-        'style': "background: none; border: none"
+        'style': "background: none; border: none; border-bottom: 1px solid #0d6efd;"
     }))
 
 class AddParkingForm(forms.Form):
