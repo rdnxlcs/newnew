@@ -1,0 +1,38 @@
+{% extends 'dash_base.html' %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Чеки</h1>
+  </div>
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">ID пользователя</th>
+          <th scope="col">ID парковки</th>
+          <th scope="col">Начало</th>
+          <th scope="col">Конец</th>
+          <th scope="col">Льгота</th>
+          <th scope="col">Сумма</th>
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        {% for el in reciepts %}
+        <tr>
+          <td>{{el.pk}}</td>
+          <td>{{el.user_id}}</td>
+          <td>{{el.parking_id}}</td>
+          <td>{{el.start_time}}</td>
+          <td>{{el.finish_time}}</td>
+          <td class="{% if el.benefit %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">{{el.benefit}}</td>
+          <td>{{el.final_price}} ₽</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</main>
+{% endblock %}

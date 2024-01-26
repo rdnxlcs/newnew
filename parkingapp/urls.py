@@ -23,5 +23,6 @@ urlpatterns = [
     path('dash_fin/', views.dash_fin, name='dash_fin'),
     path('dash_users/', views.dash_users, name='dash_users'),
     path('dash_parks/', views.dash_parks, name='dash_parks'),
+    path('dash_reciepts/', views.dash_reciepts, name='dash_reciepts'),
     path('parkings/', views.parkings, name='parkings'),
 ]

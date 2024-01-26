@@ -200,7 +200,7 @@ def addparking(request):
 
 @login_required(redirect_field_name=None)
 def signadmin(request):
-    if request.user.rights != 2:
+    if not request.user.user_control:
         return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
 
     else:
@@ -710,11 +710,15 @@ def dash_fin(request):
                 return redirect(reverse('parkingapp:error'))
         else:
             form = DashfinForm()  
-
+        period_start = '2023-12-09'
+        period_end = '2024-01-26'
+        dat = data(period_start, period_end)
         context = {
-            'title': '',
-            'form': form,
-        }     
+            'Fin':dat[1][0],
+            'parkings':dat[0],
+            'form': form
+        }
+
         return render(request, 'dash_fin.html', context)
 
 
@@ -737,6 +741,18 @@ def dash_users(request):
         }
         return render(request, 'dash_users.html', context)
 
+@login_required(redirect_field_name=None)
+def dash_reciepts(request):
+    if not request.user.user_control:
+        return redirect(reverse('parkingapp:dont_have_access'))
+    else:
+        reciepts = Reciept.objects.all()
+
+        context = {
+            'title': '',
+            'reciepts': list(reciepts)[::-1],
+        }
+        return render(request, 'dash_reciepts.html', context)
 
 def compare_parks(request):
     p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=curr_zone)
