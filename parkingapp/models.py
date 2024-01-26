@@ -40,3 +40,4 @@ class Reciept(models.Model):
     finish_time = models.DateTimeField(default=None)
     final_price = models.BigIntegerField(default=-1)
     benefit = models.BooleanField(default=False)
+    price_per_hour = models.IntegerField(default=-1)

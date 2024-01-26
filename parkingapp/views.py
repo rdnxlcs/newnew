@@ -35,7 +35,8 @@ def index(request):
                         parking.occupied_lots += 1
                         parking.save()
                         starttime = datetime.now()
-                        Reciept.objects.create(parking_id=park_id, user_id=user.pk, start_time=starttime, finish_time=starttime)
+                        park_price = parking.price_per_hour
+                        Reciept.objects.create(parking_id=park_id, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price)
                 except Exception as e:
                     print(e)
                     return redirect(reverse('parkingapp:error'))
@@ -57,7 +58,7 @@ def index(request):
                 reciept.final_price = 0
 
             else:
-                reciept.final_price = minutes * parking.price_per_hour // 60
+                reciept.final_price = minutes * reciept.price_per_hour // 60
             reciept.save()
 
 
@@ -350,10 +351,11 @@ def data(period_start, period_end, id=0):
         sessions = []
         benefit_sessions = []   
         with_benefits = 0
-
+        prices = []
+        benefit_prices = []
         for reciept in reciepts:
             if reciept.start_time >= period_start and reciept.finish_time <= period_end:
-                parking = reciept.parking_id
+                parking = Parking.objects.get(pk=reciept.parking_id)
 
                 how_much_people_used += 1
 
@@ -362,22 +364,23 @@ def data(period_start, period_end, id=0):
                 minutes = seconds // 60
 
                 sessions.append(minutes)
-
+                prices.append(reciept.final_price)
+                if reciept.benefit:
+                    benefit_sessions.append(minutes)
+                    benefit_prices.append(minutes * reciept.price_per_hour / 60)
+                    with_benefits += 1
                 if minutes <= 15:
                     people_used_free_time += 1
-                elif reciept.benefit:
-                    benefit_sessions.append(minutes)
-                    with_benefits += 1
-
+                
 
         if len(sessions) != 0:
             session_average_duration = int(sum(sessions)) // len(sessions)
             total_time = int(sum(sessions))
             min_session = min(sessions)
             max_session = max(sessions)
-            total_sum = sum(filter(lambda x: x>15, sessions))*parking.price_per_hour
+            total_sum = sum(prices)
             if len(benefit_sessions) != 0:
-                benefit_sum = sum(benefit_sessions)
+                benefit_sum = sum(benefit_prices)
                 benefits_session_average_duration = int(sum(benefit_sessions)) // len(benefit_sessions)
                 max_benefit_session = int(max(benefit_sessions))
             else:
@@ -396,7 +399,7 @@ def data(period_start, period_end, id=0):
         parkings_array.append(Park(
                 parking.address, how_much_people_used, people_used_free_time, 
                 total_time, session_average_duration, min_session, max_session, 
-                with_benefits, benefits_session_average_duration, max_benefit_session, total_sum=total_sum, benefit_sum=benefit_sum
+                with_benefits, benefits_session_average_duration, max_benefit_session, total_sum=int(total_sum), benefit_sum=int(benefit_sum)
             ))
     total_price = 0
     benefits_price = 0
@@ -404,7 +407,7 @@ def data(period_start, period_end, id=0):
     benefits_price = 0
     total_with_benefits = 0
     for park in parkings_array:
-        total_price += park.total_sum - park.benefit_sum
+        total_price += park.total_sum
         how_much_people_used += park.how_much_people_used
         with_benefits = park.with_benefits
         total_with_benefits += with_benefits
@@ -483,12 +486,10 @@ def dash_full(request):
                 period_start = request.POST['date1']
                 period_end = request.POST['date2']
                 try:
-
                     park = data(period_start, period_end, pk)[0][0]
                     # total_time average_time 
                     period_start = [i for i in period_start.split('-')]
                     period_end = [i for i in period_end.split('-')]
-                    sm = 0
                     p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=curr_zone)
                     p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=curr_zone)
                     if p_end - p_start <= timedelta(days=1):

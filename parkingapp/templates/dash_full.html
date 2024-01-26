@@ -4,13 +4,17 @@
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Наполняемость</h1>
-    <div class="mb-2 mb-md-0">
-      <div class="input-group me-2">
-        {{form.pk}}
-        {{form.date1}}
-        {{form.date2}}
-        <button type="submit" class="btn btm-sm btn-primary radr"><i class="bi bi-arrow-return-left"></i></button>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-2 mb-md-0">
+        <div class="input-group me-2">
+          {{form.pk}}
+          {{form.date1}}
+          {{form.date2}}
+          <button type="submit" class="btn btm-sm btn-primary radr" name=""><i class="bi bi-arrow-return-left"></i></button>
+        </div>
       </div>
+    </form>
     </div>
   </div>
 
@@ -32,8 +36,8 @@
       </div>
     </div>
   </div>
-
   <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+
   <script>
     const ctx = document.getElementById('myChart');
     let r = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
