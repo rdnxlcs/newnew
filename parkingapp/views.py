@@ -10,14 +10,15 @@ from django.utils.timezone import make_aware
 from django.http import JsonResponse
 import ymaps
 import json
-
+from dateutil import tz
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
-
+tzname = datetime.now(timezone.utc).astimezone().tzname()
+curr_zone = tz.gettz(tzname)
+# print(datetime(2022, 2, 24, 6, 0, 0, tzinfo=curr_zone))
 def check_logged(request):
     if request.user.is_authenticated:
         return True
     return False
-
 
 def index(request):
     if request.method == 'POST':
@@ -49,7 +50,7 @@ def index(request):
             parking.occupied_lots -= 1
             parking.save()
             print(parking.max_parking_lots - parking.occupied_lots)
-            dif = (reciept.finish_time.replace(tzinfo=None) - reciept.start_time.replace(tzinfo=None))
+            dif = (reciept.finish_time.replace(tzinfo=curr_zone) - reciept.start_time.replace(tzinfo=curr_zone))
             dif = dif.total_seconds()
             minutes = dif // 60
             if minutes <= 15 or reciept.benefit == True:
@@ -86,7 +87,8 @@ def index(request):
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1])
         print(parkings)
-    except:
+    except Exception as e:
+        print(e)
         parkings = []
     try:
         bdsm = []
@@ -95,7 +97,8 @@ def index(request):
             parkingxd = Parking.objects.get(pk=el.parking_id)
             bdsm.append([el, parkingxd.address])
         
-    except:
+    except Exception as e:
+        print(e)
         reciepts = []
         bdsm = []
 
@@ -449,7 +452,8 @@ def panel(request):
             period_start = request.COOKIES['period_start']
             period_end = request.COOKIES['period_end']
             parks, fins = data(period_start, period_end)
-        except:
+        except Exception as e:
+            print(e)
             period_start = '2012-10-12'
             period_end = '2012-10-12'
             parks, fins = data(period_start, period_end)
@@ -485,11 +489,11 @@ def dash_full(request):
                     period_start = [i for i in period_start.split('-')]
                     period_end = [i for i in period_end.split('-')]
                     sm = 0
-                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=curr_zone)
+                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=curr_zone)
                     if p_end - p_start <= timedelta(days=1):
                         delta = timedelta(hours=1)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'часам'
                         reciepts_to_send["period"] = {}
@@ -499,7 +503,7 @@ def dash_full(request):
                             reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
                             reciepts_to_send['free-period'][str(ctime.hour)+'-'+str(ctime.day)] = 0
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                                     reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
                                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -508,7 +512,7 @@ def dash_full(request):
                         reciepts_to_send = str(reciepts_to_send)
                     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
                         delta = timedelta(days=1)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'дням'
                         reciepts_to_send['period'] = {}
@@ -519,7 +523,7 @@ def dash_full(request):
                             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
                             
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -528,7 +532,7 @@ def dash_full(request):
                         reciepts_to_send = str(reciepts_to_send) 
                     elif timedelta(days=90) < p_end-p_start:
                         delta = timedelta(days=7)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'неделям'
                         reciepts_to_send['period'] = {}
@@ -540,7 +544,7 @@ def dash_full(request):
                             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
                             
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -555,6 +559,7 @@ def dash_full(request):
                             'form': form}
                     return render(request, 'dash_full.html', context)
                 except Exception as e:
+                    print(e)
                     return redirect(reverse('parkingapp:error'))
             else:
                 return redirect(reverse('parkingapp:error'))
@@ -575,8 +580,8 @@ def dash_parks(request):
                     pk = request.POST.get('change_price')
                     new_price = request.POST['newprice']
                     parking = Parking.objects.get(pk=pk)
-                    now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
-                    tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+                    now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=curr_zone)
+                    tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=curr_zone)
                     if now - tm >= timedelta(days=90):
                         parking.price_per_hour = new_price
                         parking.change = datetime.now()
@@ -616,11 +621,11 @@ def dash_coupon(request):
                     period_start = [i for i in period_start.split('-')]
                     period_end = [i for i in period_end.split('-')]
 
-                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)        
+                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=curr_zone)
+                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=curr_zone)        
                     if p_end - p_start <= timedelta(days=1):
                         delta = timedelta(hours=1)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'часам'
                         reciepts_to_send["period"] = {}
@@ -629,14 +634,14 @@ def dash_coupon(request):
                         while p_start <= ctime <= p_end:
                             reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.benefit:
                                     reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
                             ctime += delta
                         reciepts_to_send = str(reciepts_to_send)
                     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
                         delta = timedelta(days=1)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'дням'
                         reciepts_to_send['period'] = {}
@@ -644,14 +649,14 @@ def dash_coupon(request):
                         while p_start <= ctime <= p_end:
                             reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.benefit:
                                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                             ctime += delta
                         reciepts_to_send = str(reciepts_to_send) 
                     elif timedelta(days=90) < p_end-p_start:
                         delta = timedelta(days=7)
-                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+                        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
                         reciepts_to_send = {}
                         reciepts_to_send['name'] = 'неделям'
                         reciepts_to_send['period'] = {}
@@ -661,7 +666,7 @@ def dash_coupon(request):
                             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
                             
                             for el in reciepts:
-                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                                 if ctime <= etime <= ctime+delta and el.benefit:
                                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                             ctime += delta
@@ -671,7 +676,8 @@ def dash_coupon(request):
                             'reciepts': json.dumps(str(reciepts_to_send)),
                             'form': form}
                     return render(request, 'dash_coupon.html', context)
-                except:
+                except Exception as e:
+                    print(e)
                     return redirect(reverse('parkingapp:error'))
             else:
                 return redirect(reverse('parkingapp:error'))
@@ -740,30 +746,31 @@ def dash_users(request):
 
 
 def compare_parks(request):
-    p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
-    p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)
+    p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=curr_zone)
+    p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=curr_zone)
     reciepts_to_send = {}
     reciepts_to_send["parks"] = {}
     parkings = Parking.objects.all()
     for park in parkings:
         reciepts = Reciept.objects.filter(parking_id=park.pk)
         for reciept in reciepts:
-            dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
+            dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=curr_zone)
             if p_end >= dt >= p_start:
                 try:
                     reciepts_to_send['parks'][str(park.pk)] += 1
-                except:
+                except Exception as e:
+                    print(e)
                     reciepts_to_send['parks'][str(park.pk)] = 1
     reciepts_to_send = str(reciepts_to_send)
     return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
 
 
 def compare_time(request):
-    p_start = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
-    p_end = datetime(2023, 12, 26, 23, 59, 50, tzinfo=None)
+    p_start = datetime(2023, 12, 25, 23, 59, 59, tzinfo=curr_zone)
+    p_end = datetime(2023, 12, 26, 23, 59, 50, tzinfo=curr_zone)
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'часам'
         reciepts_to_send["period"] = {}
@@ -771,14 +778,14 @@ def compare_time(request):
         while p_start <= ctime <= p_end:
             reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                 if ctime <= etime <= ctime+delta:
                     reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send)
     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
         delta = timedelta(days=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'дням'
         reciepts_to_send['period'] = {}
@@ -786,7 +793,7 @@ def compare_time(request):
         while p_start <= ctime <= p_end:
             reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                 if ctime <= etime <= ctime+delta:
                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             ctime += delta
@@ -794,7 +801,7 @@ def compare_time(request):
         
     elif timedelta(days=90) < p_end-p_start:
         delta = timedelta(days=7)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'неделям'
         reciepts_to_send['period'] = {}
@@ -803,7 +810,7 @@ def compare_time(request):
         while p_start <= ctime <= p_end:
             reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
                 if ctime <= etime <= ctime+delta:
                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             ctime += delta
@@ -823,8 +830,8 @@ def parkings(request):
             pk = request.POST.get('change_price')
             new_price = request.POST.get('new_price')
             parking = Parking.objects.get(pk=pk)
-            now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=None)
-            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+            now = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, tzinfo=curr_zone)
+            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=curr_zone)
             if now - tm >= timedelta(days=90):    
                 parking.price_per_hour = new_price
                 parking.change = datetime.now()
