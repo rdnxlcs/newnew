@@ -22,7 +22,7 @@
   <div class="container">
     <nav class="navbar navbar-light navbar-expand-md d-sticky py-3 border-bottom" style="background: inherit;">
       <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'parkingapp:esp' %}">
           <span class="fw-semibold">ЕСП</span></a>
         <button class="navbar-toggler border-0" data-bs-toggle="collapse" onclick="pos()" data-bs-target="#navcol-3"><span
             class="visually-hidden">Toggle
@@ -32,12 +32,12 @@
             {% csrf_token %}
             <ul class="navbar-nav mx-auto">
               <li class="nav-item mx-1"><a class="nav-link" href="#">Профиль</a></li>
-              <li class="nav-item mx-1"><a href="/" class="nav-link {% block active_parking %}{% endblock %}"
+              <li class="nav-item mx-1"><a href="{% url 'parkingapp:index' %}" class="nav-link {% block active_parking %}{% endblock %}"
                   aria-current="page">Парковка</a></li>
               {% if not user.is_authenticated %}
-              <li class="nav-link text-primary mx-1"><a class="text-decoration-none" href="enter">Вход</a> / <a href="sign" class="text-decoration-none">Регистрация</a></li>
+              <li class="nav-link text-primary mx-1"><a class="text-decoration-none" href="{% url 'parkingapp:enter' %}">Вход</a> / <a href="{% url 'parkingapp:sign' %}" class="text-decoration-none">Регистрация</a></li>
               {% else %}
-              <li class="nav-item mx-1"><a href="logout" class="nav-link rounded-4">Выход</a></li>
+              <li class="nav-item mx-1"><a href="{% url 'parkingapp:logout' %}" class="nav-link rounded-4">Выход</a></li>
               {% endif %}
             </ul>
           </form>
