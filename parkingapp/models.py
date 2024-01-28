@@ -9,7 +9,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=20, unique=True)
     password1 = models.CharField(max_length=200, default=" ")
     password2 = models.CharField(max_length=200, default=" ")
-    phone_number = models.IntegerField(default=-1)
+    phone_number = models.CharField(max_length=16, default=" ")
     park_id = models.IntegerField(default=0)
     car_num = models.CharField(max_length=12, default='')
     user_control = models.BooleanField(default=False)

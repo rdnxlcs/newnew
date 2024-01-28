@@ -55,10 +55,28 @@
                 Просмотр панели администратора
               </label>
             </div>
-            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
+            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" onclick="help()" type="submit">Зарегистрироваться</button>
           </form>
         </div>
       </div>
     </div>
 </div>
+<script>
+  function check() {
+    var users =  document.getElementById('user_control').checked
+    var parks = document.getElementById('parking_control').checked
+    var admin = document.getElementById('admin_view').checked
+    if ((users || parks) & !(admin)) {
+      document.getElementById('admin_view').click()
+      document.getElementById('admin_view').setAttribute('disabled', 'true')
+    } else if (users || parks) {
+      document.getElementById('admin_view').setAttribute('disabled', 'true')
+    } else {
+      document.getElementById('admin_view').removeAttribute('disabled')
+    }
+  }
+  function help() {
+    document.getElementById('admin_view').removeAttribute('disabled')
+  }
+</script>
 {% endblock %}

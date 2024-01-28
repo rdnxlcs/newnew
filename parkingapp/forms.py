@@ -39,14 +39,14 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 100
     }))
     card = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'type': 'number',
+        'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
         'minlength': 4,
         'maxlength': 4,
         'inputmode': 'numeric',
     }))
-    car = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    car = forms.CharField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Автомобильный номер',
@@ -54,7 +54,7 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 12,
         'style': 'text-transform: uppercase;',
     }))
-    tel = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    tel = forms.CharField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер телефона',
@@ -87,10 +87,14 @@ class AdminRegistrationForm(UserCreationForm):
     user_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
+        'onclick': 'check()',
+        'id': 'user_control',
     }))
     parking_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
+        'onclick': 'check()',
+        'id': 'parking_control',
     }))
     barrier_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
@@ -103,6 +107,7 @@ class AdminRegistrationForm(UserCreationForm):
     admin_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
+        'id': 'admin_view',
     }))
 
     class Meta:
@@ -190,6 +195,7 @@ class ChangePriceForm(forms.Form):
         'style': "background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;",
         'type': 'number',
         'inputmode': 'numeric',
+        'hidden': 'true',
     }))
 
 class AddParkingForm(forms.Form):

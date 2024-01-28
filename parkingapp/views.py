@@ -139,18 +139,21 @@ def endparking(request):
     return render(request, 'endparking.html', {'logged': check_logged(request)})
 
 def sign(request):
+    error = ''
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
-        print(form)
         if form.is_valid():
-            form.save()
+            form = form.save()
             return HttpResponseRedirect(reverse('parkingapp:enter'))
+        else:
+            error = 'Не удалось зарегестрироваться'
     else:
         form = UserRegistrationForm()
 
     context = {
         'logged': check_logged(request),
         'form': form,
+        'error': error
     }
     return render(request, 'sign.html', context)
 
@@ -554,6 +557,7 @@ def dash_full(request):
     
 @login_required(redirect_field_name=None)
 def dash_parks(request):
+    error = ''
     if not request.user.parking_control: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
@@ -565,6 +569,7 @@ def dash_parks(request):
                     pk = request.POST.get('change_price')
                     new_price = request.POST['newprice']
                     parking = Parking.objects.get(pk=pk)
+                    now = datetime.now()
                     now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
                     tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
                     if now - tm >= timedelta(days=90):
@@ -573,7 +578,7 @@ def dash_parks(request):
                         parking.save()
                         form = ChangePriceForm()
                     else:
-                        return redirect(reverse('parkingapp:dash_parks'))
+                        error = 'Изменение цены доступно раз в три месяца'
                 else:
                     return redirect(reverse('parkingapp:error'))
             elif 'delete' in request.POST:
@@ -584,7 +589,7 @@ def dash_parks(request):
 
         form = ChangePriceForm()        
         parkings = Parking.objects.all()
-        return render(request, 'dash_parks.html', {'parkings':parkings, 'form': form})
+        return render(request, 'dash_parks.html', {'parkings':parkings, 'form': form, 'error': error})
 
 
 def coupon_reciepts(pk, period_start, period_end):
