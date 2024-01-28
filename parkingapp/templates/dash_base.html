@@ -172,7 +172,8 @@
           <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="{% url 'parkingapp:dash_full' %}">
+                <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
+                  href="{% url 'parkingapp:dash_full' %}">
                   <i class="bi bi-car-front-fill"></i>
                   Наполняемость
                 </a>
@@ -214,17 +215,55 @@
                   </a>
                 </li>
               </ul>
-
-              <hr class="my-3">
-
+                <h6
+                  class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                  <span>Действия</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                  <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2" href="{% url 'parkingapp:barrier' %}">
+                      <i class="bi bi-door-open-fill"></i>
+                      Управление шлагбаумом
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2" href="{% url 'parkingapp:coupon' %}">
+                      <i class="bi bi-receipt-cutoff"></i>
+                      Выдача льгот
+                    </a>
+                  </li>
+                  
+                </ul>
+                <h6
+                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                <span>Добавление</span>
+              </h6>
               <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2" href="#">
-                    <i class="bi bi-box-arrow-up"></i>
-                    Экспорт
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'parkingapp:addparking' %}">
+                    <i class="bi bi-p-circle-fill"></i>
+                    Новая парковка
                   </a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'parkingapp:signadmin' %}">
+                    <i class="bi bi-person-plus-fill"></i>
+                    Новый пользователь
+                  </a>
+                </li>
+                
               </ul>
+
+                <hr class="my-3">
+
+                <ul class="nav flex-column mb-auto">
+                  <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                      <i class="bi bi-box-arrow-up"></i>
+                      Экспорт
+                    </a>
+                  </li>
+                </ul>
           </div>
         </div>
       </div>

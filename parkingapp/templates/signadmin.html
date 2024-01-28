@@ -1,12 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'dash_base.html' %}
 {% block content %}
-<div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+  <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
     <div class="modal-dialog" role="document">
       <div class="modal-content rounded-4 shadow border">
         <div class="modal-header p-5 pb-4 border-bottom-0">
           <h1 class="fw-bold mb-0 fs-2">Новый пользователь</h1>
         </div>
-  
+
         <div class="modal-body p-5 pt-0">
           <form method="post">
             {% csrf_token %}
@@ -55,15 +56,17 @@
                 Просмотр панели администратора
               </label>
             </div>
-            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" onclick="help()" type="submit">Зарегистрироваться</button>
+            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" onclick="help()"
+              type="submit">Зарегистрироваться</button>
           </form>
         </div>
       </div>
     </div>
-</div>
+  </div>
+</main>
 <script>
   function check() {
-    var users =  document.getElementById('user_control').checked
+    var users = document.getElementById('user_control').checked
     var parks = document.getElementById('parking_control').checked
     var admin = document.getElementById('admin_view').checked
     if ((users || parks) & !(admin)) {

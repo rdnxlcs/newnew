@@ -59,7 +59,8 @@
     <div class="input-group shadow rounded-4">
       <div class="form-floating">
         {{ form.parking_id }}
-        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %} ID парковки {% endif %}</label>
+        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %} ID
+          парковки {% endif %}</label>
       </div>
       <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
     </div>
@@ -125,13 +126,16 @@
 
     }, {
       searchControlProvider: 'yandex#search',
-      yandexMapDisablePoiInteractivity: true
+      yandexMapDisablePoiInteractivity: true,
     });
 
     MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
       '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
-
+    MyBalloonContentLayout = ymaps.templateLayoutFactory.createClass(
+      '<h3 class="popover-title">$[properties.balloonHeader]</h3>' +
+      '<div class="popover-content">$[properties.balloonContent]</div>'
+    )
     for (let i = 0; i < parkings.length; i++) {
       let proc = parkings[i][3] / parkings[i][5] * 100;
       if (proc > 70) {
@@ -144,24 +148,20 @@
 
       var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {
         iconContent: String(parkings[i][4]),
-        border: String(blar)
+        border: String(blar),
+        balloonContentHeader: "Сучара сделай балун",
+        balloonContentBody: "Содержимое <em>балуна</em> метки",
+        balloonContentFooter: "Подвал",
       }, {
-        // Опции.
-        // Необходимо указать данный тип макета. Показываем что это изображение.
         iconLayout: 'default#imageWithContent',
-        // Своё изображение иконки метки. Указываем путь до картинки
         iconImageHref: '',
-        // Размеры метки. 
-        iconImageSize: [0, 0],
-        // Смещение левого верхнего угла иконки относительно её "ножки" (точки привязки).
+        iconImageSize: [50, 50],
         iconImageOffset: [0, 0],
         iconContentOffset: [0, 0],
         iconContentLayout: MyIconContentLayout
       });
       myMap.geoObjects.add(myPlacemark);
     }
-    myMap.geoObjects.add(myPlacemark);
-    myMap.behaviors.disable('scrollZoom');
   }
 </script>
 

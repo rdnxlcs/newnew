@@ -206,10 +206,12 @@ class AddParkingForm(forms.Form):
     }))
     max_parking_lots = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control rounded-4',
+        'placeholder': 'Места',
         'id': 'a'
     }))
     price = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control rounded-4',
+        'placeholder': 'Цена',
         'id': 'a',
     }))
 

@@ -309,6 +309,8 @@ def error(request):
     }
     return render(request, 'error.html', context)
 
+def barrier(request):
+    return render(request, 'barrier.html')
 
 class Park: 
     def __init__(
