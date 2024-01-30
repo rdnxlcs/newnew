@@ -156,13 +156,13 @@ class DashForm(forms.Form):
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-16',
+        'value': '2024-01-25',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-26',
+        'value': '2024-02-05',
     }))
 
 class DashfinForm(forms.Form):
@@ -170,13 +170,13 @@ class DashfinForm(forms.Form):
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-16',
+        'value': '2024-01-25',
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-26',
+        'value': '2024-02-05',
     }))
 
 class ChangePriceForm(forms.Form):
@@ -209,7 +209,7 @@ class AddParkingForm(forms.Form):
 
 
 class CommitParkingForm(forms.Form):
-    code = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    code = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'class': 'form-control group-first',
         'code': 'floatingInput',
         'inputmode': 'numeric',

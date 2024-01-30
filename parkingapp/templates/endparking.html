@@ -11,7 +11,7 @@
   <div class="p-4 p-md-5 border bg-white rounded-4 shadow">
     <div class="row mb-3">
       <h5 class="col-4">Парковка завершена</h5>
-      <small class="col-8 text-end text-secondary">Jan. 26, 2024, 7:15 a.m.<br>Jan. 26, 2024, 7:33 a.m.</small>
+      <small class="col-8 text-end text-secondary">{{ reciept.0.start_time }}<br>{{ reciept.0.finish_time }}</small>
     </div>
     <hr class="my-4">
     <div class="row mb-3">
@@ -20,15 +20,11 @@
     </div>
     <div class="row mb-3">
       <small class="col-6 text-start">Длительность</small>
-      <small class="col-6 text-end text-secondary">100 минут</small>
+      <small class="col-6 text-end text-secondary">{{ reciept.2 }}:{{ reciept.3 }}</small>
     </div>
     <div class="row mb-3">
-      <small class="col-6 text-start">ID чека</small>
-      <small class="col-6 text-end text-secondary">{{ reciept.0.pk }}</small>
-    </div>
-    <div class="row mb-3">
-      <small class="col-6 text-start">ID парковки</small>
-      <small class="col-6 text-end text-secondary">{{ reciept.0.parking_id_id }}</small>
+      <small class="col-6 text-start">Адрес парковки</small>
+      <small class="col-6 text-end text-secondary">{{ reciept.1 }}</small>
     </div>
   </div>
 </div>

@@ -10,7 +10,7 @@ from django.utils.timezone import make_aware
 from django.http import JsonResponse
 import ymaps
 import json
-# from dateutil import tz
+from dateutil import tz
 import time
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 import random
@@ -23,6 +23,55 @@ def check_logged(request):
     return False
 
 def index(request):
+    try:
+        parkings = []
+        for el in Parking.objects.all():
+            parkings.append(el.longitude)
+            parkings.append(el.lattitude)
+            parkings.append(el.pk)
+            parkings.append(el.max_parking_lots - el.occupied_lots)
+            parkings.append(el.price_per_hour)
+            parkings.append(el.max_parking_lots)
+            parkings.append(el.address)
+            parkings.append(99999)
+        parkings = ' '.join(list(map(str, parkings))[:-1])
+    except Exception as e:
+        print(e)
+        parkings = []
+    try:
+        bdsm = []
+        reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
+        for el in reciepts:
+            print(el.parking_id)
+            parkingxd = Parking.objects.get(pk=el.parking_id)
+            print(parkingxd)
+            now = datetime.now()
+            t = el.start_time
+            seconds = (now.replace(tzinfo=None) - t.replace(tzinfo=None)).total_seconds()
+            minutes = int(seconds // 60)
+            seconds -= minutes * 60
+            seconds = int(seconds)
+            price_per_minute = el.price_per_hour / 60
+            if minutes <= 14:
+                price_per_minute = 0
+            bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', int(price_per_minute * minutes)])
+
+    except Exception as e:
+        print(e)
+        reciepts = []
+        bdsm = []
+
+    form = CommitParkingForm()
+    context = {
+        'title': 'Главная',
+        'parking': Parking.objects.all(),
+        'reciepts': reciepts, 
+        'logged':check_logged(request), 
+        "parkings":parkings, 
+        'bdsm': bdsm,
+        'form': form,
+        'error': ''
+    }
     if request.method == 'POST':
         if 'create_park' in request.POST:
             form = CommitParkingForm(data=request.POST)
@@ -41,10 +90,13 @@ def index(request):
                         starttime = datetime.now().replace(tzinfo=None)
                         park_price = parking.price_per_hour
                         Reciept.objects.create(parking_id=parking.pk, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price, final_start_time=starttime.replace(tzinfo=None))
+                        return redirect(reverse('parkingapp:index'))
                 except Exception as e:
                     print(e)
                     form = CommitParkingForm()
-                    return render(request, 'index.html', {'form': form, 'error': 'Попробуйте ещё раз'})
+                    context['error'] = 'Попробуйте ещё раз'
+                    context['form'] = form
+                    return render(request, 'index.html', context)
             else:
                 return redirect(reverse('parkingapp:error'))
         elif 'end_park' in request.POST:
@@ -71,52 +123,19 @@ def index(request):
             logged = False
             
             bdsm = []
-            
+
+            seconds = (reciept.finish_time - reciept.start_time).total_seconds()
+            minutes = int(seconds // 60)
+            seconds -= minutes * 60
+            seconds = int(seconds)
+
             parkingxd = Parking.objects.get(pk=reciept.parking_id)
-            bdsm = [reciept, parkingxd.address]
+            bdsm = [reciept, parkingxd.address, f'{minutes:02}', f'{seconds:02}']
 
-            if request.user.pk:
-                logged = True
-            return render(request, 'endparking.html', {'reciept': bdsm, 'logged': check_logged(request)})
-    
-    try:
-        parkings = []
-        for el in Parking.objects.all():
-            parkings.append(el.longitude)
-            parkings.append(el.lattitude)
-            parkings.append(el.pk)
-            parkings.append(el.max_parking_lots - el.occupied_lots)
-            parkings.append(el.price_per_hour)
-            parkings.append(el.max_parking_lots)
-            parkings.append(el.address)
-            parkings.append(99999)
-        parkings = ' '.join(list(map(str, parkings))[:-1])
-    except Exception as e:
-        print(e)
-        parkings = []
-    try:
-        bdsm = []
-        reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
-        for el in reciepts:
-            parkingxd = Parking.objects.get(pk=el.parking_id)
-            bdsm.append([el, parkingxd.address])
-        
-    except Exception as e:
-        print(e)
-        reciepts = []
-        bdsm = []
+            return render(request, 'endparking.html', {'reciept': bdsm})
 
-    form = CommitParkingForm()
-    context = {
-        'title': 'Главная',
-        'parking': Parking.objects.all(),
-        'reciepts': reciepts, 
-        'logged':check_logged(request), 
-        'parkings': parkings, 
-        'bdsm': bdsm,
-        'form': form,
-        'error': ''
-    }
+
+
 
     return render(request, 'index.html', context)
 
@@ -733,8 +752,9 @@ def parking_lot(request):
     if request.user.parking_lot_view:    
         secret = request.GET.get('secret', '')
         if secret:
-            parking = Parking.objects.filter(secret=secret)[0]
+            parking = Parking.objects.filter(secret=secret)
             if parking:
+                parking = parking[0]
                 return render(request, 'parking_lot.html', {'parking': parking})
             else:
                 return redirect(reverse('parkingapp:error'))
