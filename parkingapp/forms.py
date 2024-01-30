@@ -134,7 +134,7 @@ class CouponForm(forms.Form):
         'id': 'uppercar',
         'style': 'text-transform: uppercase;',
     }))
-    tel = forms.CharField(required=False, widget=forms.NumberInput(attrs={
+    phone = forms.CharField(required=False, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер телефона',
