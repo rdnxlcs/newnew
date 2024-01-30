@@ -108,7 +108,7 @@ def index(request):
             price_per_minute = el.price_per_hour / 60
             if minutes <= 15:
                 price_per_minute = 0
-            bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', price_per_minute * minutes])
+            bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', int(price_per_minute * minutes)])
         
     except Exception as e:
         print(e)
