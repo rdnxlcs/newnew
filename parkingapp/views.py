@@ -23,62 +23,6 @@ def check_logged(request):
     return False
 
 def index(request):
-    if request.method == 'POST':
-        if 'create_park' in request.POST:
-            form = CommitParkingForm(data=request.POST)
-            if form.is_valid():
-                user = request.user
-                code = request.POST['code']
-                try:
-                    parking = Parking.objects.get(code=code)
-                    if parking.occupied_lots >= parking.max_parking_lots:
-                        return redirect(reverse('parkingapp:error'))
-                    else:
-                        extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
-                        parking.code = extremecode
-                        parking.occupied_lots += 1
-                        parking.save()
-                        starttime = datetime.now().replace(tzinfo=None)
-                        park_price = parking.price_per_hour
-                        Reciept.objects.create(parking_id=parking.pk, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price, final_start_time=starttime.replace(tzinfo=None))
-                except Exception as e:
-                    print(e)
-                    form = CommitParkingForm()
-                    return render(request, 'index.html', {'form': form, 'error': 'Попробуйте ещё раз'})
-            else:
-                return redirect(reverse('parkingapp:error'))
-        elif 'end_park' in request.POST:
-            reciept_id = request.POST.get('end_park')
-            reciept = Reciept.objects.get(pk=reciept_id)
-            now = datetime.now()
-            now = now.replace(tzinfo=None)
-            reciept.finish_time = now.replace(tzinfo=None)
-            dif = reciept.finish_time - reciept.final_start_time.replace(tzinfo=None)
-
-            dif = dif.total_seconds()
-            minutes = dif // 60
-            if minutes <= 15:
-                reciept.final_price = 0
-
-            else:
-                reciept.final_price = minutes * reciept.price_per_hour // 60
-            reciept.save()
-            parking = Parking.objects.get(pk=reciept.parking_id)
-            parking.occupied_lots -= 1
-            parking.save()
-
-            reciept = Reciept.objects.get(pk=reciept_id)
-            logged = False
-            
-            bdsm = []
-            
-            parkingxd = Parking.objects.get(pk=reciept.parking_id)
-            bdsm = [reciept, parkingxd.address]
-
-            if request.user.pk:
-                logged = True
-            return render(request, 'endparking.html', {'reciept': bdsm, 'logged': check_logged(request)})
-    
     try:
         parkings = []
         for el in Parking.objects.all():
@@ -109,7 +53,7 @@ def index(request):
             if minutes <= 15:
                 price_per_minute = 0
             bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', int(price_per_minute * minutes)])
-        
+
     except Exception as e:
         print(e)
         reciepts = []
@@ -126,6 +70,65 @@ def index(request):
         'form': form,
         'error': ''
     }
+    if request.method == 'POST':
+        if 'create_park' in request.POST:
+            form = CommitParkingForm(data=request.POST)
+            if form.is_valid():
+                user = request.user
+                code = request.POST['code']
+                try:
+                    parking = Parking.objects.get(code=code)
+                    if parking.occupied_lots >= parking.max_parking_lots:
+                        return redirect(reverse('parkingapp:error'))
+                    else:
+                        extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
+                        parking.code = extremecode
+                        parking.occupied_lots += 1
+                        parking.save()
+                        starttime = datetime.now().replace(tzinfo=None)
+                        park_price = parking.price_per_hour
+                        Reciept.objects.create(parking_id=parking.pk, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price, final_start_time=starttime.replace(tzinfo=None))
+                        return redirect(reverse('parkingapp:index'))
+                except Exception as e:
+                    print(e)
+                    form = CommitParkingForm()
+                    context['error'] = 'Попробуйте ещё раз'
+                    context['form'] = form
+                    return render(request, 'index.html', context)
+            else:
+                return redirect(reverse('parkingapp:error'))
+        elif 'end_park' in request.POST:
+            reciept_id = request.POST.get('end_park')
+            reciept = Reciept.objects.get(pk=reciept_id)
+            now = datetime.now()
+            now = now.replace(tzinfo=None)
+            reciept.finish_time = now.replace(tzinfo=None)
+            dif = reciept.finish_time - reciept.final_start_time.replace(tzinfo=None)
+
+            dif = dif.total_seconds()
+            minutes = dif // 60
+            if minutes <= 15:
+                reciept.final_price = 0
+
+            else:
+                reciept.final_price = minutes * reciept.price_per_hour // 60
+            reciept.save()
+            parking = Parking.objects.get(pk=reciept.parking_id)
+            parking.occupied_lots -= 1
+            parking.save()
+
+            reciept = Reciept.objects.get(pk=reciept_id)
+            logged = False
+            
+            bdsm = []
+            
+            parkingxd = Parking.objects.get(pk=reciept.parking_id)
+            bdsm = [reciept, parkingxd.address]
+
+            return render(request, 'endparking.html', {'reciept': bdsm})
+
+
+
 
     return render(request, 'index.html', context)
 
@@ -741,10 +744,10 @@ def dash_reciepts(request):
 def parking_lot(request):
     if request.user.parking_lot_view:    
         secret = request.GET.get('secret', '')
-        parking = Parking.objects.filter(pk=13)[0]
         if secret:
-            parking = Parking.objects.filter(secret=secret)[0]
+            parking = Parking.objects.filter(secret=secret)
             if parking:
+                parking = parking[0]
                 return render(request, 'parking_lot.html', {'parking': parking})
             else:
                 return redirect(reverse('parkingapp:error'))
