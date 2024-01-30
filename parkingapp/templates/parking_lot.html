@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container text-center pt-5">
+    <h1 class="display-6 text-body-emphasis">Введите код для въезда на парковку</h1>
+    <h1 class="display-1 text-body-emphasis fw-bolder">{{parking.code}}</h1>
+    <p>{{parking.address}}</p>
+</div>
+{% endblock %}

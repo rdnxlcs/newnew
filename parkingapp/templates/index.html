@@ -58,9 +58,8 @@
     {% csrf_token %}
     <div class="input-group shadow rounded-4">
       <div class="form-floating">
-        {{ form.parking_id }}
-        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %} ID
-          парковки {% endif %}</label>
+        {{ form.code }}
+        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %}Введите код парковки{% endif %}</label>
       </div>
       <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
     </div>

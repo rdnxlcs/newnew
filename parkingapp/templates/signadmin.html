@@ -51,17 +51,23 @@
           Обнуление чеков
         </label>
       </div>
-      <div class="form-check my-3 mb-4">
+      <div class="form-check my-3">
         {{ form.admin_view }}
         <label class="form-check-label" for="flexCheckChecked">
           Просмотр панели администратора
+        </label>
+      </div>
+      <div class="form-check my-3 mb-4">
+        {{ form.parking_lot_view }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Парковка
         </label>
       </div>
       <hr class="my-4 mb-2">
 
       <div id="temp" hidden>
         <div class="col-12">
-          <label for="username" class="form-label">ID парковки для выдачи льгот</label>
+          <label for="username" class="form-label">Парковка для выдачи льгот</label>
           {{ form.park_id }}
         </div>
       </div>

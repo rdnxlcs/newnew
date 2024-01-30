@@ -17,6 +17,7 @@ class User(AbstractUser):
     barrier_control = models.BooleanField(default=False)
     coupon_control = models.BooleanField(default=False)
     admin_view = models.BooleanField(default=False)
+    parking_lot_view = models.BooleanField(default=False)
     def __str__(self) -> str:
         return f'{self.username} | user control {self.user_control} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.admin_view}'
     
@@ -25,11 +26,12 @@ class Parking(models.Model):
     lattitude = models.FloatField(default=0)
     longitude = models.FloatField(default=0)
     address = models.CharField(max_length=120, default='')
-    registry_nubmer = models.PositiveIntegerField(default=0)
     max_parking_lots = models.PositiveIntegerField(default=0)
     occupied_lots = models.PositiveIntegerField(default=0)
     price_per_hour = models.PositiveIntegerField(default=0)
     change = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
+    code = models.CharField(default='', max_length=10)
+    secret = models.CharField(default='', max_length=100)
 
     def __str__(self) -> str:
         return f'{self.address} | {self.max_parking_lots}'

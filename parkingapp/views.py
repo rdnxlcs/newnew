@@ -10,9 +10,10 @@ from django.utils.timezone import make_aware
 from django.http import JsonResponse
 import ymaps
 import json
-from dateutil import tz
+# from dateutil import tz
 import time
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
+import random
 tzname = time.tzname[1]
 curr_zone = tz.gettz(tzname)
 
@@ -27,17 +28,19 @@ def index(request):
             form = CommitParkingForm(data=request.POST)
             if form.is_valid():
                 user = request.user
-                park_id = request.POST['parking_id']
+                code = request.POST['code']
                 try:
-                    parking = Parking.objects.get(pk=park_id)
+                    parking = Parking.objects.get(code=code)
                     if parking.occupied_lots >= parking.max_parking_lots:
                         return redirect(reverse('parkingapp:error'))
                     else:
+                        extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
+                        parking.code = extremecode
                         parking.occupied_lots += 1
                         parking.save()
                         starttime = datetime.now().replace(tzinfo=None)
                         park_price = parking.price_per_hour
-                        Reciept.objects.create(parking_id=park_id, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price, final_start_time=starttime.replace(tzinfo=None))
+                        Reciept.objects.create(parking_id=parking.pk, user_id=user.pk, start_time=starttime, finish_time=starttime, price_per_hour=park_price, final_start_time=starttime.replace(tzinfo=None))
                 except Exception as e:
                     print(e)
                     form = CommitParkingForm()
@@ -48,7 +51,7 @@ def index(request):
             reciept_id = request.POST.get('end_park')
             reciept = Reciept.objects.get(pk=reciept_id)
             now = datetime.now()
-            now = now.replace(tzinfo=curr_zone)
+            now = now.replace(tzinfo=None)
             reciept.finish_time = now.replace(tzinfo=None)
             dif = reciept.finish_time - reciept.final_start_time.replace(tzinfo=None)
 
@@ -78,7 +81,6 @@ def index(request):
     
     try:
         parkings = []
-        print('HERE BLYAT')
         for el in Parking.objects.all():
             parkings.append(el.longitude)
             parkings.append(el.lattitude)
@@ -89,7 +91,6 @@ def index(request):
             parkings.append(el.address)
             parkings.append(99999)
         parkings = ' '.join(list(map(str, parkings))[:-1])
-        print(parkings)
     except Exception as e:
         print(e)
         parkings = []
@@ -203,11 +204,22 @@ def addparking(request):
                 address = request.POST['address']
                 client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
                 lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
-
+                # lat, lng = 101., 21.
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
-                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price)
+                alph = ''
+                Z = [92, 43, 35, 61, 63, 38]
+                for i in range(33, 127):
+                    if i not in Z:
+                        alph += chr(i)
+                alph = list(alph)
+                secret = ''.join(random.choices(alph, k=100))
+                Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
+                park = Parking.objects.filter(secret=secret)[0]
+                code = str(random.randint(1000, 9999)) + f'{park.pk:03}'
+                park.code = code
+                park.save()
                 return redirect(reverse('parkingapp:dash_parks'))
             else:
                 error = 'Не удалось добавить парковку'
@@ -226,9 +238,10 @@ def signadmin(request):
     else:
         if request.method == 'POST':    
             form = AdminRegistrationForm(data=request.POST)
+            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+            form.fields['park_id'].choices = tuple(addresses)
             if form.is_valid():
                 form = form.save(commit=False)
-                print(form)
                 form.save()
 
                 return HttpResponseRedirect(reverse('parkingapp:dash_users'))
@@ -237,6 +250,8 @@ def signadmin(request):
             
         else:
             form = AdminRegistrationForm()
+            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+            form.fields['park_id'].choices = tuple(addresses)
 
         context = {
             'title': 'Регистрация администратора',
@@ -434,7 +449,7 @@ def data(period_start, period_end, id=0):
 def spice(p_end, p_start, period_start, period_end, pk, form, park):
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'часам'
         reciepts_to_send["period"] = {}
@@ -444,7 +459,7 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
             reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
             reciepts_to_send['free-period'][str(ctime.hour)+'-'+str(ctime.day)] = 0
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                     reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -453,7 +468,7 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
         reciepts_to_send = str(reciepts_to_send)
     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
         delta = timedelta(days=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'дням'
         reciepts_to_send['period'] = {}
@@ -464,7 +479,7 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -473,7 +488,7 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
         reciepts_to_send = str(reciepts_to_send) 
     elif timedelta(days=90) < p_end-p_start:
         delta = timedelta(days=7)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=curr_zone)
+        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
         reciepts_to_send = {}
         reciepts_to_send['name'] = 'неделям'
         reciepts_to_send['period'] = {}
@@ -485,7 +500,7 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=curr_zone)
+                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
                 if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
                     reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                 elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
@@ -523,8 +538,8 @@ def dash_full(request):
                     # total_time average_time 
                     period_start = [i for i in period_start.split('-')]
                     period_end = [i for i in period_end.split('-')]
-                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=curr_zone)
-                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=curr_zone)
+                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
                     context = spice(p_end, p_start, period_start, period_end, pk, form, park)
                     return render(request, 'dash_full.html', context)
                 except Exception as e:
@@ -537,15 +552,15 @@ def dash_full(request):
             addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
             form.fields['pk'].choices = tuple(addresses)
             pk = list(Parking.objects.all())[-1].pk 
-            period_start = '2024-01-16'
-            period_end = '2024-01-26'
+            period_start = '2024-01-25'
+            period_end = '2024-02-05'
             try:
                 park = data(period_start, period_end, pk)[0][0]
                 # total_time average_time 
                 period_start = [i for i in period_start.split('-')]
                 period_end = [i for i in period_end.split('-')]
-                p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=curr_zone)
-                p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=curr_zone)
+                p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+                p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
                 context = spice(p_end, p_start, period_start, period_end, pk, form, park)
                 return render(request, 'dash_full.html', context)
             except Exception as e:
@@ -561,13 +576,11 @@ def dash_parks(request):
     
     else:
         if request.method == 'POST':
-            print(request.POST)
             if 'change_price' in request.POST:
                 form = ChangePriceForm(data=request.POST)
                 if form.is_valid():
                     pk = request.POST.get('change_price')
                     new_price = request.POST['newprice']
-                    print(new_price)
                     parking = Parking.objects.get(pk=pk)
                     now = datetime.now()
                     now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
@@ -582,7 +595,6 @@ def dash_parks(request):
                 else:
                     return redirect(reverse('parkingapp:error'))
             elif 'delete' in request.POST:
-                print(request.POST)
                 pk = request.POST.get('delete')
                 parking = Parking.objects.get(pk=pk)
                 parking.delete()
@@ -673,8 +685,8 @@ def dash_fin(request):
                 return redirect(reverse('parkingapp:error'))
         else:
             form = DashfinForm()  
-        period_start = '2024-01-16'
-        period_end = '2024-01-26'
+        period_start = '2024-01-25'
+        period_end = '2024-02-05'
         dat = data(period_start, period_end)
         context = {
             'Fin':dat[1][0],
@@ -716,6 +728,20 @@ def dash_reciepts(request):
         }
         return render(request, 'dash_reciepts.html', context)
 
+@login_required(redirect_field_name=None)
+def parking_lot(request):
+    if request.user.parking_lot_view:    
+        secret = request.GET.get('secret', '')
+        if secret:
+            parking = Parking.objects.filter(secret=secret)[0]
+            if parking:
+                return render(request, 'parking_lot.html', {'parking': parking})
+            else:
+                return redirect(reverse('parkingapp:error'))
+        else:
+            return redirect(reverse('parkingapp:error'))
+    else:
+        return redirect(reverse('parkingapp:dont_have_access'))
 def compare_parks(request):
     p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
     p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)

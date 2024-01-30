@@ -110,16 +110,19 @@ class AdminRegistrationForm(UserCreationForm):
         'type': 'checkbox',
         'id': 'admin_view',
     }))
-    park_id = forms.IntegerField(required=False, widget=forms.PasswordInput(attrs={
-        'class': 'form-control rounded-4',
-        'placeholder': 'ID парковки',
-        'type': 'number',
-        'inputmode': 'numeric'
+    parking_lot_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+        'class': 'form-check-input',
+        'type': 'checkbox',
+        'id': 'parking_lot',
+    }))
+    park_id = forms.ChoiceField(required=False, choices=(), widget=forms.Select(attrs={
+        'class': 'form-select rounded-4',
+        'value': ''
     }))
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'park_id']
+        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'parking_lot_view', 'park_id']
 
 class CouponForm(forms.Form):
     car = forms.CharField(required=False, widget=forms.NumberInput(attrs={
@@ -206,13 +209,13 @@ class AddParkingForm(forms.Form):
 
 
 class CommitParkingForm(forms.Form):
-    parking_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    code = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control group-first',
-        'id': 'floatingInput',
+        'code': 'floatingInput',
         'inputmode': 'numeric',
-        'placeholder': 'ID парковки',
+        'placeholder': 'пошла нахуй блять'
     }))
 
-    class Meta:
-        model = Parking
-        fields = ['parking_id']
+    # class Meta:
+    #     model = Parking
+    #     fields = ['code']
