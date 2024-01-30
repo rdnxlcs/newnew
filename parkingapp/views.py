@@ -193,9 +193,9 @@ def addparking(request):
             form = AddParkingForm(data=request.POST)
             if form.is_valid():
                 address = request.POST['address']
-                # client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
-                # lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
-                lat, lng = 101., 21.
+                client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+                lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+                # lat, lng = 101., 21.
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
