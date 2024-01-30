@@ -18,7 +18,6 @@ class User(AbstractUser):
     coupon_control = models.BooleanField(default=False)
     admin_view = models.BooleanField(default=False)
     parking_lot_view = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
     def __str__(self) -> str:
         return f'{self.username} | user control {self.user_control} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.admin_view}'
     
@@ -46,4 +45,3 @@ class Reciept(models.Model):
     final_price = models.BigIntegerField(default=-1)
     benefit = models.BooleanField(default=False)
     price_per_hour = models.IntegerField(default=-1)
-    active = models.BooleanField(default=True)
