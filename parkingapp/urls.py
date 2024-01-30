@@ -11,7 +11,6 @@ urlpatterns = [
     path('enter/', views.enter, name='enter'),
     path('addparking/', views.addparking, name='addparking'),
     path('signadmin/', views.signadmin, name='signadmin'),
-    path('signcoupon/', views.signcoupon, name='signcoupon'),
     path('coupon/', views.coupon, name='coupon'),
     path('endparking/', views.endparking, name='endparking'),
     path('esp/', views.esp, name='esp'),
@@ -24,4 +23,5 @@ urlpatterns = [
     path('dash_reciepts/', views.dash_reciepts, name='dash_reciepts'),
     path('parkings/', views.parkings, name='parkings'),
     path('barrier/', views.barrier, name='barrier'),
+    path('dash_corr/', views.dash_corr, name='dash_corr'),
 ]

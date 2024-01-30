@@ -1,70 +1,88 @@
 {% extends 'dash_base.html' %}
 {% block content %}
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-  <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content rounded-4 shadow border">
-        <div class="modal-header p-5 pb-4 border-bottom-0">
-          <h1 class="fw-bold mb-0 fs-2">Новый пользователь</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div class="col-md-7 col-lg-8 mt-3">
+      <div class="row">
+        <h4 class="mb-3 col-6">Новый пользователь</h4>
+        <small class="text-end text-danger col-6">{{ error }}</small>
+      </div>
+      <div class="row g-3">
+        <div class="col-12">
+          <label for="username" class="form-label">Имя пользователя</label>
+          {{ form.username }}
         </div>
 
-        <div class="modal-body p-5 pt-0">
-          <form method="post">
-            {% csrf_token %}
-            <div class="form-floating mb-3">
-              {{ form.username }}
-              <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
-            </div>
-            <div class="form-floating mb-3">
-              {{ form.password1 }}
-              <label for="{{ form.password1.id_for_label }}">Пароль</label>
-            </div>
-            <div class="form-floating mb-4">
-              {{ form.password2 }}
-              <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
-            </div>
-            {{ error }}
-            <hr class="m-0 mb-2">
-            <small class="text-secondary">Установите права для пользователя</small>
-            <div class="form-check my-3">
-              {{ form.user_control }}
-              <label class="form-check-label" for="flexCheckChecked">
-                Управление пользователями
-              </label>
-            </div>
-            <div class="form-check my-3">
-              {{ form.parking_control }}
-              <label class="form-check-label" for="flexCheckChecked">
-                Управление парковками
-              </label>
-            </div>
-            <div class="form-check my-3">
-              {{ form.barrier_control }}
-              <label class="form-check-label" for="flexCheckChecked">
-                Управление шлагбаумами
-              </label>
-            </div>
-            <div class="form-check my-3">
-              {{ form.coupon_control }}
-              <label class="form-check-label" for="flexCheckChecked">
-                Обнуление чеков
-              </label>
-            </div>
-            <div class="form-check my-3 mb-4">
-              {{ form.admin_view }}
-              <label class="form-check-label" for="flexCheckChecked">
-                Просмотр панели администратора
-              </label>
-            </div>
-            <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" onclick="help()"
-              type="submit">Зарегистрироваться</button>
-          </form>
+        <div class="col-sm-6">
+          <label for="firstName" class="form-label">Пароль</label>
+          {{ form.password1 }}
+        </div>
+
+        <div class="col-sm-6">
+          <label for="lastName" class="form-label">Подтвердите пароль</label>
+          {{ form.password2 }}
         </div>
       </div>
+
+      <hr class="my-4">
+
+      <div class="form-check my-3">
+        {{ form.user_control }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Управление пользователями
+        </label>
+      </div>
+      <div class="form-check my-3">
+        {{ form.parking_control }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Управление парковками
+        </label>
+      </div>
+      <div class="form-check my-3">
+        {{ form.barrier_control }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Управление шлагбаумами
+        </label>
+      </div>
+      <div class="form-check my-3">
+        {{ form.coupon_control }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Обнуление чеков
+        </label>
+      </div>
+      <div class="form-check my-3 mb-4">
+        {{ form.admin_view }}
+        <label class="form-check-label" for="flexCheckChecked">
+          Просмотр панели администратора
+        </label>
+      </div>
+      <hr class="my-4 mb-2">
+
+      <div id="temp" hidden>
+        <div class="col-12">
+          <label for="username" class="form-label">ID парковки для выдачи льгот</label>
+          {{ form.park_id }}
+        </div>
+      </div>
+      <button class="w-100 mt-4  btn btn-lg rounded-4 btn-primary" onclick="help()"
+        type="submit">Зарегестрировать</button>
     </div>
-  </div>
+  </form>
 </main>
 <script>
+  var hid = true
+  var tem = document.getElementById('temp')
+  function temp() {
+    if (hid) {
+      tem.removeAttribute('hidden')
+      hid = false
+    } else {
+      tem.setAttribute('hidden', 'true')
+      hid = true
+    }
+  }
+
   function check() {
     var users = document.getElementById('user_control').checked
     var parks = document.getElementById('parking_control').checked

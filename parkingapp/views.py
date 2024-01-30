@@ -12,7 +12,7 @@ import ymaps
 import json
 from dateutil import tz
 import time
-from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponerRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
+from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 tzname = time.tzname[1]
 curr_zone = tz.gettz(tzname)
 
@@ -22,7 +22,6 @@ def check_logged(request):
     return False
 
 def index(request):
-    print(datetime.now())
     if request.method == 'POST':
         if 'create_park' in request.POST:
             form = CommitParkingForm(data=request.POST)
@@ -112,7 +111,7 @@ def index(request):
         'parking': Parking.objects.all(),
         'reciepts': reciepts, 
         'logged':check_logged(request), 
-        "parkings":parkings, 
+        'parkings': parkings, 
         'bdsm': bdsm,
         'form': form,
         'error': ''
@@ -183,15 +182,24 @@ def enter(request):
 
     return render(request, 'enter.html', context)
 
+def address_valid_check(address):
+    try:
+        client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+        lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+        return True
+    except:
+        return False
+
 
 @login_required(redirect_field_name=None)
 def addparking(request):
+    error = ''
     if not request.user.parking_control:
         return redirect(reverse('parkingapp:dont_have_access'))
     else:
         if request.method == 'POST':
             form = AddParkingForm(data=request.POST)
-            if form.is_valid():
+            if form.is_valid() and address_valid_check(request.POST['address']):
                 address = request.POST['address']
                 client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
                 lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
@@ -202,15 +210,16 @@ def addparking(request):
                 Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price)
                 return redirect(reverse('parkingapp:dash_parks'))
             else:
-                return redirect(reverse('parkingapp:error'))
+                error = 'Не удалось добавить парковку'
         else:
             form = AddParkingForm()
 
-        return render(request, 'addparking.html', {'form': form})
+        return render(request, 'addparking.html', {'form': form, 'error': error})
     
 
 @login_required(redirect_field_name=None)
 def signadmin(request):
+    error = ''
     if not request.user.user_control:
         return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
 
@@ -223,6 +232,8 @@ def signadmin(request):
                 form.save()
 
                 return HttpResponseRedirect(reverse('parkingapp:dash_users'))
+            else:
+                error = 'Не удалось зарегестрировать пользователя'
             
         else:
             form = AdminRegistrationForm()
@@ -231,38 +242,13 @@ def signadmin(request):
             'title': 'Регистрация администратора',
             'logged': check_logged(request),
             'form': form,
+            'error': error,
         }
         return render(request, 'signadmin.html', context)
 
-
-@login_required(redirect_field_name=None)
-def signcoupon(request):
-    if request.user.rights != 2:
-        return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))   
-
-    else:
-        if request.method == 'POST':    
-            form = CouponerRegistrationForm(data=request.POST)
-            if form.is_valid():
-                form = form.save(commit=False)
-                form.rights = 1
-                form.save()
-
-                return HttpResponseRedirect(reverse('parkingapp:dash_users'))
-            
-        else:
-            form = CouponerRegistrationForm()
-
-        context = {
-            'title': 'Регистрация партнера',
-            'logged': check_logged(request),
-            'form': form,
-        }
-        return render(request, 'signcoupon.html', context)
-    
-
 @login_required(redirect_field_name=None)
 def coupon(request):
+    error = ''
     if not request.user.coupon_control:
         return redirect(reverse('parkingapp:dont_have_access'))
     else:
@@ -280,7 +266,7 @@ def coupon(request):
                     return HttpResponseRedirect(reverse('parkingapp:coupon'))
 
                 else:
-                    return redirect(reverse('parkingapp:error'))
+                    error = 'Не удалось выдать льготу'
 
         else:
             form = CouponForm()
@@ -288,7 +274,8 @@ def coupon(request):
         context = {
             'title': 'Обнуление чеков',
             'form': form,
-            'logged':check_logged(request),
+            'logged': check_logged(request),
+            'error': error
         }
 
         return render(request, 'coupon.html', context)
@@ -310,7 +297,11 @@ def error(request):
     return render(request, 'error.html', context)
 
 def barrier(request):
-    return render(request, 'barrier.html')
+    return render(request, 'barrier.html', {'parkings': Parking.objects.all()})
+
+def dash_corr(request):
+    return render(request, 'dash_corr.html')
+    
 
 class Park: 
     def __init__(
@@ -521,6 +512,8 @@ def dash_full(request):
     else:
         if request.method == 'POST':
             form = DashForm(data=request.POST)
+            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+            form.fields['pk'].choices = tuple(addresses)
             if form.is_valid():
                 pk = request.POST['pk']
                 period_start = request.POST['date1']
@@ -541,6 +534,8 @@ def dash_full(request):
                 return redirect(reverse('parkingapp:error'))
         else:
             form = DashForm()
+            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+            form.fields['pk'].choices = tuple(addresses)
             pk = list(Parking.objects.all())[-1].pk 
             period_start = '2024-01-16'
             period_end = '2024-01-26'
@@ -554,8 +549,9 @@ def dash_full(request):
                 context = spice(p_end, p_start, period_start, period_end, pk, form, park)
                 return render(request, 'dash_full.html', context)
             except Exception as e:
-                print(e)
-                return redirect(reverse('parkingapp:error'))
+                        print(e)
+                        return redirect(reverse('parkingapp:error'))
+
     
 @login_required(redirect_field_name=None)
 def dash_parks(request):
@@ -693,7 +689,6 @@ def dash_fin(request):
 def dash_users(request):
     if not request.user.user_control:
         return redirect(reverse('parkingapp:dont_have_access'))
-
     else:
         if request.method == 'POST':
             value = request.POST.get('delete')

@@ -1,1 +1,54 @@
-10 раз подумай сука можно поставить в бд с парковками
+{% extends 'dash_base.html' %}
+{% block actusers %}active{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Парковки</h1>
+    <div>
+      <small class="text-danger text">{{ error }}</small>
+      <a href="{% url 'parkingapp:addparking' %}" class="text-decoration-none mb-2"><i
+          class="bi bi-plus-circle"></i></a>
+    </div>
+  </div>
+
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Улица</th>
+          <th scope="col">На вьезд</th>
+          <th scope="col">На выезд</th>
+        </tr>
+      </thead>
+
+      <tbody class="align-middle">
+        {% for el in parkings %}
+        <tr>
+          <td>{{el.pk}}</td>
+          <td>{{el.address}}</td>
+
+          <td><button class="text-primary" style="background: none; border: none;" type="button" onclick="out(this)">Закрыто</button></td>
+          <td><button class="text-primary" style="background: none; border: none;" type="button" onclick="out(this)">Закрыто</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <script>
+    var outclosed = true
+    function out(el) {
+      if (outclosed) {
+        el.setAttribute('class', 'text-danger')
+        el.innerHTML = 'Отркыто'
+        outclosed = false
+      } else {
+        el.setAttribute('class', 'text-primary')
+        el.innerHTML = 'Закрыто'
+        outclosed = true
+      }
+    }
+  </script>
+</main>
+{% endblock %}

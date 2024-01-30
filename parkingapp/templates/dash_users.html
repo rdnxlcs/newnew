@@ -19,6 +19,7 @@
           <th scope="col">Управление шлагбаумами</th>
           <th scope="col">Обнуление чеков</th>
           <th scope="col">Просмотр панели администратора</th>
+          <th scope="col">Парковка</th>
           <th scope="col">Действие</th>
         </tr>
       </thead>
@@ -54,6 +55,7 @@
             {{ el.coupon_control }}</td>
           <td class="{% if el.admin_view %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.admin_view }}</td>
+          <td>{{ el.park_id }}</td>
           <td><button class="text-danger" type="button" data-bs-whatever="{{el.pk}}" data-bs-toggle="modal"
               data-bs-target="#exampleModal" style="border: none; background: none;">Удалить</button></td>
         </tr>

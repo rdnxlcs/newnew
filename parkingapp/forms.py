@@ -102,6 +102,7 @@ class AdminRegistrationForm(UserCreationForm):
     }))
     coupon_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
+        'onclick': 'temp()',
         'type': 'checkbox',
     }))
     admin_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
@@ -109,56 +110,43 @@ class AdminRegistrationForm(UserCreationForm):
         'type': 'checkbox',
         'id': 'admin_view',
     }))
-
-    class Meta:
-        model = User
-        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view']
-
-
-class CouponerRegistrationForm(UserCreationForm):
-    username = forms.CharField(required=True, widget=forms.TextInput(attrs={
-        'class': 'form-control rounded-4',
-        'placeholder': 'Имя пользователя',
-        'minlength': 4,
-        'maxlength': 20,
-    }))
-    park_id = forms.IntegerField(widget=forms.NumberInput(attrs={
+    park_id = forms.IntegerField(required=False, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'ID парковки',
-    }))
-    password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
-        'class': 'form-control rounded-4',
-        'placeholder': 'Пароль',
-        'minlength': 8
-    }))
-    password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
-        'class': 'form-control rounded-4',
-        'placeholder': 'Пароль',
-        'minlength': 8
-    }))
-
-    class Meta:
-        model = User
-        fields = ['username', 'password1', 'password2', 'park_id']
-
-
-class CouponForm(forms.Form):
-    user_reciept_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control rounded-4',
-        'placeholder': 'id парковки для предоставления льготы',
+        'type': 'number',
         'inputmode': 'numeric'
     }))
 
     class Meta:
+        model = User
+        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'park_id']
+
+class CouponForm(forms.Form):
+    car = forms.CharField(required=False, widget=forms.NumberInput(attrs={
+        'type': 'text',
+        'class': 'form-control rounded-4',
+        'placeholder': 'Автомобильный номер',
+        'minlength': 6,
+        'maxlength': 12,
+        'id': 'uppercar',
+        'style': 'text-transform: uppercase;',
+    }))
+    tel = forms.CharField(required=False, widget=forms.NumberInput(attrs={
+        'type': 'text',
+        'class': 'form-control rounded-4',
+        'placeholder': 'Номер телефона',
+        'id': 'tel',
+        'inputmode': 'tel',
+    }))
+
+    class Meta:
         model = Reciept
-        fields = ['user_reciept_id']
+        fields = ['car', 'tel']
 
 
 class DashForm(forms.Form):
-    pk = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
-        'class': 'form-control form-control-sm',
-        'inputmode': 'numeric',
-        'placeholder': 'id парковки',
+    pk = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
+        'class': 'form-select form-select-sm',
         'value': ''
     }))
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={

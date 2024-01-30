@@ -1,0 +1,96 @@
+{% extends 'dash_base.html' %}
+{% block actusers %}active{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Пользователи с подозрительной активностью</h1>
+  </div>
+
+  <div class="row g-3 mb-5">
+    <div class="col-sm-6 col-xxl-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">STR1X</h5>
+          <p class="card-text">ул. Юлии Тарановой 1</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xxl-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">rdnxlcs</h5>
+          <p class="card-text">ул. Юлии Тарановой 1</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">STR1X</h1>
+  </div>
+
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Пользователь</th>
+          <th scope="col">Парковка</th>
+          <th scope="col">Начало</th>
+          <th scope="col">Конец</th>
+          <th scope="col">Льгота</th>
+          <th scope="col">Сумма</th>
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        <tr>
+          <td>26</td>
+          <td>STR1X</td>
+          <td>1</td>
+          <td>12-26-2023 10:20</td>
+          <td>12-26-2023 10:40</td>
+          <td>Нет</td>
+          <td>5 ₽</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">rdnxlcs</h1>
+  </div>
+
+  <div class="table-responsive small">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Пользователь</th>
+          <th scope="col">Парковка</th>
+          <th scope="col">Начало</th>
+          <th scope="col">Конец</th>
+          <th scope="col">Льгота</th>
+          <th scope="col">Сумма</th>
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        <tr>
+          <td>26</td>
+          <td>STR1X</td>
+          <td>1</td>
+          <td>12-26-2023 10:20</td>
+          <td>12-26-2023 10:40</td>
+          <td>Нет</td>
+          <td>5 ₽</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+{% endblock %}

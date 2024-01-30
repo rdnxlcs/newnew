@@ -92,7 +92,6 @@
 {% endif %}
 
 
-
 <script type="text/javascript">
   let isclosed = true
   function pos() {
@@ -121,7 +120,7 @@
   function init() {
     var myMap = new ymaps.Map('myMap', {
       center: [54.7065, 20.511],
-      zoom: 15,
+      zoom: 12,
       controls: [],
 
     }, {
@@ -132,12 +131,9 @@
     MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
       '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
-    MyBalloonContentLayout = ymaps.templateLayoutFactory.createClass(
-      '<h3 class="popover-title">$[properties.balloonHeader]</h3>' +
-      '<div class="popover-content">$[properties.balloonContent]</div>'
-    )
+
     for (let i = 0; i < parkings.length; i++) {
-      let proc = parkings[i][3] / parkings[i][5] * 100;
+      let proc = parseInt(parkings[i][3] / parkings[i][5] * 100);
       if (proc > 70) {
         var blar = 'success'
       } else if (proc > 40) {
@@ -149,9 +145,10 @@
       var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {
         iconContent: String(parkings[i][4]),
         border: String(blar),
-        balloonContentHeader: "Сучара сделай балун",
-        balloonContentBody: "Содержимое <em>балуна</em> метки",
-        balloonContentFooter: "Подвал",
+        balloonContentHeader: '<div><h5 class="fw-bolder">' + String(parkings[i][6]) + '</h5><small class="text-secondary">' + String(parkings[i][4]) + ' в час </small></div>',
+        // Зададим содержимое основной части балуна.
+        balloonContentBody: '<div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="' + String(100 - proc) + '" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width: ' + String(100 - proc) + '%">' + String(100 - proc) + '%</div></div>',
+        hintContent: String(parkings[i][6])
       }, {
         iconLayout: 'default#imageWithContent',
         iconImageHref: '',
