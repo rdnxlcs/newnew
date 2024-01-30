@@ -99,7 +99,16 @@ def index(request):
         reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
         for el in reciepts:
             parkingxd = Parking.objects.get(pk=el.parking_id)
-            bdsm.append([el, parkingxd.address])
+            now = datetime.now()
+            t = el.start_time
+            seconds = (now.replace(tzinfo=None) - t.replace(tzinfo=None)).total_seconds()
+            minutes = int(seconds // 60)
+            seconds -= minutes * 60
+            seconds = int(seconds)
+            price_per_minute = el.price_per_hour / 60
+            if minutes <= 15:
+                price_per_minute = 0
+            bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', price_per_minute * minutes])
         
     except Exception as e:
         print(e)
