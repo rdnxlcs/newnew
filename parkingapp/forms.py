@@ -218,13 +218,13 @@ class AddParkingForm(forms.Form):
 
 
 class CommitParkingForm(forms.Form):
-    parking_id = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    code = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
         'class': 'form-control group-first',
-        'id': 'floatingInput',
+        'code': 'floatingInput',
         'inputmode': 'numeric',
-        'placeholder': 'ID парковки',
+        'placeholder': 'пошла нахуй блять'
     }))
 
-    class Meta:
-        model = Parking
-        fields = ['parking_id']
+    # class Meta:
+    #     model = Parking
+    #     fields = ['code']

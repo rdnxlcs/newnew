@@ -24,4 +24,5 @@ urlpatterns = [
     path('dash_reciepts/', views.dash_reciepts, name='dash_reciepts'),
     path('parkings/', views.parkings, name='parkings'),
     path('barrier/', views.barrier, name='barrier'),
+    path('parking_lot/', views.parking_lot, name='parking_lot')
 ]

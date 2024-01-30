@@ -19,8 +19,10 @@
           <th scope="col">Улица</th>
           <th scope="col">Кол-во мест</th>
           <th scope="col">Цена за час</th>
+          <th scope="col">Секрет</th>
           <th scope="col">Действие</th>
           <th scope="col">Изменить цену</th>
+          
         </tr>
       </thead>
       <!-- MODAL -->
@@ -73,6 +75,7 @@
           <td>{{el.address}}</td>
           <td>{{el.max_parking_lots}}</td>
           <td>{{el.price_per_hour}} ₽</td>
+          <td>{{el.secret}}</td>
 
           <td><button class="text-danger" style="background: none; border: none;" type="button" data-bs-toggle="modal"
               data-bs-target="#exampleModalD" data-bs-whatever="{{el.pk}}">Удалить</button></td>
