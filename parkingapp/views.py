@@ -4,6 +4,7 @@ from django.urls import reverse
 from datetime import *
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.conf import settings
+from django.http import FileResponse
 # from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import make_aware
@@ -14,6 +15,8 @@ from dateutil import tz
 import time
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 import random
+import pandas as pd
+
 tzname = time.tzname[1]
 curr_zone = tz.gettz(tzname)
 
@@ -23,6 +26,11 @@ def check_logged(request):
     return False
 
 def index(request):
+    form = CommitParkingForm()
+    
+    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+        return redirect(reverse('parkingapp:dont_have_access'))
+    
     try:
         parkings = []
         for el in Parking.objects.all():
@@ -38,13 +46,12 @@ def index(request):
     except Exception as e:
         print(e)
         parkings = []
+    
     try:
         bdsm = []
         reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
         for el in reciepts:
-            print(el.parking_id)
             parkingxd = Parking.objects.get(pk=el.parking_id)
-            print(parkingxd)
             now = datetime.now()
             t = el.start_time
             seconds = (now.replace(tzinfo=None) - t.replace(tzinfo=None)).total_seconds()
@@ -55,19 +62,16 @@ def index(request):
             if minutes <= 14:
                 price_per_minute = 0
             bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', int(price_per_minute * minutes)])
-
     except Exception as e:
         print(e)
         reciepts = []
         bdsm = []
-
-    form = CommitParkingForm()
+    
     context = {
-        'title': 'Главная',
-        'parking': Parking.objects.all(),
+        'title': 'Парковка',
         'reciepts': reciepts, 
-        'logged':check_logged(request), 
-        "parkings":parkings, 
+        'logged': check_logged(request), 
+        'parkings': parkings, 
         'bdsm': bdsm,
         'form': form,
         'error': ''
@@ -81,7 +85,10 @@ def index(request):
                 try:
                     parking = Parking.objects.get(code=code)
                     if parking.occupied_lots >= parking.max_parking_lots:
-                        return redirect(reverse('parkingapp:error'))
+                        form = CommitParkingForm()
+                        context['error'] = 'Нет свободных мест'
+                        context['form'] = form
+                        return render(request, 'index.html', context)
                     else:
                         extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
                         parking.code = extremecode
@@ -94,11 +101,11 @@ def index(request):
                 except Exception as e:
                     print(e)
                     form = CommitParkingForm()
-                    context['error'] = 'Попробуйте ещё раз'
+                    context['error'] = 'Не удалось припарковаться'
                     context['form'] = form
                     return render(request, 'index.html', context)
             else:
-                return redirect(reverse('parkingapp:error'))
+                context['error'] = 'Не удалось припарковаться'
         elif 'end_park' in request.POST:
             reciept_id = request.POST.get('end_park')
             reciept = Reciept.objects.get(pk=reciept_id)
@@ -111,7 +118,6 @@ def index(request):
             minutes = dif // 60
             if minutes <= 15:
                 reciept.final_price = 0
-
             else:
                 reciept.final_price = minutes * reciept.price_per_hour // 60
             reciept.save()
@@ -132,13 +138,14 @@ def index(request):
             parkingxd = Parking.objects.get(pk=reciept.parking_id)
             bdsm = [reciept, parkingxd.address, f'{minutes:02}', f'{seconds:02}']
 
-            return render(request, 'endparking.html', {'reciept': bdsm})
+            context = {
+                'reciept': bdsm, 
+                'title': 'Парковка завершена'
+            }
 
-
-
+            return render(request, 'endparking.html', context)
 
     return render(request, 'index.html', context)
-
 
 def dont_have_access(request):
     context = {
@@ -146,16 +153,17 @@ def dont_have_access(request):
     }
     return render(request, 'dont_have_access.html', context)
 
-
 def logout(request):
     auth.logout(request)
 
     return HttpResponseRedirect(reverse('parkingapp:enter'))
 
-
 @login_required(redirect_field_name=None)
 def endparking(request):
-    return render(request, 'endparking.html', {'logged': check_logged(request)})
+    context = {
+        'logged': check_logged(request),
+    }
+    return render(request, 'endparking.html', context)
 
 def sign(request):
     error = ''
@@ -175,7 +183,6 @@ def sign(request):
         'error': error
     }
     return render(request, 'sign.html', context)
-
 
 def enter(request):
     error = ''
@@ -210,25 +217,26 @@ def address_valid_check(address):
     except:
         return False
 
-
 @login_required(redirect_field_name=None)
 def addparking(request):
     error = ''
+    form = AddParkingForm()
+
     if not request.user.parking_control:
         return redirect(reverse('parkingapp:dont_have_access'))
-    else:
-        if request.method == 'POST':
-            form = AddParkingForm(data=request.POST)
+    
+    if request.method == 'POST':
+        form = AddParkingForm(data=request.POST)
+        try:
             if form.is_valid() and address_valid_check(request.POST['address']):
                 address = request.POST['address']
                 client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
                 lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
-                # lat, lng = 101., 21.
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
                 alph = ''
-                Z = [92, 43, 35, 61, 63, 38]
+                Z = [ord('&'), ord('<'), ord('>'), ord('«'), ord('\''), ord('#'), ord('%')]
                 for i in range(33, 127):
                     if i not in Z:
                         alph += chr(i)
@@ -242,93 +250,79 @@ def addparking(request):
                 return redirect(reverse('parkingapp:dash_parks'))
             else:
                 error = 'Не удалось добавить парковку'
-        else:
-            form = AddParkingForm()
+        except Exception as e:
+            print(e)
+            error = 'Не удалось добавить парковку'
 
-        return render(request, 'addparking.html', {'form': form, 'error': error})
+    context = {
+        'form': form, 
+        'error': error
+    }
+    return render(request, 'addparking.html', context)
     
-
 @login_required(redirect_field_name=None)
 def signadmin(request):
     error = ''
     if not request.user.user_control:
         return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
+    
+    if request.method == 'POST':    
+        form = AdminRegistrationForm(data=request.POST)
+        addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+        form.fields['park_id'].choices = tuple(addresses)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.save()
 
-    else:
-        if request.method == 'POST':    
-            form = AdminRegistrationForm(data=request.POST)
-            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
-            form.fields['park_id'].choices = tuple(addresses)
-            if form.is_valid():
-                form = form.save(commit=False)
-                form.save()
-
-                return HttpResponseRedirect(reverse('parkingapp:dash_users'))
-            else:
-                error = 'Не удалось зарегестрировать пользователя'
-            
+            return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
-            form = AdminRegistrationForm()
-            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
-            form.fields['park_id'].choices = tuple(addresses)
+            error = 'Не удалось зарегестрировать пользователя'
+        
+    
+    form = AdminRegistrationForm()
+    addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+    form.fields['park_id'].choices = tuple(addresses)
 
-        context = {
-            'title': 'Регистрация администратора',
-            'logged': check_logged(request),
-            'form': form,
-            'error': error,
-        }
-        return render(request, 'signadmin.html', context)
+    context = {
+        'title': 'Регистрация администратора',
+        'logged': check_logged(request),
+        'form': form,
+        'error': error,
+    }
+    return render(request, 'signadmin.html', context)
 
 @login_required(redirect_field_name=None)
 def coupon(request):
     error = ''
     if not request.user.coupon_control:
         return redirect(reverse('parkingapp:dont_have_access'))
-    else:
-        if request.method == 'POST':
-            form = CouponForm(data=request.POST)
-            if form.is_valid():
-                pk = request.POST['user_reciept_id']
-                reciept = Reciept.objects.filter(pk=pk)
-                if reciept and not reciept[0].benefit and reciept[0].final_price == -1:
-                    reciept = reciept[0]
-                    reciept.benefit = True
-                    reciept.final_start_time = datetime.now().replace(tzinfo=None)
-                    reciept.save()
-                    
-                    return HttpResponseRedirect(reverse('parkingapp:coupon'))
+    
+    if request.method == 'POST':
+        form = CouponForm(data=request.POST)
+        if form.is_valid():
+            pk = request.POST['user_reciept_id']
+            reciept = Reciept.objects.filter(pk=pk)
+            if reciept and not reciept[0].benefit and reciept[0].final_price == -1:
+                reciept = reciept[0]
+                reciept.benefit = True
+                reciept.final_start_time = datetime.now().replace(tzinfo=None)
+                reciept.save()
+                
+                return HttpResponseRedirect(reverse('parkingapp:coupon'))
 
-                else:
-                    error = 'Не удалось выдать льготу'
+            else:
+                error = 'Не удалось выдать льготу'
 
-        else:
-            form = CouponForm()
-        
-        context = {
-            'title': 'Обнуление чеков',
-            'form': form,
-            'logged': check_logged(request),
-            'error': error
-        }
-
-        return render(request, 'coupon.html', context)
-
-
-def esp(request):
+    form = CouponForm()
+    
     context = {
-        'title': 'Главная',
-        'logged':check_logged(request),
+        'title': 'Обнуление чеков',
+        'form': form,
+        'logged': check_logged(request),
+        'error': error
     }
-    return render(request, 'esp.html', context)
 
-
-def error(request):
-    context = {
-        'title': 'Произошла ошибка :(',
-        'logged': check_logged,
-    }
-    return render(request, 'error.html', context)
+    return render(request, 'coupon.html', context)
 
 def barrier(request):
     return render(request, 'barrier.html', {'parkings': Parking.objects.all()})
@@ -336,6 +330,18 @@ def barrier(request):
 def dash_corr(request):
     return render(request, 'dash_corr.html')
     
+def convert_data(DB):
+    res = DB[0].__dict__
+    for i in res:
+        res[i] = []
+        for row in DB:
+            res[i].append(getattr(row, i))
+    return res
+            
+def export(request):
+    df = pd.DataFrame(convert_data(Parking.objects.all()))
+    df.to_excel('parkingapp/static/data.xlsx', index=False)
+    return FileResponse(open('parkingapp/static/data.xlsx', 'rb'))
 
 class Park: 
     def __init__(
@@ -356,8 +362,7 @@ class Park:
         self.total_benefit_time = total_benefit_time
         self.total_sum = total_sum
         self.benefit_sum = benefit_sum
-        
-
+    
 class Fin:
     def __init__(
             self, total_price, how_much_people_used, 
@@ -367,7 +372,6 @@ class Fin:
         self.how_much_people_used = how_much_people_used
         self.with_benefits = with_benefits
         self.benefits_price = benefits_price
-
 
 def data(period_start, period_end, id=0):
     period_start = [i for i in period_start.split('-')]
@@ -465,7 +469,7 @@ def data(period_start, period_end, id=0):
         
     return parkings_array, fins_parkings_array
 
-def spice(p_end, p_start, period_start, period_end, pk, form, park):
+def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
@@ -535,44 +539,25 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park):
             'reciepts': json.dumps(str(reciepts_to_send)),
             'reciepts_benefit': json.dumps(str(coupon_reciepts(pk, period_start, period_end))),
             'form': form,
-            'pk': pk}
+            'pk': pk,
+            'error': error}
     return context
 
 @login_required(redirect_field_name=None)
 def dash_full(request):
+    error = ''
+
     if not request.user.admin_view: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
-    else:
-        if request.method == 'POST':
-            form = DashForm(data=request.POST)
-            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
-            form.fields['pk'].choices = tuple(addresses)
-            if form.is_valid():
-                pk = request.POST['pk']
-                period_start = request.POST['date1']
-                period_end = request.POST['date2']
-                try:
-                    park = data(period_start, period_end, pk)[0][0]
-                    # total_time average_time 
-                    period_start = [i for i in period_start.split('-')]
-                    period_end = [i for i in period_end.split('-')]
-                    p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-                    p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-                    context = spice(p_end, p_start, period_start, period_end, pk, form, park)
-                    return render(request, 'dash_full.html', context)
-                except Exception as e:
-                    print(e)
-                    return redirect(reverse('parkingapp:error'))
-            else:
-                return redirect(reverse('parkingapp:error'))
-        else:
-            form = DashForm()
-            addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
-            form.fields['pk'].choices = tuple(addresses)
-            pk = list(Parking.objects.all())[-1].pk 
-            period_start = '2024-01-25'
-            period_end = '2024-02-05'
+    if request.method == 'POST':
+        form = DashForm(data=request.POST)
+        addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+        form.fields['pk'].choices = tuple(addresses)
+        if form.is_valid():
+            pk = request.POST['pk']
+            period_start = request.POST['date1']
+            period_end = request.POST['date2']
             try:
                 park = data(period_start, period_end, pk)[0][0]
                 # total_time average_time 
@@ -580,49 +565,73 @@ def dash_full(request):
                 period_end = [i for i in period_end.split('-')]
                 p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
                 p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-                context = spice(p_end, p_start, period_start, period_end, pk, form, park)
+                context = spice(p_end, p_start, period_start, period_end, pk, form, park, error)
                 return render(request, 'dash_full.html', context)
             except Exception as e:
-                        print(e)
-                        return redirect(reverse('parkingapp:error'))
-
+                print(e)
+                error = 'Неизвестная ошибка'
+        else:
+            error = 'Неверные входные данные'
+        
+    form = DashForm()
+    addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+    form.fields['pk'].choices = tuple(addresses)
+    pk = list(Parking.objects.all())[-1].pk 
+    period_start = '2024-01-25'
+    period_end = '2024-02-05'
+    try:
+        park = data(period_start, period_end, pk)[0][0]
+        # total_time average_time 
+        period_start = [i for i in period_start.split('-')]
+        period_end = [i for i in period_end.split('-')]
+        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+        context = spice(p_end, p_start, period_start, period_end, pk, form, park, error)
+        return render(request, 'dash_full.html', context)
+    except Exception as e:
+        print(e)
+        return render(request, 'dash_full.html', {'error': error})
     
 @login_required(redirect_field_name=None)
 def dash_parks(request):
+    form = ChangePriceForm()        
+    parkings = Parking.objects.all()
     error = ''
+
     if not request.user.parking_control: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
-    else:
-        if request.method == 'POST':
-            if 'change_price' in request.POST:
-                form = ChangePriceForm(data=request.POST)
-                if form.is_valid():
-                    pk = request.POST.get('change_price')
-                    new_price = request.POST['newprice']
-                    parking = Parking.objects.get(pk=pk)
-                    now = datetime.now()
-                    now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
-                    tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
-                    if now - tm >= timedelta(days=90):
-                        parking.price_per_hour = new_price
-                        parking.change = datetime.now().replace(tzinfo=None)
-                        parking.save()
-                        form = ChangePriceForm()
-                    else:
-                        error = 'Изменение цены доступно раз в три месяца'
-                else:
-                    return redirect(reverse('parkingapp:error'))
-            elif 'delete' in request.POST:
-                pk = request.POST.get('delete')
+    if request.method == 'POST':
+        if 'change_price' in request.POST:
+            form = ChangePriceForm(data=request.POST)
+            if form.is_valid():
+                pk = request.POST.get('change_price')
+                new_price = request.POST['newprice']
                 parking = Parking.objects.get(pk=pk)
-                parking.delete()
-                form = ChangePriceForm()
+                now = datetime.now()
+                now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
+                tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+                if now - tm >= timedelta(days=90):
+                    parking.price_per_hour = new_price
+                    parking.change = datetime.now().replace(tzinfo=None)
+                    parking.save()
+                    form = ChangePriceForm()
+                else:
+                    error = 'Изменение цены доступно раз в три месяца'
+            else:
+                error = 'Неверные входные данные'
+        elif 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            parking = Parking.objects.get(pk=pk)
+            parking.delete()
+            form = ChangePriceForm()
 
-        form = ChangePriceForm()        
-        parkings = Parking.objects.all()
-        return render(request, 'dash_parks.html', {'parkings':parkings, 'form': form, 'error': error})
-
+    context = {
+        'parkings': parkings, 
+       'form': form, 
+       'error': error
+    }
+    return render(request, 'dash_parks.html', context)
 
 def coupon_reciepts(pk, period_start, period_end):
     try:
@@ -684,178 +693,89 @@ def coupon_reciepts(pk, period_start, period_end):
 
 @login_required(redirect_field_name=None)
 def dash_fin(request):
+    form = DashfinForm()  
+    period_start = '2024-01-25'
+    period_end = '2024-02-05'
+    dat = data(period_start, period_end)
+    error = ''
+
     if not request.user.admin_view:
         return redirect(reverse('parkingapp:dont_have_access'))
 
-    else:
-        if request.method == 'POST':
-            form = DashfinForm(data=request.POST)
-            if form.is_valid():
-                period_start = request.POST['date1']
-                period_end = request.POST['date2']
-                dat = data(period_start, period_end)
-                context = {
-                    'Fin':dat[1][0],
-                    'parkings':dat[0],
-                    'form': form
-                }
-                return render(request, 'dash_fin.html', context)
-            else:
-                return redirect(reverse('parkingapp:error'))
+    if request.method == 'POST':
+        form = DashfinForm(data=request.POST)
+        if form.is_valid():
+            period_start = request.POST['date1']
+            period_end = request.POST['date2']
+            dat = data(period_start, period_end)
+            context = {
+                'Fin':dat[1][0],
+                'parkings':dat[0],
+                'form': form
+            }
+            return render(request, 'dash_fin.html', context)
         else:
-            form = DashfinForm()  
-        period_start = '2024-01-25'
-        period_end = '2024-02-05'
-        dat = data(period_start, period_end)
-        context = {
-            'Fin':dat[1][0],
-            'parkings':dat[0],
-            'form': form
-        }
+            error = 'Неверные входные данные'
 
-        return render(request, 'dash_fin.html', context)
+    
+    context = {
+        'Fin':dat[1][0],
+        'parkings':dat[0],
+        'form': form,
+        'error': error
+    }
 
+    return render(request, 'dash_fin.html', context)
 
 @login_required(redirect_field_name=None)
 def dash_users(request):
     if not request.user.user_control:
         return redirect(reverse('parkingapp:dont_have_access'))
-    else:
-        if request.method == 'POST':
-            value = request.POST.get('delete')
-            user = User.objects.get(pk=value)
-            user.delete()
 
-        users = User.objects.all()
+    if request.method == 'POST':
+        value = request.POST.get('delete')
+        user = User.objects.get(pk=value)
+        user.delete()
 
-        context = {
-            'title': '',
-            'users': list(users),
-        }
-        return render(request, 'dash_users.html', context)
+    users = User.objects.all()
+
+    context = {
+        'title': '',
+        'users': list(users),
+    }
+    return render(request, 'dash_users.html', context)
 
 @login_required(redirect_field_name=None)
 def dash_reciepts(request):
     if not request.user.admin_view:
         return redirect(reverse('parkingapp:dont_have_access'))
-    else:
-        reciepts = Reciept.objects.all()
+    
+    reciepts = Reciept.objects.all()
 
-        context = {
-            'title': '',
-            'reciepts': list(reciepts)[::-1],
-        }
-        return render(request, 'dash_reciepts.html', context)
+    context = {
+        'title': '',
+        'reciepts': list(reciepts)[::-1],
+    }
+    return render(request, 'dash_reciepts.html', context)
 
 @login_required(redirect_field_name=None)
 def parking_lot(request):
-    if request.user.parking_lot_view:    
-        secret = request.GET.get('secret', '')
-        if secret:
-            parking = Parking.objects.filter(secret=secret)
-            if parking:
-                parking = parking[0]
-                return render(request, 'parking_lot.html', {'parking': parking})
-            else:
-                return redirect(reverse('parkingapp:error'))
-        else:
-            return redirect(reverse('parkingapp:error'))
-    else:
+    error = ''
+
+    if not request.user.parking_lot_view:   
         return redirect(reverse('parkingapp:dont_have_access'))
-def compare_parks(request):
-    p_start = datetime(2022, 12, 25, 0, 0, 0, tzinfo=None)
-    p_end = datetime(2024, 12, 25, 23, 59, 59, tzinfo=None)
-    reciepts_to_send = {}
-    reciepts_to_send["parks"] = {}
-    parkings = Parking.objects.all()
-    for park in parkings:
-        reciepts = Reciept.objects.filter(parking_id=park.pk)
-        for reciept in reciepts:
-            dt = datetime(reciept.start_time.year, reciept.start_time.month, reciept.start_time.day, reciept.start_time.hour, reciept.start_time.minute, reciept.start_time.second, tzinfo=None)
-            if p_end >= dt >= p_start:
-                try:
-                    reciepts_to_send['parks'][str(park.pk)] += 1
-                except Exception as e:
-                    print(e)
-                    reciepts_to_send['parks'][str(park.pk)] = 1
-    reciepts_to_send = str(reciepts_to_send)
-    return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
-
-
-def compare_time(request):
-    p_start = datetime(2023, 12, 25, 23, 59, 59, tzinfo=None)
-    p_end = datetime(2023, 12, 26, 23, 59, 50, tzinfo=None)
-    if p_end - p_start <= timedelta(days=1):
-        delta = timedelta(hours=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
-        reciepts_to_send = {}
-        reciepts_to_send['name'] = 'часам'
-        reciepts_to_send["period"] = {}
-        reciepts = Reciept.objects.all()
-        while p_start <= ctime <= p_end:
-            reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
-            for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta:
-                    reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
-            ctime += delta
-        reciepts_to_send = str(reciepts_to_send)
-    elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
-        delta = timedelta(days=1)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
-        reciepts_to_send = {}
-        reciepts_to_send['name'] = 'дням'
-        reciepts_to_send['period'] = {}
-        reciepts = Reciept.objects.all()
-        while p_start <= ctime <= p_end:
-            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
-            for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta:
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-            ctime += delta
-        reciepts_to_send = str(reciepts_to_send)
-        
-    elif timedelta(days=90) < p_end-p_start:
-        delta = timedelta(days=7)
-        ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
-        reciepts_to_send = {}
-        reciepts_to_send['name'] = 'неделям'
-        reciepts_to_send['period'] = {}
-        reciepts = Reciept.objects.all()
-        week = 1
-        while p_start <= ctime <= p_end:
-            reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
-            for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta:
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-            ctime += delta
-            week += 1
-        reciepts_to_send = str(reciepts_to_send)
-    return render(request, 'charts.html', {'reciepts': json.dumps(reciepts_to_send)})
-
-
-def parkings(request):
-    if request.method == 'POST':
-        if 'delete' in request.POST:
-            pk = request.POST.get('delete')
-            parking = Parking.objects.get(pk=pk)
-            parking.delete()
-        elif 'change_price' in request.POST:
-            
-            pk = request.POST.get('change_price')
-            new_price = request.POST.get('new_price')
-            parking = Parking.objects.get(pk=pk)
-            now = datetime.now()
-            now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
-            tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
-            if now - tm >= timedelta(days=90):    
-                parking.price_per_hour = new_price
-                parking.change = datetime.now().replace(tzinfo=None)
-                parking.save()
-            else:
-                return redirect(reverse('parkingapp:index'))
-            
-    parkings = Parking.objects.all()
-    return render(request, 'parkings.html', {'parkings':parkings})
+    
+    secret = request.GET.get('secret', '')
+    if secret:
+        parking = Parking.objects.filter(secret=secret)
+        if parking:
+            parking = parking[0]
+            return render(request, 'parking_lot.html', {'parking': parking})
+        else:
+            print(secret)
+            error = 'Нет парковок'
+    else:
+        print(secret)
+        error = 'Нет ключа'
+    
+    return render(request, 'parking_lot.html', {'parking': parking, 'error': error})

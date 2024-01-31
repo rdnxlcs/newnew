@@ -38,7 +38,7 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 8,
         'maxlength': 100
     }))
-    card = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={
+    card = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
