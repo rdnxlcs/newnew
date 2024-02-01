@@ -309,6 +309,26 @@ def coupon(request):
                 reciept.save()
                 
                 return HttpResponseRedirect(reverse('parkingapp:coupon'))
+    else:
+        if request.method == 'POST':
+            form = CouponForm(data=request.POST)
+            if form.is_valid():
+                car_num = request.POST['car'].upper()
+                # phone_number = request.POST['phone']
+                user = User.objects.filter(car_num=car_num)
+                # user = User.objects.filter(phone_number)
+                if user:
+                    user = user[0]
+                    reciept = Reciept.objects.filter(user_id=user.pk, final_price=-1)
+                    if reciept and not reciept[0].benefit and reciept[0].final_price == -1:
+                        reciept = reciept[0]
+                        reciept.benefit = True
+                        reciept.final_start_time = datetime.now().replace(tzinfo=None)
+                        reciept.save()
+                        
+                        return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                    else:
+                        error = 'У пользователя нет чеков'
 
             else:
                 error = 'Не удалось выдать льготу'
