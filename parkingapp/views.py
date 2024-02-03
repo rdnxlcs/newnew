@@ -27,6 +27,9 @@ def check_logged(request):
 
 def index(request):
     form = CommitParkingForm()
+
+    if not check_logged(request):
+        return redirect(reverse('parkingapp:enter'))
     
     if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
         return redirect(reverse('parkingapp:dont_have_access'))
@@ -136,6 +139,8 @@ def index(request):
             seconds = int(seconds)
 
             parkingxd = Parking.objects.get(pk=reciept.parking_id)
+            reciept.start_time = reciept.start_time.strftime('%d-%m-%y %H:%M')
+            reciept.finish_time = reciept.finish_time.strftime('%d-%m-%y %H:%M')
             bdsm = [reciept, parkingxd.address, f'{minutes:02}', f'{seconds:02}']
 
             context = {
@@ -194,7 +199,10 @@ def enter(request):
             user = auth.authenticate(username=username, password=password)
             if user:
                 auth.login(request, user)
-                return HttpResponseRedirect(reverse('parkingapp:index'))
+                if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+                    return HttpResponseRedirect(reverse('parkingapp:dash_full')) 
+                else:
+                    return HttpResponseRedirect(reverse('parkingapp:index')) 
         else:
             error = 'Не удалось войти'
 
@@ -348,7 +356,31 @@ def barrier(request):
     return render(request, 'barrier.html', {'parkings': Parking.objects.all()})
 
 def dash_corr(request):
-    return render(request, 'dash_corr.html')
+    users = User.objects.all()
+    corr_users = []
+    corr_reciepts = []
+
+    for user in users:
+        user_reciepts = Reciept.objects.filter(user_id=user.pk)
+        counter = 0
+        for rec in user_reciepts:
+            delta_hz = (rec.finish_time-rec.start_time)
+            delta = delta_hz.days * 24 + delta_hz.seconds / 3600
+            if rec.benefit and delta > 6:
+                counter += 1
+                corr_reciepts.append(rec)
+                if counter >= 2:
+                    corr_users.append(user)
+                    corr_reciepts.append(rec)
+                else:
+                    del corr_reciepts[-1]
+    
+    context = {
+        'corr_users': corr_users,
+        'corr_reciepts': corr_reciepts
+    }        
+
+    return render(request, 'dash_corr.html', context)
     
 def convert_data(DB):
     res = DB[0].__dict__
@@ -362,6 +394,38 @@ def export(request):
     df = pd.DataFrame(convert_data(Parking.objects.all()))
     df.to_excel('parkingapp/static/data.xlsx', index=False)
     return FileResponse(open('parkingapp/static/data.xlsx', 'rb'))
+
+def profile(request):
+    reciept = Reciept.objects.filter(user_id=request.user.pk)
+
+    bdsm = []
+
+    for rec in reciept:
+        rec.start_time = rec.start_time.strftime('%d-%m-%y %H:%M')
+        rec.finish_time = rec.finish_time.strftime('%d-%m-%y %H:%M')
+        bdsm.append([rec, Parking.objects.get(pk=rec.parking_id).address])
+
+    print(type(bdsm[0][0].start_time))
+    
+
+    print(User.objects.filter(pk=request.user.pk)[0])
+    context = {
+        'user': User.objects.filter(pk=request.user.pk)[0], 
+        'bdsm': bdsm
+    }
+    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+        return redirect(reverse('parkingapp:dash_profile'))
+    else:
+        return render(request, 'profile.html', context)
+
+def dash_profile(request):
+    context = {
+        'user': User.objects.filter(pk=request.user.pk)[0], 
+    }
+    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+        return render(request, 'dash_profile.html', context)
+    else: 
+        return redirect(reverse('parkingapp:profile'))
 
 class Park: 
     def __init__(

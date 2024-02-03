@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-
+{% load static %}
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,9 +12,10 @@
     integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
     crossorigin="anonymous"></script>
   <script src="https://api-maps.yandex.ru/2.1.47/?lang=ru_RU&amp;apikey=fe7387f0-4485-4341-91bd-7b6427f658d7"
-    type="text/javascript"></script>
+    type="text/sjavascript"></script>
   <script src="https://unpkg.com/imask"></script>
-  <title>{% block title %}{% endblock %}</title>
+  <title>ЕСП</title>
+  <link rel="icon" type="image/x-icon" href="{% static 'fav.ico' %}">
 </head>
 
 <body class="bg-body-tertiary">
@@ -31,7 +31,7 @@
           <form method="post" action="enter">
             {% csrf_token %}
             <ul class="navbar-nav mx-auto">
-              <li class="nav-item mx-1"><a class="nav-link" href="#">Профиль</a></li>
+              <li class="nav-item mx-1"><a class="nav-link {% block active_profile %}{% endblock %}" href="{% url 'parkingapp:profile' %}">Профиль</a></li>
               <li class="nav-item mx-1"><a href="{% url 'parkingapp:index' %}" class="nav-link {% block active_parking %}{% endblock %}"
                   aria-current="page">Парковка</a></li>
               {% if not user.is_authenticated %}

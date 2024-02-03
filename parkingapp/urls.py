@@ -22,4 +22,6 @@ urlpatterns = [
     path('parking_lot/', views.parking_lot, name='parking_lot'),
     path('dash_corr/', views.dash_corr, name='dash_corr'),
     path('export/', views.export, name='export'),
+    path('profile/', views.profile, name='profile'),
+    path('dash_profile/', views.dash_profile, name='dash_profile'),
 ]

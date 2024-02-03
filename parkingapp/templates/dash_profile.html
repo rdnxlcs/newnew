@@ -1,0 +1,49 @@
+{% extends 'dash_base.html' %}
+{% block content %}
+{% load static %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+  <div class="container p-5 text-center">
+    <p>
+      <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
+        role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <rect width="100%" height="100%" fill="var(--bs-primary)"></rect>
+      </svg>
+    </p>
+    <h1>{{ user.username }}</h1>
+    <p>Профиль администратора</p>
+    <dl class="row g-3 text-start mx-auto" style="max-width: 450px;">
+      {% if user.user_control %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Управление пользователями</dt>
+      </div>
+      {% endif %}
+      {% if user.parking_control %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Управление парковками</dt>
+      </div>
+      {% endif %}
+      {% if user.barrier_control %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Управление шлагбаумами</dt>
+      </div>
+      {% endif %}
+      {% if user.coupon_control %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Выдача льгот</dt>
+      </div>
+      {% endif %}
+      {% if user.admin_view %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Просмотр панели администратора</dt>
+      </div>
+      {% endif %}
+      {% if user.parking_lot_view %}
+      <div class="rounded-2 border p-3">
+        <dt class="col-sm-9 m-0">Является парковкой</dt>
+      </div>
+      {% endif %}
+
+    </dl>
+  </div>
+</main>
+{% endblock %}

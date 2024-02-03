@@ -18,7 +18,6 @@ class UserLoginForm(AuthenticationForm):
         model = User
         fields = ['username', 'password']
 
-
 class UserRegistrationForm(UserCreationForm):
     username = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'class': 'form-control rounded-4',
@@ -38,7 +37,7 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 8,
         'maxlength': 100
     }))
-    card = forms.CharField(required=True, widget=forms.TextInput(attrs={
+    card_num = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер карты',
@@ -46,7 +45,7 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 4,
         'inputmode': 'numeric',
     }))
-    car = forms.CharField(required=True, widget=forms.NumberInput(attrs={
+    car_num = forms.CharField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Автомобильный номер',
@@ -54,7 +53,7 @@ class UserRegistrationForm(UserCreationForm):
         'maxlength': 12,
         'style': 'text-transform: uppercase;',
     }))
-    tel = forms.CharField(required=True, widget=forms.NumberInput(attrs={
+    phone_number = forms.CharField(required=True, widget=forms.NumberInput(attrs={
         'type': 'text',
         'class': 'form-control rounded-4',
         'placeholder': 'Номер телефона',
@@ -64,8 +63,7 @@ class UserRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'card', 'car', 'tel']
-
+        fields = ['username', 'password1', 'password2', 'card_num', 'car_num', 'phone_number']
 
 class AdminRegistrationForm(UserCreationForm):
     username = forms.CharField(required=True, widget=forms.TextInput(attrs={
@@ -144,8 +142,7 @@ class CouponForm(forms.Form):
 
     class Meta:
         model = Reciept
-        fields = ['car', 'tel']
-
+        fields = ['car', 'phone']
 
 class DashForm(forms.Form):
     pk = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
@@ -205,8 +202,6 @@ class AddParkingForm(forms.Form):
         'placeholder': 'Цена',
         'id': 'a',
     }))
-
-
 
 class CommitParkingForm(forms.Form):
     code = forms.CharField(required=True, widget=forms.TextInput(attrs={

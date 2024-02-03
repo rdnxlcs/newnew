@@ -1,2 +1,0 @@
-_state,id,password,last_login,is_superuser,first_name,last_name,email,is_staff,is_active,date_joined,card_num,username,password1,password2,phone_number,park_id,car_num,user_control,parking_control,barrier_control,coupon_control,admin_view,parking_lot_view
-<django.db.models.base.ModelState object at 0x110bd83d0>,1,pbkdf2_sha256$390000$w9s5zTuOEAcg94TixYPvSn$ewPBpvxpUs1rnF3TzUyvD8Y1IVp1EdYJHFNTZEiJAtw=,2024-01-31 19:18:37+00:00,True,,,,True,True,2024-01-31 19:17:36+00:00,1111,taranova_arina,kdhackwinner,kdhackwinner,0,0,0,True,True,True,True,True,True
