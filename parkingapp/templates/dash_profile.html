@@ -1,14 +1,17 @@
 {% extends 'dash_base.html' %}
 {% block content %}
 {% load static %}
+<style>
+  svg.bd-placeholder-img {
+    background: url("https://masterpiecer-images.s3.yandex.net/4c5565d77c9411eea55e9209e5449f76:upscaled");
+    background-size: cover;
+  }
+</style>
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
   <div class="container p-5 text-center">
-    <p>
-      <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
-        role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <rect width="100%" height="100%" fill="var(--bs-primary)"></rect>
-      </svg>
-    </p>
+    <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
+      role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
+    </svg>
     <h1>{{ user.username }}</h1>
     <p>Профиль администратора</p>
     <dl class="row g-3 text-start mx-auto" style="max-width: 450px;">

@@ -2,22 +2,19 @@
 {% block active_profile %}active{% endblock %}
 {% block content %}
 {% load static %}
+<style>
+  svg.bd-placeholder-img {
+    background: url("https://masterpiecer-images.s3.yandex.net/4c5565d77c9411eea55e9209e5449f76:upscaled");
+    background-size: cover;
+  }
+</style>
 <div class="container p-5 text-center">
-  <p>
     <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
       role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
-      <rect width="100%" height="100%" fill="var(--bs-primary)"></rect>
     </svg>
-  </p>
   <h1>{{ user.username }}</h1>
   <p>{{ user.phone_number }}</p>
   <dl class="row g-3 text-start">
-    <div class="bg-white rounded-4 shadow p-3">
-      <dt class="col-sm-9 m-0">{{ user.username }}</dt>
-    </div>
-    <div class="bg-white rounded-4 shadow p-3">
-      <dt class="col-sm-9 m-0">{{ user.phone_number }}</dt>
-    </div>
     <div class="bg-white rounded-4 shadow p-3">
       <dt class="col-sm-9 m-0">{{ user.car_num }}</dt>
     </div>

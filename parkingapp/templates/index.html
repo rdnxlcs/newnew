@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block active_parking %}active{% endblock %}
-{% block title %}{{ title }}{% endblock %}
 {% block content %}
 {% load static %}
 <style>
@@ -59,7 +58,8 @@
     <div class="input-group shadow rounded-4">
       <div class="form-floating">
         {{ form.code }}
-        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small> {% else %}Введите код парковки{% endif %}</label>
+        <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small>{% else
+          %}Введите код парковки{% endif %}</label>
       </div>
       <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
     </div>
@@ -131,6 +131,40 @@
       '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
 
+    clusterer = new ymaps.Clusterer({
+      /**
+       * Через кластеризатор можно указать только стили кластеров,
+       * стили для меток нужно назначать каждой метке отдельно.
+       * @see https://api.yandex.ru/maps/doc/jsapi/2.1/ref/reference/option.presetStorage.xml
+       */
+      preset: 'islands#invertedVioletClusterIcons',
+      /**
+       * Ставим true, если хотим кластеризовать только точки с одинаковыми координатами.
+       */
+      groupByCoordinates: false,
+      /**
+       * Опции кластеров указываем в кластеризаторе с префиксом "cluster".
+       * @see https://api.yandex.ru/maps/doc/jsapi/2.1/ref/reference/ClusterPlacemark.xml
+       */
+      clusterDisableClickZoom: true,
+      clusterHideIconOnBalloonOpen: false,
+      geoObjectHideIconOnBalloonOpen: false
+    }),
+      getPointData = function (index) {
+        return {
+          balloonContentHeader: '<font size=3><b><a target="_blank" href="https://yandex.ru">Здесь может быть ваша ссылка</a></b></font>',
+          balloonContentBody: '<p>Ваше имя: <input name="login"></p><p>Телефон в формате 2xxx-xxx:  <input></p><p><input type="submit" value="Отправить"></p>',
+          balloonContentFooter: '<font size=1>Информация предоставлена: </font> балуном <strong>метки ' + index + '</strong>',
+          clusterCaption: 'метка <strong>' + index + '</strong>'
+        };
+      }
+    getPointOptions = function () {
+      return {
+        preset: 'islands#violetIcon'
+      };
+    }
+    geoObjects = [];
+    var points = [];
     for (let i = 0; i < parkings.length; i++) {
       let proc = parseInt(parkings[i][3] / parkings[i][5] * 100);
       if (proc > 70) {
@@ -141,7 +175,7 @@
         var blar = 'danger'
       }
 
-      var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], {
+      var myPlacemark = new ymaps.Placemark([parkings[i][0], parkings[i][1]], getPointData(i), getPointOptions(), {
         iconContent: String(parkings[i][4]),
         border: String(blar),
         balloonContentHeader: '<div><h5 class="fw-bolder">' + String(parkings[i][6]) + '</h5><small class="text-secondary">' + String(parkings[i][4]) + ' в час </small></div>',
@@ -158,6 +192,21 @@
       });
       myMap.geoObjects.add(myPlacemark);
     }
+
+    for (var i = 0, len = points.length; i < len; i++) {
+      geoObjects[i] = new ymaps.Placemark(points[i], getPointData(i), getPointOptions());
+    }
+
+    clusterer.options.set({
+      gridSize: 80,
+      clusterDisableClickZoom: true
+    });
+
+    clusterer.add(geoObjects);
+    myMap.geoObjects.add(clusterer);
+    myMap.setBounds(clusterer.getBounds(), {
+      checkZoomRange: true
+    });
   }
 </script>
 

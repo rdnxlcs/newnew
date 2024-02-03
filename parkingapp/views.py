@@ -25,11 +25,9 @@ def check_logged(request):
         return True
     return False
 
+@login_required(redirect_field_name=None)
 def index(request):
     form = CommitParkingForm()
-
-    if not check_logged(request):
-        return redirect(reverse('parkingapp:enter'))
     
     if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
         return redirect(reverse('parkingapp:dont_have_access'))
@@ -150,6 +148,7 @@ def index(request):
 
             return render(request, 'endparking.html', context)
 
+    print(context)
     return render(request, 'index.html', context)
 
 def dont_have_access(request):
@@ -352,10 +351,17 @@ def coupon(request):
 
     return render(request, 'coupon.html', context)
 
+@login_required(redirect_field_name=None)
 def barrier(request):
+    if not request.user.barrier_control:
+        return redirect(reverse('parkingapp:dont_have_access'))
     return render(request, 'barrier.html', {'parkings': Parking.objects.all()})
 
+@login_required(redirect_field_name=None)
 def dash_corr(request):
+    if not request.user.admin_view:
+        return redirect(reverse('parkingapp:dont_have_access'))
+
     users = User.objects.all()
     corr_users = []
     corr_reciepts = []
@@ -389,12 +395,14 @@ def convert_data(DB):
         for row in DB:
             res[i].append(getattr(row, i))
     return res
-            
+
+@login_required(redirect_field_name=None)       
 def export(request):
     df = pd.DataFrame(convert_data(Parking.objects.all()))
     df.to_excel('parkingapp/static/data.xlsx', index=False)
     return FileResponse(open('parkingapp/static/data.xlsx', 'rb'))
 
+@login_required(redirect_field_name=None)
 def profile(request):
     reciept = Reciept.objects.filter(user_id=request.user.pk)
 
@@ -418,6 +426,7 @@ def profile(request):
     else:
         return render(request, 'profile.html', context)
 
+@login_required(redirect_field_name=None)
 def dash_profile(request):
     context = {
         'user': User.objects.filter(pk=request.user.pk)[0], 
