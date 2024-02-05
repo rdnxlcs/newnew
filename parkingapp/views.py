@@ -20,6 +20,7 @@ import pandas as pd
 tzname = time.tzname[1]
 curr_zone = tz.gettz(tzname)
 
+
 def check_logged(request):
     if request.user.is_authenticated:
         return True

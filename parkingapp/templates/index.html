@@ -50,8 +50,21 @@
     transition: .35s;
   }
 
+  .bal {
+    z-index: 1;
+    position: absolute;
+    bottom: 0;
+    width: calc(100vw - 2rem);
+    left: calc(50% - 50vw + 1rem);
+    transition: .35s;
+  }
+
   #circ {
     border: 0.25rem solid;
+  }
+
+  .btn {
+    margin-top: 10px;
   }
 </style>
 <div>
@@ -66,11 +79,12 @@
         {{ form.code }}
         <label for="floatingInput">{% if error %}<small class="text-end text-danger">{{ error }}</small>{% else %}Введите код парковки{% endif %}</label>
       </div>
-      <button name="create_park" class="btn btn-lg group-second btn-primary" type="submit">Заехать</button>
+      <button name="create_park" class="m-0 btn btn-lg group-second btn-primary" type="submit">Заехать</button>
     </div>
   </form>
   {% endif %}
 </div>
+<div id="baloon"></div>
 {% if bdsm %}
 {% for sex in bdsm %}
 <div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3 bla">
@@ -131,17 +145,16 @@
       searchControlProvider: 'yandex#search',
       yandexMapDisablePoiInteractivity: true,
     });
-
     MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
       '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
 
     ClusterLayout = ymaps.templateLayoutFactory.createClass(
-      '<button disabled id="clust" class="text-center rounded-pill p-2 text-dark fw-bolder bg-primary-subtle">$[properties.geoObjects.length]</button>'
+      '<button disabled id="clust" class="text-center rounded-pill p-2 fw-bolder text-primary bg-primary-subtle">$[properties.geoObjects.length]</button>'
     )
-
     clusterer = new ymaps.Clusterer({
       clusterIconLayout: ClusterLayout,
+      offset: [-20, -20],
       groupByCoordinates: false,
       clusterDisableClickZoom: true,
       clusterHideIconOnBalloonOpen: false,
@@ -151,10 +164,10 @@
         return {
           iconContent: String(parkings[i][4]),
           border: String(blar),
-          balloonContentHeader: '<div><h5 class="fw-bolder">' + String(parkings[i][6]) + '</h5><small class="text-secondary">' + String(parkings[i][4]) + ' в час </small></div>',
-          // Зададим содержимое основной части балуна.
-          balloonContentBody: '<div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="' + String(100 - proc) + '" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width: ' + String(100 - proc) + '%">' + String(100 - proc) + '%</div></div>',
           hintContent: String(parkings[i][6]),
+          address: String(parkings[i][6]),
+          price: String(parkings[i][4]),
+          proc: proc,
         };
       }
     getPointOptions = function () {
@@ -162,9 +175,8 @@
         iconLayout: 'default#imageWithContent',
         iconImageHref: '',
         iconImageSize: [50, 50],
-        iconImageOffset: [0, 0],
-        iconContentOffset: [0, 0],
-        iconContentLayout: MyIconContentLayout
+        iconContentOffset: [-20, -20],
+        iconContentLayout: MyIconContentLayout,
       };
     }
     geoObjects = [];
@@ -185,12 +197,38 @@
     }
 
     clusterer.options.set({
-      gridSize: 80,
+      gridSize: 126,
       clusterDisableClickZoom: true
     });
 
     clusterer.add(geoObjects);
     myMap.geoObjects.add(clusterer);
+    myMap.geoObjects.events.add('click', function (e) {
+      var target = e.get('target');
+      var address = target.properties._data.address
+      var price = target.properties._data.price
+      var proc = 100-target.properties._data.proc
+
+      var x = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 32 32"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>'
+
+      document.getElementById('baloon').innerHTML = '<div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3 bal">'
+      +'<div class="p-4 p-md-5 border bg-white rounded-4 shadow">'
+      +'<div class="row">'
+      +'<h4 class="fw-bolder col-11 m-0">'+address+'</h4>'
+      +'<button class="col-1 m-0 text-end fw-bolder" style="background: none; border: none;" onclick="hide()">'+x+'</button>'
+      +'</div><div class="progress my-4" role="progressbar" aria-valuenow="'+proc+'" aria-valuemin="0" aria-valuemax="100" style="height: 2px">'
+      +'<div class="progress-bar" style="width: '+proc+'%"></div>'
+      +'</div>'
+      +'<div class="row">'
+      +'<p class="col-6">Цена / час</p>'
+      +'<p class="col-6 text-end">'+price+' ₽</p>'
+      +'<p class="col-6">Заполненость</p>'
+      +'<p class="col-6 text-end">'+proc+'%</p>'
+      +'</div></div></div>'
+    });
+  }
+  function hide() {
+    document.getElementById('baloon').innerHTML = ''
   }
 </script>
 
