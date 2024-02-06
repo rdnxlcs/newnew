@@ -10,9 +10,8 @@
   }
 
   #clust {
-    min-width: 42px;
+    min-width: 56px;
     border: 0.25rem solid #0d6efd;
-
   }
 
   .suk {
@@ -61,6 +60,8 @@
 
   #circ {
     border: 0.25rem solid;
+    border-radius: 2rem;
+    border-bottom-left-radius: 0;
   }
 
   .btn {
@@ -146,11 +147,11 @@
       yandexMapDisablePoiInteractivity: true,
     });
     MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
-      '<button disabled id="circ" class="text-center rounded-pill p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
+      '<button disabled id="circ" class="text-center p-2 text-dark fw-bolder bg-$[properties.border]-subtle border-$[properties.border]">$[properties.iconContent]</button>'
     )
 
     ClusterLayout = ymaps.templateLayoutFactory.createClass(
-      '<button disabled id="clust" class="text-center rounded-pill p-2 fw-bolder text-primary bg-primary-subtle">$[properties.geoObjects.length]</button>'
+      '<button disabled id="clust" class="text-center rounded-pill p-3 fw-bolder text-primary bg-primary-subtle">$[properties.geoObjects.length]</button>'
     )
     clusterer = new ymaps.Clusterer({
       clusterIconLayout: ClusterLayout,
@@ -174,8 +175,8 @@
       return {
         iconLayout: 'default#imageWithContent',
         iconImageHref: '',
-        iconImageSize: [50, 50],
-        iconContentOffset: [-20, -20],
+        iconImageSize: [42, 42],
+        iconContentOffset: [0, -42],
         iconContentLayout: MyIconContentLayout,
       };
     }
@@ -197,7 +198,7 @@
     }
 
     clusterer.options.set({
-      gridSize: 126,
+      gridSize: 120,
       clusterDisableClickZoom: true
     });
 

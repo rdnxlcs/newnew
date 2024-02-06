@@ -1,11 +1,7 @@
 {% extends 'base.html' %}
-
-
 {% block active_sign %}
-  active
+active
 {% endblock %}
-
-
 {% block content %}
 <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
   <div class="modal-dialog" role="document">
@@ -55,11 +51,11 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    const inputElement = document.getElementById('tel') // ищем наш единственный input
-    const maskOptions = { // создаем объект параметров
-      mask: '+{7}(000)000-00-00' // задаем единственный параметр mask
+    const inputElement = document.getElementById('tel')
+    const maskOptions = {
+      mask: '+{7}(000)000-00-00'
     }
-    IMask(inputElement, maskOptions) // запускаем плагин с переданными параметрами
+    IMask(inputElement, maskOptions)
 
   })
 </script>

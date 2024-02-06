@@ -9,7 +9,7 @@
   }
 </style>
 <div class="container p-5 text-center">
-    <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
+    <svg class="bd-placeholder-img mb-2 rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
       role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
     </svg>
   <h1>{{ user.username }}</h1>
@@ -22,8 +22,7 @@
       <dt class="col-sm-9 m-0">{{ user.card_num }}</dt>
     </div>
     <hr class="my-4">
-    <dt class="m-0">Последние парковки</dt>
-    <dd class="row g-3">
+    <dd class="row g-3 mt-0 scrollable" onscroll="this.scrollIntoView(scrollIntoViewOptions);">
       {% for sex in bdsm %}
       <div class="mx-auto">
         <div class="p-5 border bg-white rounded-4 shadow">
