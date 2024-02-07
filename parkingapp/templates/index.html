@@ -10,7 +10,7 @@
   }
 
   #clust {
-    min-width: 56px;
+    min-width: 60px;
     border: 0.25rem solid #0d6efd;
   }
 
@@ -96,7 +96,7 @@
       <small class="col-4 text-secondary">ID чека</small>
     </div>
     <div class="row text-center mb-4">
-      <h5 class="col-4">{{ sex.2 }}:{{sex.3}}</h5>
+      <h5 class="col-4" id="time">{{ sex.2 }}:{{sex.3}}</h5>
       <h5 class="col-4">{{ sex.4 }} ₽</h5>
       <h5 class="col-4">{{ sex.0.pk }}</h5>
     </div>
@@ -198,7 +198,7 @@
     }
 
     clusterer.options.set({
-      gridSize: 120,
+      gridSize: 160,
       clusterDisableClickZoom: true
     });
 
@@ -216,7 +216,7 @@
       +'<div class="p-4 p-md-5 border bg-white rounded-4 shadow">'
       +'<div class="row">'
       +'<h4 class="fw-bolder col-11 m-0">'+address+'</h4>'
-      +'<button class="col-1 m-0 text-end fw-bolder" style="background: none; border: none;" onclick="hide()">'+x+'</button>'
+      +'<button class="col-1 p-0 m-0 text-end fw-bolder" style="background: none; border: none;" onclick="hide()">'+x+'</button>'
       +'</div><div class="progress my-4" role="progressbar" aria-valuenow="'+proc+'" aria-valuemin="0" aria-valuemax="100" style="height: 2px">'
       +'<div class="progress-bar" style="width: '+proc+'%"></div>'
       +'</div>'
@@ -231,6 +231,24 @@
   function hide() {
     document.getElementById('baloon').innerHTML = ''
   }
+
+  const intervalId = setInterval(function() {
+    var time = document.getElementById('time')
+    var min = parseInt(time.innerHTML.split(':')[0])
+    var sec = parseInt(time.innerHTML.split(':')[1])
+    sec++
+    if (sec == 60) {
+      min++
+      sec = 0
+    }
+    if (String(sec).length == 1) {
+      sec = '0' + String(sec)
+    }
+    if (String(min).length == 1) {
+      sec = '0' + String(min)
+    }
+    time.innerHTML = String(min) + ':' +  String(sec)
+  }, 1000)
 </script>
 
 {% endblock %}

@@ -7,37 +7,34 @@
     background: url("https://masterpiecer-images.s3.yandex.net/4c5565d77c9411eea55e9209e5449f76:upscaled");
     background-size: cover;
   }
+  body {
+    overflow: hidden;
+  }
 </style>
-<div class="container p-5 text-center">
+<div class="container p-5 text-center" style="max-width: 450px;">
     <svg class="bd-placeholder-img mb-2 rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
       role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false">
     </svg>
   <h1>{{ user.username }}</h1>
-  <p>{{ user.phone_number }}</p>
+  <div class="row">
+    <p class="col-6">{{ user.phone_number }}</p>
+    <p class="col-3">{{ user.car_num }}</p>
+    <p class="col-3">{{ user.card_num }}</p>
+  </div>
   <dl class="row g-3 text-start">
-    <div class="bg-white rounded-4 shadow p-3">
-      <dt class="col-sm-9 m-0">{{ user.car_num }}</dt>
-    </div>
-    <div class="bg-white rounded-4 shadow p-3">
-      <dt class="col-sm-9 m-0">{{ user.card_num }}</dt>
-    </div>
-    <hr class="my-4">
-    <dd class="row g-3 mt-0 scrollable" onscroll="this.scrollIntoView(scrollIntoViewOptions);">
+    <hr class="mt-4 mb-0">
+    <dd class="row mt-0 g-3" style="overflow: scroll; max-height: 60vh">
       {% for sex in bdsm %}
       <div class="mx-auto">
-        <div class="p-5 border bg-white rounded-4 shadow">
+        <div class="p-4 border bg-white rounded-4 shadow">
           <div class="row mb-3">
-            <h5 class="col-4">{{ sex.0.pk }}</h5>
-            <small class="col-8 text-end text-secondary">{{ sex.0.start_time }}<br>{{ sex.0.finish_time }}</small>
+            <p class="col-12 fw-bolder">{{ sex.1 }}</p>
+            <small class="col-6 text-start text-secondary">{{ sex.0.finish_time }}</small>
+            <small class="col-6 text-end text-secondary">{{ sex.0.finish_time }}</small>
           </div>
-          <hr class="my-4">
           <div class="row mb-3">
             <small class="col-6 text-start">Стоимость</small>
             <small class="col-6 text-end text-secondary">{{ sex.0.final_price }} ₽</small>
-          </div>
-          <div class="row mb-3">
-            <small class="col-6 text-start">Адрес</small>
-            <small class="col-6 text-end text-secondary">{{ sex.1 }}</small>
           </div>
         </div>
       </div>
