@@ -20,18 +20,12 @@ import pandas as pd
 tzname = time.tzname[1]
 curr_zone = tz.gettz(tzname)
 
-
-def check_logged(request):
-    if request.user.is_authenticated:
-        return True
-    return False
-
 @login_required(redirect_field_name=None)
 def index(request):
     form = CommitParkingForm()
     
-    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
-        return redirect(reverse('parkingapp:dont_have_access'))
+    # if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+    #     return redirect(reverse('parkingapp:dont_have_access'))
     
     try:
         parkings = []
@@ -54,9 +48,9 @@ def index(request):
         reciepts = Reciept.objects.filter(user_id=request.user.pk, final_price=-1)
         for el in reciepts:
             parkingxd = Parking.objects.get(pk=el.parking_id)
-            now = datetime.now()
+            now = datetime.now().replace(tzinfo=None)
             t = el.start_time
-            seconds = (now.replace(tzinfo=None) - t.replace(tzinfo=None)).total_seconds()
+            seconds = (now - t.replace(tzinfo=None)).total_seconds()
             minutes = int(seconds // 60)
             seconds -= minutes * 60
             seconds = int(seconds)
@@ -71,8 +65,7 @@ def index(request):
     
     context = {
         'title': 'Парковка',
-        'reciepts': reciepts, 
-        'logged': check_logged(request), 
+        'reciepts': reciepts,  
         'parkings': parkings, 
         'bdsm': bdsm,
         'form': form,
@@ -111,10 +104,10 @@ def index(request):
         elif 'end_park' in request.POST:
             reciept_id = request.POST.get('end_park')
             reciept = Reciept.objects.get(pk=reciept_id)
-            now = datetime.now()
-            now = now.replace(tzinfo=None)
-            reciept.finish_time = now.replace(tzinfo=None)
-            dif = reciept.finish_time - reciept.final_start_time.replace(tzinfo=None)
+            now = datetime.now().replace(tzinfo=None)
+            reciept.finish_time = now
+            reciept.save()
+            dif = now - reciept.final_start_time.replace(tzinfo=None)
 
             dif = dif.total_seconds()
             minutes = dif // 60
@@ -166,7 +159,6 @@ def logout(request):
 @login_required(redirect_field_name=None)
 def endparking(request):
     context = {
-        'logged': check_logged(request),
     }
     return render(request, 'endparking.html', context)
 
@@ -183,7 +175,6 @@ def sign(request):
         form = UserRegistrationForm()
 
     context = {
-        'logged': check_logged(request),
         'form': form,
         'error': error
     }
@@ -210,7 +201,6 @@ def enter(request):
         form = UserLoginForm()
 
     context = {
-        'logged': check_logged(request),
         'form': form,
         'error': error
     }
@@ -293,7 +283,6 @@ def signadmin(request):
 
     context = {
         'title': 'Регистрация администратора',
-        'logged': check_logged(request),
         'form': form,
         'error': error,
     }
@@ -346,7 +335,6 @@ def coupon(request):
     context = {
         'title': 'Обнуление чеков',
         'form': form,
-        'logged': check_logged(request),
         'error': error
     }
 
@@ -702,12 +690,11 @@ def dash_parks(request):
                 pk = request.POST.get('change_price')
                 new_price = request.POST['newprice']
                 parking = Parking.objects.get(pk=pk)
-                now = datetime.now()
-                now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, tzinfo=None)
+                now = datetime.now().replace(tzinfo=None)
                 tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
                 if now - tm >= timedelta(days=90):
                     parking.price_per_hour = new_price
-                    parking.change = datetime.now().replace(tzinfo=None)
+                    parking.change = now
                     parking.save()
                     form = ChangePriceForm()
                 else:
@@ -861,15 +848,17 @@ def parking_lot(request):
     
     secret = request.GET.get('secret', '')
     if secret:
-        parking = Parking.objects.filter(secret=secret)
-        if parking:
+        try:
+            parking = Parking.objects.filter(secret=secret)
             parking = parking[0]
             return render(request, 'parking_lot.html', {'parking': parking})
-        else:
+        except:
+            parking = ''
             print(secret)
             error = 'Нет парковок'
     else:
         print(secret)
+        parking = ''
         error = 'Нет ключа'
     
     return render(request, 'parking_lot.html', {'parking': parking, 'error': error})
