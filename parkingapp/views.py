@@ -11,14 +11,10 @@ from django.utils.timezone import make_aware
 from django.http import JsonResponse
 import ymaps
 import json
-from dateutil import tz
-import time
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 import random
 import pandas as pd
 
-tzname = time.tzname[1]
-curr_zone = tz.gettz(tzname)
 
 @login_required(redirect_field_name=None)
 def index(request):
@@ -166,11 +162,12 @@ def sign(request):
     error = ''
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
-        if form.is_valid():
+        if form.is_valid() and form.cleaned_data['password'] == form.cleaned_data['password2']:
             form = form.save()
             return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
-            error = 'Не удалось зарегестрироваться'
+            print(form.errors)
+            error = 'Не удалось зарегистрироваться'
     else:
         form = UserRegistrationForm()
 
@@ -233,11 +230,7 @@ def addparking(request):
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
-                alph = ''
-                Z = [ord('&'), ord('<'), ord('>'), ord('«'), ord('\''), ord('#'), ord('%')]
-                for i in range(33, 127):
-                    if i not in Z:
-                        alph += chr(i)
+                alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-&!@$^*()'
                 alph = list(alph)
                 secret = ''.join(random.choices(alph, k=100))
                 Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
@@ -274,7 +267,7 @@ def signadmin(request):
 
             return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
-            error = 'Не удалось зарегестрировать пользователя'
+            error = 'Не удалось зарегистрировать пользователя'
         
     
     form = AdminRegistrationForm()
