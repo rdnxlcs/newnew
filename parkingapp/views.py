@@ -230,7 +230,7 @@ def addparking(request):
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
-                alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-&!@$^*()'
+                alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
                 alph = list(alph)
                 secret = ''.join(random.choices(alph, k=100))
                 Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
