@@ -24,4 +24,5 @@ urlpatterns = [
     path('export/', views.export, name='export'),
     path('profile/', views.profile, name='profile'),
     path('dash_profile/', views.dash_profile, name='dash_profile'),
+    path('pptx/', views.pptx, name='pptx'),
 ]

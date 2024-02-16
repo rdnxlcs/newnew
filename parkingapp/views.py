@@ -388,7 +388,32 @@ def convert_data(DB):
 @login_required(redirect_field_name=None)       
 def export(request):
     df = pd.DataFrame(convert_data(Parking.objects.all()))
-    df.to_excel('parkingapp/static/data.xlsx', index=False)
+
+    writer = pd.ExcelWriter('parkingapp/static/data.xlsx', engine='xlsxwriter')
+
+    for i in range(len(df['change'])):
+        df['change'][i] = str(df['change'][i])
+    df.to_excel(writer, index=False, sheet_name='Parkings')
+
+    df_rec = pd.DataFrame(convert_data(Reciept.objects.all()))
+
+    for i in range(len(df_rec['start_time'])):
+        df_rec['final_start_time'][i] = pd.to_datetime(df_rec['final_start_time'][i], errors = 'coerce').date()
+        df_rec['start_time'][i] = pd.to_datetime(df_rec['start_time'][i], errors = 'coerce').date()
+        df_rec['finish_time'][i] = pd.to_datetime(df_rec['finish_time'][i], errors = 'coerce').date()
+    df_rec.to_excel(writer, index=False, sheet_name='Reciepts')
+
+    df_us = pd.DataFrame(convert_data(User.objects.all()))
+    for i in range(len(df_us['date_joined'])):
+        df_us['date_joined'][i] = pd.to_datetime(df_us['date_joined'][i], errors = 'coerce').date()
+        df_us['last_login'][i] = pd.to_datetime(df_us['last_login'][i], errors = 'coerce').date()
+
+    df_us.to_excel(writer, index=False, sheet_name='Users')
+
+    writer.close()
+
+
+
     return FileResponse(open('parkingapp/static/data.xlsx', 'rb'))
 
 @login_required(redirect_field_name=None)
@@ -862,3 +887,6 @@ def parking_lot(request):
         error = 'Нет ключа'
     
     return render(request, 'parking_lot.html', {'parking': parking, 'error': error})
+
+def pptx(request):
+    return render(request, 'pptx.html')

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЕСП</title>
+</head>
+
+<body style="background: #F8F8F8; padding: 0; margin: 0; overflow: hidden;">
+  {% load static %}
+  <img id="img" src="/static/9.png" style="width: auto; height: auto;">
+</body>
+<script>
+  var el = document.getElementById('img')
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var aspect = width / height;
+
+  if (aspect >= (16 / 9)) {
+    el.style.width = ''
+    el.style.height = '100vh'
+  } else {
+    el.style.width = '100vw'
+    el.style.height = ''
+  }
+
+  el.style.marginLeft = 'calc(50% - ' + String(document.getElementById('img').offsetWidth / 2) + 'px)'
+
+  window.onresize = function () {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var aspect = width / height;
+
+    if (aspect >= (16 / 9)) {
+      el.style.width = ''
+      el.style.height = '100vh'
+    } else {
+      el.style.width = '100vw'
+      el.style.height = ''
+    }
+
+    el.style.marginLeft = 'calc(50% - ' + String(document.getElementById('img').offsetWidth / 2) + 'px)'
+  };
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      const keyCode = event.keyCode;
+      console.log(el.getAttribute('src').split('.')[0].slice(8))
+      var slide = parseInt((el.getAttribute('src')).split('.')[0].slice(8))
+
+
+      if (keyCode == 39) {
+        slide++;
+        el.setAttribute('src', '/static/' + String(slide) + '.png')
+        if (slide == 8) {
+          el.setAttribute('onclick', 'document.location.href = "/dash_full"')
+        } else {
+          el.removeAttribute('onclick')
+        }
+        return;
+      }
+      if (keyCode == 37) {
+        slide--;
+        el.setAttribute('src', '/static/' + String(slide) + '.png')
+        if (slide == 8) {
+          el.setAttribute('onclick', 'document.location.href = "/dash_full"')
+        } else {
+          el.removeAttribute('onclick')
+        }
+        return;
+      }
+    },
+    false,
+  );
+</script>
+
+</html>
