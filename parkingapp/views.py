@@ -666,10 +666,12 @@ def dash_full(request):
         form.fields['pk'].choices = tuple(addresses)
         if form.is_valid():
             pk = request.POST['pk']
+            print(pk)
             period_start = request.POST['date1']
             period_end = request.POST['date2']
             try:
                 park = data(period_start, period_end, pk)[0][0]
+                print(park.address)
                 # total_time average_time 
                 period_start = [i for i in period_start.split('-')]
                 period_end = [i for i in period_end.split('-')]
