@@ -230,7 +230,7 @@ def addparking(request):
                 max_parking_lots = request.POST['max_parking_lots']
                 price = request.POST['price']
                 occupied_lots = 0
-                alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-&!@$^*()'
+                alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
                 alph = list(alph)
                 secret = ''.join(random.choices(alph, k=100))
                 Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
@@ -656,10 +656,12 @@ def dash_full(request):
         form.fields['pk'].choices = tuple(addresses)
         if form.is_valid():
             pk = request.POST['pk']
+            print(pk)
             period_start = request.POST['date1']
             period_end = request.POST['date2']
             try:
                 park = data(period_start, period_end, pk)[0][0]
+                print(park.address)
                 # total_time average_time 
                 period_start = [i for i in period_start.split('-')]
                 period_end = [i for i in period_end.split('-')]
