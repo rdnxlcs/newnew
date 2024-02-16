@@ -121,7 +121,6 @@ class AdminRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'password', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'parking_lot_view', 'park_id']
-
 class CouponForm(forms.Form):
     car = forms.CharField(required=False, widget=forms.NumberInput(attrs={
         'type': 'text',

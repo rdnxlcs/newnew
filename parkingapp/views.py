@@ -264,11 +264,10 @@ def signadmin(request):
         if form.is_valid():
             form = form.save(commit=False)
             form.save()
-
             return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
             error = 'Не удалось зарегистрировать пользователя'
-        
+            print(form.errors)
     
     form = AdminRegistrationForm()
     addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
