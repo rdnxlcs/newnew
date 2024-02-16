@@ -5,7 +5,7 @@ from dateutil import tz
 # from phonenumber_field.modelfields import PhoneNumberField
 tzname = datetime.now().astimezone().tzname()
 class User(AbstractUser):
-    card_num = models.PositiveBigIntegerField(default=0000, unique=True)
+    card_num = models.PositiveBigIntegerField(default=0000)
     username = models.CharField(max_length=20, unique=True)
     phone_number = models.CharField(max_length=16, default=" ", unique=True)
     park_id = models.IntegerField(default=0)

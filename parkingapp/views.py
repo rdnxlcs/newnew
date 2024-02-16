@@ -570,6 +570,7 @@ def data(period_start, period_end, id=0):
     return parkings_array, fins_parkings_array
 
 def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
+    pk = int(pk)
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
@@ -582,11 +583,13 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
             reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] = 0
             reciepts_to_send['free-period'][str(ctime.hour)+'-'+str(ctime.day)] = 0
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
-                    reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
-                elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
-                    reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+                if el.parking_id == pk:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                        reciepts_to_send["free-period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
+
             ctime += delta
         reciepts_to_send = str(reciepts_to_send)
     elif timedelta(days=1) < p_end-p_start <= timedelta(days=90):
@@ -600,13 +603,13 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
         while p_start <= ctime <= p_end:
             reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
-            
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-                elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                if el.parking_id == pk:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                    elif ctime <= etime <= ctime+delta and (el.finish_time - el.start_time <= timedelta(minutes=15) or el.benefit):
+                        reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send) 
     elif timedelta(days=90) < p_end-p_start:
@@ -623,15 +626,18 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
             reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] = 0
             
             for el in reciepts:
-                etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-                elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
-                    reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             
+                if el.parking_id == pk:
+                    etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
+                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                        reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                        reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
+                
             ctime += delta
             week += 1
         reciepts_to_send = str(reciepts_to_send)
+    print(reciepts_to_send)
     context = {'total_time': park.total_time,
             'average_time': park.session_average_duration,
             'total_benefit_time': park.total_benefit_time,
@@ -646,7 +652,12 @@ def spice(p_end, p_start, period_start, period_end, pk, form, park, error):
 @login_required(redirect_field_name=None)
 def dash_full(request):
     error = ''
-
+    form = DashForm()
+    addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+    form.fields['pk'].choices = tuple(addresses)
+    pk = list(Parking.objects.all())[-1].pk 
+    period_start = '2024-01-25'
+    period_end = '2024-02-05'
     if not request.user.admin_view: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
@@ -672,13 +683,7 @@ def dash_full(request):
                 error = 'Неизвестная ошибка'
         else:
             error = 'Неверные входные данные'
-        
-    form = DashForm()
-    addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
-    form.fields['pk'].choices = tuple(addresses)
-    pk = list(Parking.objects.all())[-1].pk 
-    period_start = '2024-01-25'
-    period_end = '2024-02-05'
+
     try:
         park = data(period_start, period_end, pk)[0][0]
         # total_time average_time 
