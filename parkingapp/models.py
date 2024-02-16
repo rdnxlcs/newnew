@@ -5,13 +5,11 @@ from dateutil import tz
 # from phonenumber_field.modelfields import PhoneNumberField
 tzname = datetime.now().astimezone().tzname()
 class User(AbstractUser):
-    card_num = models.PositiveBigIntegerField(default=1111)
+    card_num = models.PositiveBigIntegerField(default=0000, unique=True)
     username = models.CharField(max_length=20, unique=True)
-    password1 = models.CharField(max_length=200, default=" ")
-    password2 = models.CharField(max_length=200, default=" ")
-    phone_number = models.CharField(max_length=16, default=" ")
+    phone_number = models.CharField(max_length=16, default=" ", unique=True)
     park_id = models.IntegerField(default=0)
-    car_num = models.CharField(max_length=12, default='')
+    car_num = models.CharField(max_length=12, default='', unique=True)
     user_control = models.BooleanField(default=False)
     parking_control = models.BooleanField(default=False)
     barrier_control = models.BooleanField(default=False)

@@ -25,7 +25,7 @@ class UserRegistrationForm(UserCreationForm):
         'minlength': 4,
         'maxlength': 20,
     }))
-    password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
         'minlength': 8,
@@ -60,11 +60,10 @@ class UserRegistrationForm(UserCreationForm):
         'id': 'tel',
         'inputmode': 'tel',
     }))
-
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'card_num', 'car_num', 'phone_number']
-
+        fields = ['username', 'password', 'card_num', 'car_num', 'phone_number']
+    password1 = forms.CharField(required=False)
 class AdminRegistrationForm(UserCreationForm):
     username = forms.CharField(required=True, widget=forms.TextInput(attrs={
         'class': 'form-control rounded-4',
@@ -72,7 +71,7 @@ class AdminRegistrationForm(UserCreationForm):
         'minlength': 4,
         'maxlength': 20,
     }))
-    password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
         'placeholder': 'Пароль',
         'minlength': 8
@@ -117,10 +116,11 @@ class AdminRegistrationForm(UserCreationForm):
         'class': 'form-select rounded-4',
         'value': ''
     }))
+    password1 = forms.CharField(required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'parking_lot_view', 'park_id']
+        fields = ['username', 'password', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'parking_lot_view', 'park_id']
 
 class CouponForm(forms.Form):
     car = forms.CharField(required=False, widget=forms.NumberInput(attrs={
