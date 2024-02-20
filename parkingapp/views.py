@@ -889,3 +889,55 @@ def parking_lot(request):
 
 def pptx(request):
     return render(request, 'pptx.html')
+
+def info(request):
+    return render(request, 'info.html')
+
+def dash_main(request):
+    error = ''
+    form = DashForm()
+    addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+    form.fields['pk'].choices = tuple(addresses)
+    pk = list(Parking.objects.all())[-1].pk 
+    period_start = '2024-01-25'
+    period_end = '2024-02-05'
+    if not request.user.admin_view: 
+        return redirect(reverse('parkingapp:dont_have_access'))
+    
+    if request.method == 'POST':
+        form = DashForm(data=request.POST)
+        addresses = [tuple([park.pk, park.address]) for park in list(Parking.objects.all())]
+        form.fields['pk'].choices = tuple(addresses)
+        if form.is_valid():
+            pk = request.POST['pk']
+            print(pk)
+            period_start = request.POST['date1']
+            period_end = request.POST['date2']
+            try:
+                park = data(period_start, period_end, pk)[0][0]
+                print(park.address)
+                # total_time average_time 
+                period_start = [i for i in period_start.split('-')]
+                period_end = [i for i in period_end.split('-')]
+                p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+                p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+                context = spice(p_end, p_start, period_start, period_end, pk, form, park, error)
+                return render(request, 'dash_main.html', context)
+            except Exception as e:
+                print(e)
+                error = 'Неизвестная ошибка'
+        else:
+            error = 'Неверные входные данные'
+
+    try:
+        park = data(period_start, period_end, pk)[0][0]
+        # total_time average_time 
+        period_start = [i for i in period_start.split('-')]
+        period_end = [i for i in period_end.split('-')]
+        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
+        context = spice(p_end, p_start, period_start, period_end, pk, form, park, error)
+        return render(request, 'dash_main.html', context)
+    except Exception as e:
+        print(e)
+        return render(request, 'dash_main.html', {'error': error})

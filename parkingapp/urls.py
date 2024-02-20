@@ -25,4 +25,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('dash_profile/', views.dash_profile, name='dash_profile'),
     path('pptx/', views.pptx, name='pptx'),
+    path('info/', views.info, name='info'),
+    path('dash_main/', views.dash_main, name='dash_main'),
 ]

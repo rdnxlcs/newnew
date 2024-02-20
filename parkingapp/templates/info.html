@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block active_profile %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="container p-4">
+  <main>
+  <h1 class="text-body-emphasis">Краткое руководство пользователя</h1>
+  <p class="fs-5 col-md-8">Выберите подходящую парковку на <a href="">карте</a>, подъедьте к шлагбауму, введите код для начала сессии и паркуйтесь. После, аналогично выезжайте по коду для окончания сессии.</p>
+
+  <hr class="col-3 col-md-2 mb-5">
+
+  <div class="row g-5">
+    <div class="col-md-6">
+      <h2 class="text-body-emphasis">Регистрация</h2>
+      <p>При регистрации необходимо будет предоставить номер телефона, номер автомобиля и 4 последние цифры банковской карты, с которой будет производится оплата парковки.</p>
+      <ul class="list-unstyled ps-0">
+        <li>
+          <a class="icon-link mb-1" href="https://github.com/twbs/examples/tree/main/icons-font" rel="noopener"
+            target="_blank">
+            Зарегистрироваться
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h2 class="text-body-emphasis">Льготы</h2>
+      <p>Пользователям ЕСП предоставляются льготы на аннулирование стоимости парковочной сессии в местах работы, учебы, проживания, а также возле больниц, МФЦ, МВД и так далее...</p>
+      <ul class="list-unstyled ps-0">
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            На какие парковки действуют льготы?
+          </a>
+        </li>
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/webpack/">
+            Где можно получить льготу?
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h2 class="text-body-emphasis">Партнерам</h2>
+      <p>Начните работу с ЕСП, для увеличения потока ТС на вашей парковке.</p>
+      <ul class="list-unstyled ps-0">
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            Связаться
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h2 class="text-body-emphasis">Контакты</h2>
+      <ul class="list-unstyled ps-0">
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            Служба поддержки
+          </a>
+        </li>
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            Горячая линия
+          </a>
+        </li>
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            Министерство цифровизации
+          </a>
+        </li>
+        <li>
+          <a class="icon-link mb-1" href="/docs/5.3/getting-started/introduction/">
+            Разработчик
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</main>
+</div>
+
+{% endblock %}

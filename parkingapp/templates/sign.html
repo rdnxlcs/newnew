@@ -1,16 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'base_sign.html' %}
 {% block active_sign %}
 active
 {% endblock %}
 {% block content %}
+{% load static %}
 <div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog" id="modalSignin">
   <div class="modal-dialog" role="document">
     <div class="modal-content rounded-4 shadow border">
-      <div class="modal-header p-5 pb-4 border-bottom-0">
-        <h1 class="fw-bold mb-0 fs-2">Регистрация</h1>
+      <div class="modal-header mx-auto p-1 px-sm-5 pb-4 border-bottom-0">
+        <h1 class="fw-bold mb-0 fs-2"><a href="" class="text-primary me-2"><i class="bi bi-geo-alt-fill"></i></a>Регистрация</h1>
       </div>
 
-      <div class="modal-body p-5 pt-0 rounded-4">
+      <div class="modal-body p-1 px-sm-5 pt-0 rounded-4">
         <form method="post">
           {% csrf_token %}
           <div class="form-floating mb-3">
@@ -48,6 +49,13 @@ active
     </div>
   </div>
 </div>
+<style>
+  .modal-content {
+    border: none !important;
+    background: #f8f9fa;
+    box-shadow: none !important;
+  }
+</style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
 

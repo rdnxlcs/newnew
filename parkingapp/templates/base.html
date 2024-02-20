@@ -24,7 +24,7 @@
     <nav class="navbar navbar-light navbar-expand-md d-sticky py-3 border-bottom" style="background: inherit;">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="">
-          <span class="fw-semibold">ЕСП</span></a>
+          <img src="{% static 'fav.ico' %}" height="32" width="32"><span class="ms-2 fw-semibold">ЕСП</span></a>
         <button class="navbar-toggler border-0" data-bs-toggle="collapse" onclick="pos()"
           data-bs-target="#navcol-3"><span class="visually-hidden">Toggle
             navigation</span><span class="navbar-toggler-icon"></span></button>
@@ -38,8 +38,9 @@
                   class="nav-link {% block active_parking %}{% endblock %}" aria-current="page">Парковка</a></li>
               {% if not user.is_authenticated %}
               <li class="nav-link text-primary mx-1"><a class="text-decoration-none"
-                  href="{% url 'parkingapp:enter' %}">Вход</a> / <a href="{% url 'parkingapp:sign' %}"
-                  class="text-decoration-none">Регистрация</a></li>
+                  href="{% url 'parkingapp:enter' %}">Вход</a></li>
+              <li class="nav-link text-primary mx-1"><a href="{% url 'parkingapp:sign' %}"
+                  class="text-decoration-none 2">Регистрация</a></li>
               {% else %}
               <li class="nav-item mx-1"><a href="{% url 'parkingapp:logout' %}" class="nav-link rounded-4">Выход</a>
               </li>
@@ -50,7 +51,6 @@
       </div>
     </nav>
   </div>
-
   {% block content %}{% endblock %}
 </body>
 

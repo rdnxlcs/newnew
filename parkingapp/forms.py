@@ -146,7 +146,7 @@ class CouponForm(forms.Form):
 class DashForm(forms.Form):
     pk = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
         'class': 'form-select form-select-sm',
-        'value': ''
+        'value': '',
     }))
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
