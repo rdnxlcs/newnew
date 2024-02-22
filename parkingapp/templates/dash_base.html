@@ -18,9 +18,8 @@
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <link rel="icon" type="image/x-icon" href="{% static 'fav.ico' %}">
   <style>
-    .card {
-      
-    }
+    .card {}
+
     .bd-placeholder-img {
       font-size: 1.125rem;
       text-anchor: middle;
@@ -132,8 +131,7 @@
     <div id="navbarSearch" class="navbar-search w-100 collapse">
       <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
     </div>
-    <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"
-      crossorigin="anonymous"></script>
+    <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!--<script src="dash.js"></script>-->
@@ -150,22 +148,39 @@
               aria-label="Close"></button>
           </div>
           <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+
+            <ul class="nav flex-column mb-auto">
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2 {% block mainact %}{% endblock %}"
+                  href="{% url 'parkingapp:dash_main' %}">
+                  <i class="bi bi-geo-alt-fill"></i>
+                  Главная
+                </a>
+              </li>
+
+            </ul>
+            <h6
+              class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+              <span>Отчеты</span>
+            </h6>
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-2 {% block fullact %}{% endblock %}" aria-current="page"
-                  href="{% url 'parkingapp:dash_full' %}">
+                <a class="nav-link d-flex align-items-center gap-2 {% block fullact %}{% endblock %}"
+                  aria-current="page" href="{% url 'parkingapp:dash_full' %}">
                   <i class="bi bi-car-front-fill"></i>
                   Наполняемость
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-2 {% block finact %}{% endblock %}" href="{% url 'parkingapp:dash_fin' %}">
+                <a class="nav-link d-flex align-items-center gap-2 {% block finact %}{% endblock %}"
+                  href="{% url 'parkingapp:dash_fin' %}">
                   <i class="bi bi-piggy-bank-fill"></i>
                   Финансовый отчет
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-2 {% block corract %}{% endblock %}" href="{% url 'parkingapp:dash_corr' %}">
+                <a class="nav-link d-flex align-items-center gap-2 {% block corract %}{% endblock %}"
+                  href="{% url 'parkingapp:dash_corr' %}">
                   <i class="bi bi-exclamation-circle-fill"></i>
                   Подозрительная активность
                 </a>
@@ -177,19 +192,22 @@
               </h6>
               <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block usersact %}{% endblock %}" href="{% url 'parkingapp:dash_users' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block usersact %}{% endblock %}"
+                    href="{% url 'parkingapp:dash_users' %}">
                     <i class="bi bi-people-fill"></i>
                     Пользователи
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block parksact %}{% endblock %}" href="{% url 'parkingapp:dash_parks' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block parksact %}{% endblock %}"
+                    href="{% url 'parkingapp:dash_parks' %}">
                     <i class="bi bi-p-circle-fill"></i>
                     Парковки
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block recact %}{% endblock %}" href="{% url 'parkingapp:dash_reciepts' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block recact %}{% endblock %}"
+                    href="{% url 'parkingapp:dash_reciepts' %}">
                     <i class="bi bi-receipt-cutoff"></i>
                     Чеки
                   </a>
@@ -201,13 +219,8 @@
               </h6>
               <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block barrieract %}{% endblock %}" href="{% url 'parkingapp:barrier' %}">
-                    <i class="bi bi-door-open-fill"></i>
-                    Управление шлагбаумом
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block couponact %}{% endblock %}" href="{% url 'parkingapp:coupon' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block couponact %}{% endblock %}"
+                    href="{% url 'parkingapp:coupon' %}">
                     <i class="bi bi-receipt-cutoff"></i>
                     Выдача льгот
                   </a>
@@ -220,13 +233,15 @@
               </h6>
               <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block addact %}{% endblock %}" href="{% url 'parkingapp:addparking' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block addact %}{% endblock %}"
+                    href="{% url 'parkingapp:addparking' %}">
                     <i class="bi bi-p-circle-fill"></i>
                     Новая парковка
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block signact %}{% endblock %}" href="{% url 'parkingapp:signadmin' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block signact %}{% endblock %}"
+                    href="{% url 'parkingapp:signadmin' %}">
                     <i class="bi bi-person-plus-fill"></i>
                     Новый пользователь
                   </a>
@@ -238,7 +253,8 @@
 
               <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                  <a class="nav-link d-flex align-items-center gap-2 {% block profact %}{% endblock %}" href="{% url 'parkingapp:dash_profile' %}">
+                  <a class="nav-link d-flex align-items-center gap-2 {% block profact %}{% endblock %}"
+                    href="{% url 'parkingapp:dash_profile' %}">
                     <i class="bi bi-person-circle"></i>
                     Профиль
                   </a>
@@ -263,4 +279,5 @@
     </div>
   </div>
 </body>
+
 </html>

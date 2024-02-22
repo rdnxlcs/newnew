@@ -1,5 +1,5 @@
 {% extends 'dash_base.html' %}
-{% block fullact %}active{% endblock %}
+{% block mainact %}active{% endblock %}
 {% block content %}
 <div class="modal fade" id="exampleModalD" tabindex="-1" aria-labelledby="exampleModalLabelD" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -41,6 +41,44 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="modalrec" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ user.username }}</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive small">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Парковка</th>
+                <th scope="col">Начало</th>
+                <th scope="col">Конец</th>
+                <th scope="col">Льгота</th>
+                <th scope="col">Сумма</th>
+              </tr>
+            </thead>
+            <tbody class="align-middle">
+              <tr>
+                <td>{{ rec.pk }}1</td>
+                <td>{{ rec.parking_id }}2</td>
+                <td>{{ rec.start_time }}3</td>
+                <td>{{ rec.finish_time }}4</td>
+                <td>{{ rec.benefit }}5</td>
+                <td>{{ rec.final_price }}6</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
   <style>
     #id_pk {
@@ -62,34 +100,34 @@
   <div class="row g-3">
     <div class="col-sm-6">
       <div class="card h-100">
+        <div class="card-header">Реестровый номер</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">Реестровый номер</h5>
-          <p class="card-text">1488</p>
+          <h5 class="card-title fw-bolder">1488</h5>
         </div>
       </div>
     </div>
     <div class="col-sm-6">
       <div class="card h-100">
+        <div class="card-header">Количество мест</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">Количество мест</h5>
-          <p class="card-text">44</p>
+          <h5 class="card-title fw-bolder">44</h5>
         </div>
       </div>
     </div>
     <div class="col-sm-6">
       <div class="card h-100">
+        <div class="card-header">Секрет</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">Секрет</h5>
           <a href="/parking_lot?secret={{el.secret}}"
-            class="card-text">Xwa40sRwPLuwAkAEbcYNnF8DPGjiJPjLOBgmYfpJKQW9JQtVEu5BdFktcMNNDONLZui3B6n87dFDoQYptqI5pjjOFtmF6Mds24K4</a>
+            class="h5 text-primary card-title fw-bolder">Xwa40sRwPLuwAkAEbcYNnF8DPGjiJPjLOBgmYfpJKQW9JQtVEu5BdFktcMNNDONLZui3B6n87dFDoQYptqI5pjjOFtmF6Mds24K4</a>
         </div>
       </div>
     </div>
     <div class="col-sm-6">
       <div class="card h-100">
+        <div class="card-header">Цена за час</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">Цена за час</h5>
-          <p class="card-text">67 ₽</p>
+          <h5 class="card-title fw-bolder">67 ₽</h5>
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
             data-bs-whatever="{{ el.pk }}">Новая цена</button>
         </div>
@@ -100,6 +138,26 @@
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Управление шлагбаумом</h1>
   </div>
+
+  <div class="row g-3">
+    <div class="col-sm-6">
+      <div class="card border-primary">
+        <div class="card-header">На въезд</div>
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bolder" onclick="out(this)">Закрыт</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-primary">
+        <div class="card-header">На выезд</div>
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bolder" onclick="out(this)">Закрыт</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Финансовый отчет</h1>
@@ -119,33 +177,33 @@
   <div class="row g-3">
     <div class="col-sm-6 col-xxl-3">
       <div class="card">
+        <div class="card-header">Транзакций на сумму</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{Fin.total_price}} ₽</h5>
-          <p class="card-text">Транзакций на сумму</p>
         </div>
       </div>
     </div>
     <div class="col-sm-6 col-xxl-3">
       <div class="card">
+        <div class="card-header">Количество транзакций</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{Fin.how_much_people_used}}</h5>
-          <p class="card-text">Количество транзакций</p>
         </div>
       </div>
     </div>
     <div class="col-sm-6 col-xxl-3">
       <div class="card">
+        <div class="card-header">Льготных транзакций на сумму</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{Fin.benefits_price}} ₽</h5>
-          <p class="card-text">Льготных транзакций на сумму</p>
         </div>
       </div>
     </div>
     <div class="col-sm-6 col-xxl-3">
       <div class="card">
+        <div class="card-header">Количество льготных транзакций</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{Fin.with_benefits}}</h5>
-          <p class="card-text">Количество льготных транзакций</p>
         </div>
       </div>
     </div>
@@ -159,17 +217,17 @@
   <div class="row g-3">
     <div class="col-sm-6">
       <div class="card">
+        <div class="card-header">Суммарный период пребывания</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{total_time}} минут</h5>
-          <p class="card-text">Суммарный период пребывания</p>
+          <h5 class="card-title fw-bolder">{{total_benefit_time}} минут</h5>
         </div>
       </div>
     </div>
     <div class="col-sm-6">
       <div class="card">
+        <div class="card-header">Средний период пребывания</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{average_time}} минут</h5>
-          <p class="card-text">Средний период пребывания</p>
+          <h5 class="card-title fw-bolder">{{average_benefits}} минут</h5>
         </div>
       </div>
     </div>
@@ -222,17 +280,17 @@
   <div class="row g-3">
     <div class="col-sm-6">
       <div class="card">
+        <div class="card-header">Суммарный период пребывания</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{total_benefit_time}} минут</h5>
-          <p class="card-text">Суммарный период пребывания</p>
         </div>
       </div>
     </div>
     <div class="col-sm-6">
       <div class="card">
+        <div class="card-header">Средний период пребывания</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{average_benefits}} минут</h5>
-          <p class="card-text">Средний период пребывания</p>
         </div>
       </div>
     </div>
@@ -284,40 +342,17 @@
     <h1 class="h2">Пользователи с подозрительной активностью</h1>
   </div>
 
-  <dl class="row g-3 p-2 text-start row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-6">
-    <div class="rounded-2 border p-3 col">
-      <dt class="m-0">{{ user.username }}</dt>
+  <dl class="row g-3 p-2 text-start row-cols-md-2 row-cols-xl-3 row-cols-xxl-4">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">{{ user.phone_number }}</div>
+        <div class="card-body">
+          <h5 class="card-title fw-bolder">{{ user.username }}</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec">Показать чеки</button>
+        </div>
+      </div>
     </div>
   </dl>
-
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">{{ user.username }}</h1>
-  </div>
-
-  <div class="table-responsive small">
-    <table class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Парковка</th>
-          <th scope="col">Начало</th>
-          <th scope="col">Конец</th>
-          <th scope="col">Льгота</th>
-          <th scope="col">Сумма</th>
-        </tr>
-      </thead>
-      <tbody class="align-middle">
-        <tr>
-          <td>{{ rec.pk }}1</td>
-          <td>{{ rec.parking_id }}2</td>
-          <td>{{ rec.start_time }}3</td>
-          <td>{{ rec.finish_time }}4</td>
-          <td>{{ rec.benefit }}5</td>
-          <td>{{ rec.final_price }}6</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Пользователи</h1>
@@ -416,5 +451,20 @@
   </div>
 
 </main>
-
+<script>
+  var outclosed = true
+  function out(el) {
+    if (outclosed) {
+      el.setAttribute('class', 'card-title text-danger fw-bolder')
+      el.parentNode.parentNode.setAttribute('class', 'card border-danger')
+      el.innerHTML = 'Отркыто'
+      outclosed = false
+    } else {
+      el.setAttribute('class', 'card-title text-primary fw-bolder')
+      el.parentNode.parentNode.setAttribute('class', 'card border-primary')
+      el.innerHTML = 'Закрыто'
+      outclosed = true
+    }
+  }
+</script>
 {% endblock %}

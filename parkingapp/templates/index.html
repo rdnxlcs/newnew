@@ -88,14 +88,14 @@
 <div id="baloon"></div>
 {% if bdsm %}
 {% for sex in bdsm %}
-<div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3 bla">
+<div class="col-12 mx-auto col-lg-6 mt-0 mb-3 bla">
   <div class="p-4 p-md-5 border bg-white rounded-4 shadow">
     <div class="row text-center mb-3">
       <small class="col-4 text-secondary">Длительность</small>
       <small class="col-4 text-secondary">Стоимость</small>
       <small class="col-4 text-secondary">ID чека</small>
     </div>
-    <div class="row text-center mb-4">
+    <div class="row text-center mb-3">
       <h5 class="col-4" id="time">{{ sex.2 }}:{{sex.3}}</h5>
       <h5 class="col-4">{{ sex.4 }} ₽</h5>
       <h5 class="col-4">{{ sex.0.pk }}</h5>
@@ -103,7 +103,7 @@
     <form method="post">
       {% csrf_token %}
       <button type="submit" name="end_park" value="{{ sex.0.pk }}"
-        class="w-100 btn btn-lg btn-primary rounded-4">Завершить парковку</button>
+        class="w-100 btn m-0 btn-lg btn-primary rounded-4">Завершить парковку</button>
     </form>
   </div>
 </div>
@@ -112,14 +112,23 @@
 
 
 <script type="text/javascript">
-  let isclosed = true
+  let isopened = false
   function pos() {
-    if (isclosed) {
-      document.getElementsByClassName('suk')[0].style.top = 'calc(193px + 1rem)'
-      isclosed = false
-    } else {
+    console.log(isopened)
+    if (isopened) {
       document.getElementsByClassName('suk')[0].style.top = 'calc(73px + 1rem)'
-      isclosed = true
+      isopened = false
+    } else { 
+      document.getElementsByClassName('suk')[0].style.top = 'calc(193px + 1rem)'
+      isopened = true
+    }
+  }
+  function pos2() {
+    console.log(isopened, 111)
+    if (isopened) {
+      document.getElementsByClassName('suk')[0].style.top = 'calc(193px + 1rem)'
+    } else { 
+      document.getElementsByClassName('suk')[0].style.top = 'calc(73px + 1rem)'
     }
   }
 
@@ -212,7 +221,7 @@
 
       var x = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 32 32"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>'
 
-      document.getElementById('baloon').innerHTML = '<div class="col-12 mx-auto col-lg-6 mt-0 mt-lg-5 mb-3 bal">'
+      document.getElementById('baloon').innerHTML = '<div class="col-12 mx-auto col-lg-6 mt-0 mb-3 {% if bdsm %} suk {% else %} bal {% endif %}">'
       +'<div class="p-4 p-md-5 border bg-white rounded-4 shadow">'
       +'<div class="row">'
       +'<h4 class="fw-bolder col-11 m-0">'+address+'</h4>'
@@ -226,6 +235,7 @@
       +'<p class="col-6">Заполненость</p>'
       +'<p class="col-6 text-end">'+proc+'%</p>'
       +'</div></div></div>'
+      pos2()
     });
   }
   function hide() {

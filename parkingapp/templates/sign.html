@@ -8,7 +8,7 @@ active
   <div class="modal-dialog" role="document">
     <div class="modal-content rounded-4 shadow border">
       <div class="modal-header mx-auto p-1 px-sm-5 pb-4 border-bottom-0">
-        <h1 class="fw-bold mb-0 fs-2"><a href="" class="text-primary me-2"><i class="bi bi-geo-alt-fill"></i></a>Регистрация</h1>
+        <h1 class="fw-bold mb-0 fs-2"><a href="{% url 'parkingapp:info' %}" class="text-primary me-2"><i class="bi bi-geo-alt-fill"></i></a>Регистрация</h1>
       </div>
 
       <div class="modal-body p-1 px-sm-5 pt-0 rounded-4">
@@ -43,7 +43,10 @@ active
           </div>
 
           <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" type="submit">Зарегистрироваться</button>
-          <small class="text-danger">{{ error }}</small>
+          <div class="text-center">
+            <small class="text-danger mx-auto">{{ error }}</small>
+            <small>Уже есть аккаунт? <a href="{% url 'parkingapp:enter' %}">Войдите</a></small>
+          </div>
         </form>
       </div>
     </div>
