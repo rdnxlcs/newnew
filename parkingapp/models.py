@@ -30,6 +30,7 @@ class Parking(models.Model):
     change = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
     code = models.CharField(default='', max_length=10)
     secret = models.CharField(default='', max_length=100)
+    reg_num = models.IntegerField(default=-1)
 
     def __str__(self) -> str:
         return f'{self.address} | {self.max_parking_lots}'
