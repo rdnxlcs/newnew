@@ -941,3 +941,39 @@ def dash_main(request):
     except Exception as e:
         print(e)
         return render(request, 'dash_main.html', {'error': error})
+
+def create():
+    df = pd.read_excel('parking.xlsx')
+
+    class Parking:
+        def __init__(self, lat, lng, address, max_parking_lots, occupied_lots, price, secret):
+            self.lat = lat
+            self.lng = lng
+            self.address = address
+            self.max_parking_lots = max_parking_lots
+            self.occupied_lots = occupied_lots
+            self.price = price
+            self.secret = secret
+    
+    for col in df:
+        for i in range(len(df[col])):
+            if col == 'Ориентир':
+                address = 'Калининград, ' + df[col][i]
+            elif col == 'Кол-во мест':
+                max_parking_lots = df[col][i]
+            elif col == 'Реестровый номер':
+                max_parking_lots = df[col][i]
+            else:
+                price = df[col][i]
+
+            client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+            lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+            occupied_lots = 0
+            alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            alph = list(alph)
+            secret = ''.join(random.choices(alph, k=100))
+            Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
+            park = Parking.objects.filter(secret=secret)[0]
+            code = str(random.randint(1000, 9999)) + f'{park.pk:03}'
+            park.code = code
+            park.save()
