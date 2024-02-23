@@ -7,7 +7,6 @@ from django.conf import settings
 from django.http import FileResponse
 # from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
-from django.utils.timezone import make_aware
 from django.http import JsonResponse
 import ymaps
 import json
