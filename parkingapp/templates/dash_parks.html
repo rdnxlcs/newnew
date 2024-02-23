@@ -15,8 +15,8 @@
     <table class="table table-striped table-sm">
       <thead>
         <tr>
-          <th scope="col">ID</th>
           <th scope="col">Улица</th>
+          <th scope="col">Реестровый номер</th>
           <th scope="col">Кол-во мест</th>
           <th scope="col">Цена за час</th>
           <th scope="col">Секрет 🤫</th>
@@ -71,8 +71,8 @@
       <tbody class="align-middle">
         {% for el in parkings %}
         <tr>
-          <td>{{el.pk}}</td>
           <td>{{el.address}}</td>
+          <td>{{el.reg_num}}</td>
           <td>{{el.max_parking_lots}}</td>
           <td>{{el.price_per_hour}} ₽</td>
           <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot?secret={{el.secret}}">{{el.secret}}</a></td>
@@ -85,7 +85,7 @@
                 style="background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;"
                 inputmode="numeric" required="">
               <button type="button" class="btn btn-sm" style="background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;" data-bs-toggle="modal"
-                data-bs-target="#exampleModal" data-bs-whatever="{{ el.pk }}"><i
+                data-bs-target="#exampleModal" data-bs-whatever="{{ el.reg_num }}"><i
                   class="bi bi-arrow-return-left"></i></button>
             </div>
           </td>

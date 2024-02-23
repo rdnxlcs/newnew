@@ -69,6 +69,7 @@
   }
 </style>
 <div>
+  <div style="display: none" id="jsonData" data-json="{{ parkings }}"></div>
   <div id="myMap" class="mx-auto"></div>
   {% if reciepts %}
 
@@ -114,7 +115,6 @@
 <script type="text/javascript">
   let isopened = false
   function pos() {
-    console.log(isopened)
     if (isopened) {
       document.getElementsByClassName('suk')[0].style.top = 'calc(73px + 1rem)'
       isopened = false
@@ -124,7 +124,6 @@
     }
   }
   function pos2() {
-    console.log(isopened, 111)
     if (isopened) {
       document.getElementsByClassName('suk')[0].style.top = 'calc(193px + 1rem)'
     } else { 
@@ -132,8 +131,9 @@
     }
   }
 
-
-  let parkings = "{{parkings}}".split(" 99999 ");
+  let parkings = JSON.parse(document.getElementById('jsonData').getAttribute('data-json'));
+  console.log(parkings[0]['address'])
+  /*
   for (let i = 0; i < parkings.length; i++) {
     parkings[i] = parkings[i].split(" ");
     for (let j = 0; j < 6; j++) {
@@ -142,8 +142,7 @@
     for (let j = 7; j < parkings[i].length; j++) {
       parkings[i][6] += " " + parkings[i][j];
     }
-  }
-  console.log(parkings)
+  }*/
   ymaps.ready(init);
   function init() {
     var myMap = new ymaps.Map('myMap', {
@@ -172,11 +171,11 @@
     }),
       getPointData = function (i, proc) {
         return {
-          iconContent: String(parkings[i][4]),
+          iconContent: String(parkings[i]['price_per_hour']),
           border: String(blar),
-          hintContent: String(parkings[i][6]),
-          address: String(parkings[i][6]),
-          price: String(parkings[i][4]),
+          hintContent: String(parkings[i]['address']),
+          address: String(parkings[i]['address']),
+          price: String(parkings[i]['price_per_hour']),
           proc: proc,
         };
       }
@@ -192,7 +191,7 @@
     geoObjects = [];
     var points = [];
     for (let i = 0; i < parkings.length; i++) {
-      let proc = parseInt(parkings[i][3] / parkings[i][5] * 100);
+      let proc = parseInt(parkings[i]['max_parking_lots'] / parkings[i]['free_lots'] * 100);
       if (proc > 70) {
         var blar = 'success'
       } else if (proc > 40) {
@@ -201,7 +200,7 @@
         var blar = 'danger'
       }
 
-      geoObjects[i] = new ymaps.Placemark([parkings[i][0], parkings[i][1]], getPointData(i, proc), getPointOptions());
+      geoObjects[i] = new ymaps.Placemark([parkings[i]['lan'], parkings[i]['lat']], getPointData(i, proc), getPointOptions());
       myMap.geoObjects.add(geoObjects[i]);
       points.push([parkings[i][0], parkings[i][1]])
     }

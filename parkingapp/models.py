@@ -30,13 +30,13 @@ class Parking(models.Model):
     change = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
     code = models.CharField(default='', max_length=10)
     secret = models.CharField(default='', max_length=100)
-    reg_num = models.IntegerField(default=-1)
+    reg_num = models.CharField(default='', max_length=100)
 
     def __str__(self) -> str:
-        return f'{self.address} | {self.max_parking_lots}'
+        return f'{self.lattitude} | {self.longitude} | {self.address} | {self.max_parking_lots} | {self.occupied_lots} | {self.price_per_hour} ||| '
 
 class Reciept(models.Model):
-    parking_id = models.IntegerField(default=0)
+    parking_id = models.CharField(default='', max_length=100)
     user_id = models.IntegerField(default=0)
     start_time = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))
     final_start_time = models.DateTimeField(default=datetime(2, 1, 1, 0, 0, 0, tzinfo=None))

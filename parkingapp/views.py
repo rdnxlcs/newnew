@@ -24,16 +24,19 @@ def index(request):
     
     try:
         parkings = []
-        for el in Parking.objects.all():
-            parkings.append(el.longitude)
-            parkings.append(el.lattitude)
-            parkings.append(el.reg_num)
-            parkings.append(el.max_parking_lots - el.occupied_lots)
-            parkings.append(el.price_per_hour)
-            parkings.append(el.max_parking_lots)
-            parkings.append(el.address)
-            parkings.append(99999)
-        parkings = ' '.join(list(map(str, parkings))[:-1])
+        pks = Parking.objects.all()
+        for el in pks:
+            indexes = [i for i, x in enumerate(list(pks)) if x.address == el.address]
+            if len(indexes) >= 2:
+                for i in range(1, len(indexes)):
+                    pks[indexes[i]].lattitude = pks[indexes[i-1]].lattitude + 0.0003
+            parkings.append({'lan': el.longitude,
+            'lat': el.lattitude,
+            'reg_num': el.reg_num,
+            'max_parking_lots': el.max_parking_lots,
+            'free_lots': el.max_parking_lots - el.occupied_lots,
+            'price_per_hour': el.price_per_hour,
+            'address': el.address })
     except Exception as e:
         print(e)
         parkings = []
@@ -61,10 +64,11 @@ def index(request):
     context = {
         'title': 'Парковка',
         'reciepts': reciepts,  
-        'parkings': parkings, 
+        'parkings': json.dumps(parkings),
         'bdsm': bdsm,
         'form': form,
-        'error': ''
+        'error': '',
+        'tits': [x for x in range(206)]
     }
     if request.method == 'POST':
         if 'create_park' in request.POST:
@@ -137,7 +141,6 @@ def index(request):
 
             return render(request, 'endparking.html', context)
 
-    print(context)
     return render(request, 'index.html', context)
 
 def dont_have_access(request):
@@ -418,8 +421,6 @@ def profile(request):
         rec.start_time = rec.start_time.strftime('%d-%m-%y %H:%M')
         rec.finish_time = rec.finish_time.strftime('%d-%m-%y %H:%M')
         bdsm.append([rec, Parking.objects.get(reg_num=rec.parking_id).address])
-
-    print(type(bdsm[0][0].start_time))
     
 
     print(User.objects.filter(pk=request.user.pk)[0])
@@ -886,35 +887,38 @@ def dash_main(request):
 def create():
     df = pd.read_excel('parking.xlsx')
 
-    class Parking:
-        def __init__(self, lat, lng, address, max_parking_lots, occupied_lots, price, secret):
-            self.lat = lat
-            self.lng = lng
-            self.address = address
-            self.max_parking_lots = max_parking_lots
-            self.occupied_lots = occupied_lots
-            self.price = price
-            self.secret = secret
-    
+    addressArr = []
+    max_parking_lotsArr = []
+    reg_numArr = []
+    priceArr = []
+
     for col in df:
         for i in range(len(df[col])):
             if col == 'Ориентир':
-                address = 'Калининград, ' + df[col][i]
+                addressArr.append('Калининград, ' + df[col][i])
             elif col == 'Кол-во мест':
-                max_parking_lots = df[col][i]
+                max_parking_lotsArr.append(df[col][i])
             elif col == 'Реестровый номер':
-                max_parking_lots = df[col][i]
+                reg_numArr.append(df[col][i])
             else:
-                price = df[col][i]
+                priceArr.append(df[col][i])
 
-            client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
-            lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
-            occupied_lots = 0
-            alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-            alph = list(alph)
-            secret = ''.join(random.choices(alph, k=100))
-            Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
-            park = Parking.objects.filter(secret=secret)[0]
-            code = str(random.randint(1000, 9999)) + f'{park.pk:03}'
-            park.code = code
-            park.save()
+
+    for i in range(len(addressArr)):
+        print(addressArr[i])
+        address = addressArr[i]
+        max_parking_lots = max_parking_lotsArr[i]
+        reg_num = reg_numArr[i]
+        price = priceArr[i]
+
+        client = ymaps.Geocode('fe7387f0-4485-4341-91bd-7b6427f658d7')
+        lat, lng = list(map(float, client.geocode(address)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split()))
+        occupied_lots = 0
+        alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        alph = list(alph)
+        secret = ''.join(random.choices(alph, k=100))
+        Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret, reg_num=reg_num)
+        park = Parking.objects.filter(secret=secret)[0]
+        code = str(random.randint(1000, 9999)) + f'{park.pk:03}'
+        park.code = code
+        park.save()
