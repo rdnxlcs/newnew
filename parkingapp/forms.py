@@ -144,7 +144,7 @@ class CouponForm(forms.Form):
         fields = ['car', 'phone']
 
 class DashForm(forms.Form):
-    pk = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
+    reg_num = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
         'class': 'form-select form-select-sm',
         'value': '',
     }))
