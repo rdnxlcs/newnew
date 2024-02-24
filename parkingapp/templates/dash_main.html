@@ -43,10 +43,10 @@
 </div>
 
 <div class="modal fade" id="modalrec" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ user.username }}</h1>
+        <h1 class="modal-title fs-5" id="modelrecLabel">{{ user.username }}</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -63,14 +63,16 @@
               </tr>
             </thead>
             <tbody class="align-middle">
+              {% for rec in corr_reciepts %}
               <tr>
-                <td>{{ rec.pk }}1</td>
-                <td>{{ rec.parking_id }}2</td>
-                <td>{{ rec.start_time }}3</td>
-                <td>{{ rec.finish_time }}4</td>
-                <td>{{ rec.benefit }}5</td>
-                <td>{{ rec.final_price }}6</td>
+                <td>{{ rec.pk }}</td>
+                <td>{{ rec.parking_id }}</td>
+                <td>{{ rec.start_time }}</td>
+                <td>{{ rec.finish_time }}</td>
+                <td>{{ rec.benefit }}</td>
+                <td>{{ rec.final_price }}</td>
               </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
@@ -81,28 +83,39 @@
 </div>
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
   <style>
-    #id_pk {
+    #id_reg_num {
       border: none;
       font-size: calc(1.325rem + .9vw);
       font-weight: 500;
       line-height: 1.2;
     }
   </style>
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <form method="post">
-      {% csrf_token %}
-      <h1 class="h2">{{form.pk}}</h1>
-    </form>
-    <small class="text-danger text">{{ error }}</small>
-    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModalD">Удалить (Убрать вниз)</button>
 
-  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div
+      class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">{{ form.reg_num }}</h1>
+      <small class="text-danger text">{{ error }}</small>
+      <div class="mb-2 mb-md-0">
+        <div class="input-group me-2">
+          {{form.date1}}
+          {{form.date2}}
+          <button type="submit" class="btn btm-sm btn-primary radr"><i class="bi bi-arrow-return-left"></i></button>
+        </div>
+      </div>
+      <button class="btn btn-danger" hidden data-bs-toggle="modal" data-bs-target="#exampleModalD">Удалить (Убрать
+        вниз)</button>
+
+    </div>
+  </form>
+
   <div class="row g-3">
     <div class="col-sm-6">
       <div class="card h-100">
         <div class="card-header">Реестровый номер</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">1488</h5>
+          <h5 class="card-title fw-bolder">{{ parking.reg_num }}</h5>
         </div>
       </div>
     </div>
@@ -110,7 +123,7 @@
       <div class="card h-100">
         <div class="card-header">Количество мест</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">44</h5>
+          <h5 class="card-title fw-bolder">{{ parking.max_parking_lots }}</h5>
         </div>
       </div>
     </div>
@@ -118,8 +131,7 @@
       <div class="card h-100">
         <div class="card-header">Секрет</div>
         <div class="card-body">
-          <a href="/parking_lot?secret={{el.secret}}"
-            class="h5 text-primary card-title fw-bolder">Xwa40sRwPLuwAkAEbcYNnF8DPGjiJPjLOBgmYfpJKQW9JQtVEu5BdFktcMNNDONLZui3B6n87dFDoQYptqI5pjjOFtmF6Mds24K4</a>
+          <a href="/parking_lot?secret={{parking.secret}}" class="h5 text-primary card-title fw-bolder">{{ parking.secret }}</a>
         </div>
       </div>
     </div>
@@ -127,14 +139,13 @@
       <div class="card h-100">
         <div class="card-header">Цена за час</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">67 ₽</h5>
+          <h5 class="card-title fw-bolder">{{ parking.price_per_hour }} ₽</h5>
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
             data-bs-whatever="{{ el.pk }}">Новая цена</button>
         </div>
       </div>
     </div>
   </div>
-
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Управление шлагбаумом</h1>
   </div>
@@ -161,17 +172,6 @@
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Финансовый отчет</h1>
-    <small class="text-danger text">{{ error }}</small>
-    <div class="mb-2 mb-md-0">
-      <form method="POST">
-        {% csrf_token %}
-        <div class="input-group me-2">
-          {{form.date1}}
-          {{form.date2}}
-          <button type="submit" class="btn btm-sm btn-primary radr"><i class="bi bi-arrow-return-left"></i></button>
-        </div>
-      </form>
-    </div>
   </div>
 
   <div class="row g-3">
@@ -342,16 +342,18 @@
     <h1 class="h2">Пользователи с подозрительной активностью</h1>
   </div>
 
-  <dl class="row g-3 p-2 text-start row-cols-md-2 row-cols-xl-3 row-cols-xxl-4">
+  <dl class="row g-3 p-0 text-start row-cols-md-2 row-cols-xl-3 row-cols-xxl-4">
+    {% for user in corr_users %}
     <div class="col">
       <div class="card">
         <div class="card-header">{{ user.phone_number }}</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{ user.username }}</h5>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec">Показать чеки</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec" data-bs-whatever="{{ user.username }}">Показать чеки</button>
         </div>
       </div>
     </div>
+    {% endfor %}
   </dl>
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -393,7 +395,7 @@
         </div>
       </div>
       <tbody class="align-middle">
-        {% for el in users %}
+        {% for el in coupon_users %}
         <tr>
           <td>{{ el.pk }}</td>
           <td>{{ el.username }}</td>
@@ -435,7 +437,7 @@
         </tr>
       </thead>
       <tbody class="align-middle">
-        {% for el in reciepts %}
+        {% for el in recs %}
         <tr>
           <td>{{el.pk}}</td>
           <td>{{el.user_id}}</td>
@@ -466,5 +468,17 @@
       outclosed = true
     }
   }
+
+  const exampleModalD = document.getElementById('modalrec')
+    if (exampleModalD) {
+      exampleModalD.addEventListener('show.bs.modal', event => {
+        const buttonD = event.relatedTarget
+        const recipientD = buttonD.getAttribute('data-bs-whatever')
+        const modalTitleD = exampleModalD.querySelector('#modelrecLabel')
+        document.getElementById('submitD').setAttribute('value', recipientD)
+
+        modalTitleD.textContent = `${recipientD}`
+      })
+    }
 </script>
 {% endblock %}

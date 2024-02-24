@@ -13,6 +13,7 @@ import json
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
 import random
 import pandas as pd
+from parkingapp.global_variables import global_variables
 
 @login_required(redirect_field_name=None)
 def index(request):
@@ -28,7 +29,7 @@ def index(request):
             indexes = [i for i, x in enumerate(list(pks)) if x.address == el.address]
             if len(indexes) >= 2:
                 for i in range(1, len(indexes)):
-                    pks[indexes[i]].lattitude = pks[indexes[i-1]].lattitude + 0.0003
+                    pks[indexes[i]].lattitude = pks[indexes[i-1]].lattitude + 0.00015
             parkings.append({'lan': el.longitude,
             'lat': el.lattitude,
             'reg_num': el.reg_num,
@@ -74,16 +75,17 @@ def index(request):
             form = CommitParkingForm(data=request.POST)
             if form.is_valid():
                 user = request.user
-                code = request.POST['code']
+                code = str(request.POST['code'])
                 try:
                     parking = Parking.objects.get(code=code)
+                    print(1)
                     if parking.occupied_lots >= parking.max_parking_lots:
                         form = CommitParkingForm()
                         context['error'] = 'Нет свободных мест'
                         context['form'] = form
                         return render(request, 'index.html', context)
                     else:
-                        extremecode = str(random.randint(1000, 9999)) + f'{parking.reg_num:03}' # subscribe!!!
+                        extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
                         parking.code = extremecode
                         parking.occupied_lots += 1
                         parking.save()
@@ -472,6 +474,7 @@ class Fin:
         self.with_benefits = with_benefits
         self.benefits_price = benefits_price
 
+# Возвращает данные для графиков
 def data(period_start, period_end, id=0):
     period_start = [i for i in period_start.split('-')]
     period_end = [i for i in period_end.split('-')]
@@ -568,8 +571,10 @@ def data(period_start, period_end, id=0):
         
     return parkings_array, fins_parkings_array
 
-def spice(p_end, p_start, period_start, period_end, reg_num, form, park, error):
-    reg_num = int(reg_num)
+# Перехеривает данные для графиков
+def spice(period_start, period_end, reg_num, park):
+    p_start = datetime(int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
+    p_end = datetime(int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
     if p_end - p_start <= timedelta(days=1):
         delta = timedelta(hours=1)
         ctime = datetime(p_start.year, p_start.month, p_start.day, p_start.hour, p_start.minute, p_start.second, tzinfo=None)
@@ -636,46 +641,53 @@ def spice(p_end, p_start, period_start, period_end, reg_num, form, park, error):
             ctime += delta
             week += 1
         reciepts_to_send = str(reciepts_to_send)
-    print(reciepts_to_send)
+    
     context = {'total_time': park.total_time,
             'average_time': park.session_average_duration,
             'total_benefit_time': park.total_benefit_time,
             'average_benefits': park.benefits_session_average_duration,
-            'reciepts': json.dumps(str(reciepts_to_send)),
-            'form': form,
-            'pk': reg_num,
-            'error': error}
+            'reciepts': json.dumps(str(reciepts_to_send))}
+    
     return context
 
 @login_required(redirect_field_name=None)
 def dash_full(request):
+    # Переменные по умолчанию
     error = ''
     form = DashForm()
+    reg_num = list(Parking.objects.all())[0].reg_num 
+    period_start = global_variables.default_start_time
+    period_end = global_variables.default_end_time
+
     addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
     form.fields['reg_num'].choices = tuple(addresses)
-    reg_num = list(Parking.objects.all())[-1].reg_num 
-    period_start = '2024-01-25'
-    period_end = '2024-02-05'
+
     if not request.user.admin_view: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
-    if request.method == 'POST':
+    if request.method == 'POST':  
+
         form = DashForm(data=request.POST)
+
         addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
         form.fields['reg_num'].choices = tuple(addresses)
+
         if form.is_valid():
             reg_num = request.POST['reg_num']
             period_start = request.POST['date1']
             period_end = request.POST['date2']
+ 
             try:
                 park = data(period_start, period_end, reg_num)[0][0]
-                print(park.address)
-                # total_time average_time 
                 period_start = [i for i in period_start.split('-')]
                 period_end = [i for i in period_end.split('-')]
-                p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-                p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-                context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
+
+                context = spice(period_start, period_end, reg_num, park)
+                context.update({
+                    'form': form,
+                    'pk': reg_num,
+                    'error': error
+                })
                 return render(request, 'dash_full.html', context)
             except Exception as e:
                 print(e)
@@ -686,12 +698,15 @@ def dash_full(request):
 
     try:
         park = data(period_start, period_end, reg_num)[0][0]
-        # total_time average_time 
         period_start = [i for i in period_start.split('-')]
         period_end = [i for i in period_end.split('-')]
-        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-        context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
+
+        context = spice(period_start, period_end, reg_num, park)
+        context.update({
+            'form': form,
+            'pk': reg_num,
+            'error': error
+        })
         return render(request, 'dash_full.html', context)
     except Exception as e:
         print(e)
@@ -737,15 +752,16 @@ def dash_parks(request):
     }
     return render(request, 'dash_parks.html', context)
 
-
 @login_required(redirect_field_name=None)
 def dash_fin(request):
-    form = DashfinForm()  
-    period_start = '2024-01-25'
-    period_end = '2024-02-05'
-    dat = data(period_start, period_end)
-    error = ''
 
+    error = ''
+    form = DashfinForm()  
+    period_start = global_variables.default_start_time
+    period_end = global_variables.default_end_time
+
+    fin = data(period_start, period_end)
+    
     if not request.user.admin_view:
         return redirect(reverse('parkingapp:dont_have_access'))
 
@@ -754,10 +770,11 @@ def dash_fin(request):
         if form.is_valid():
             period_start = request.POST['date1']
             period_end = request.POST['date2']
-            dat = data(period_start, period_end)
+            fin = data(period_start, period_end)
+
             context = {
-                'Fin':dat[1][0],
-                'parkings':dat[0],
+                'Fin': fin[1][0],
+                'parkings': fin[0],
                 'form': form
             }
             return render(request, 'dash_fin.html', context)
@@ -766,8 +783,8 @@ def dash_fin(request):
 
     
     context = {
-        'Fin':dat[1][0],
-        'parkings':dat[0],
+        'Fin': fin[1][0],
+        'parkings': fin[0],
         'form': form,
         'error': error
     }
@@ -840,7 +857,7 @@ def dash_main(request):
     form = DashForm()
     addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
     form.fields['reg_num'].choices = tuple(addresses)
-    reg_num = list(Parking.objects.all())[-1].reg_num 
+    reg_num = list(Parking.objects.all())[0].reg_num 
     period_start = '2024-01-25'
     period_end = '2024-02-05'
     if not request.user.admin_view: 
@@ -855,29 +872,76 @@ def dash_main(request):
             period_start = request.POST['date1']
             period_end = request.POST['date2']
             try:
+                users = User.objects.all()
+                corr_users = []
+                corr_reciepts = []
+                for user in users:
+                    user_reciepts = Reciept.objects.filter(user_id=user.pk)
+                    counter = 0
+                    for rec in user_reciepts:
+                        delta_hz = (rec.finish_time-rec.start_time)
+                        delta = delta_hz.days * 24 + delta_hz.seconds / 3600
+                        if rec.benefit and delta > 6 and rec.parking_id == reg_num:
+                            counter += 1
+                            corr_reciepts.append(rec)
+                            if counter >= 2:
+                                corr_users.append(user)
+                                corr_reciepts.append(rec)
+                            else:
+                                del corr_reciepts[-1]
+
                 park = data(period_start, period_end, reg_num)[0][0]
-                print(park.address)
+
                 # total_time average_time 
                 period_start = [i for i in period_start.split('-')]
                 period_end = [i for i in period_end.split('-')]
                 p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
                 p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
                 context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
+                context['parking'] = Parking.objects.get(reg_num=reg_num)
+                context['corr_users'] = corr_users
+                context['corr_reciepts'] = corr_reciepts
+                context['coupon_users'] = User.objects.filter(park_id=reg_num)
+                context['recs'] = Reciept.objects.filter(parking_id=reg_num)
                 return render(request, 'dash_main.html', context)
             except Exception as e:
                 print(e)
                 error = 'Неизвестная ошибка'
         else:
+            print(form.errors)
             error = 'Неверные входные данные'
 
     try:
-        park = data(period_start, period_end, pk)[0][0]
+        users = User.objects.all()
+        corr_users = []
+        corr_reciepts = []
+        for user in users:
+            user_reciepts = Reciept.objects.filter(user_id=user.pk)
+            counter = 0
+            for rec in user_reciepts:
+                delta_hz = (rec.finish_time-rec.start_time)
+                delta = delta_hz.days * 24 + delta_hz.seconds / 3600
+                if rec.benefit and delta > 6 and rec.parking_id == reg_num:
+                    counter += 1
+                    corr_reciepts.append(rec)
+                    if counter >= 2:
+                        corr_users.append(user)
+                        corr_reciepts.append(rec)
+                    else:
+                        del corr_reciepts[-1]
+
+        park = data(period_start, period_end, reg_num)[0][0]
         # total_time average_time 
         period_start = [i for i in period_start.split('-')]
         period_end = [i for i in period_end.split('-')]
         p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
         p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
         context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
+        context['parking'] = Parking.objects.get(reg_num=reg_num)
+        context['corr_users'] = corr_users
+        context['corr_reciepts'] = corr_reciepts
+        context['coupon_users'] = User.objects.filter(park_id=reg_num)
+        context['recs'] = Reciept.objects.filter(parking_id=reg_num)
         return render(request, 'dash_main.html', context)
     except Exception as e:
         print(e)

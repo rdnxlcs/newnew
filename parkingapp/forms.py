@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from parkingapp.models import *
+from parkingapp.global_variables import global_variables
 
 
 class UserLoginForm(AuthenticationForm):
@@ -147,18 +148,19 @@ class DashForm(forms.Form):
     reg_num = forms.ChoiceField(required=True, choices=(), widget=forms.Select(attrs={
         'class': 'form-select form-select-sm',
         'value': '',
+        'id': 'id_reg_num'
     }))
     date1 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-25',
+        'value': global_variables.default_start_time,
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-02-05',
+        'value': global_variables.default_end_time,
     }))
 
 class DashfinForm(forms.Form):
@@ -166,13 +168,13 @@ class DashfinForm(forms.Form):
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-01-25',
+        'value': global_variables.default_start_time,
     }))
     date2 = forms.DateField(required=True, widget=forms.DateInput(attrs={
         'class': 'form-control form-control-sm',
         'type': 'date',
         'style': 'background: none;',
-        'value': '2024-02-05',
+        'value': global_variables.default_end_time,
     }))
 
 class ChangePriceForm(forms.Form):
