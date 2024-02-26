@@ -650,6 +650,27 @@ def spice(period_start, period_end, reg_num, park):
     
     return context
 
+def corr_detector():
+    users = User.objects.all()
+    corr_users = []
+    corr_reciepts = []
+
+    for user in users:
+        user_reciepts = Reciept.objects.filter(user_id=user.pk)
+        counter = 0
+        for rec in user_reciepts:
+            delta_hz = (rec.finish_time-rec.start_time)
+            delta = delta_hz.days * 24 + delta_hz.seconds / 3600
+            if rec.benefit and delta > 6:
+                counter += 1
+                corr_reciepts.append(rec)
+                if counter >= 2:
+                    corr_users.append(user)
+                    corr_reciepts.append(rec)
+                else:
+                    del corr_reciepts[-1]
+    return corr_users, corr_reciepts
+
 @login_required(redirect_field_name=None)
 def dash_full(request):
     # Переменные по умолчанию
@@ -747,14 +768,13 @@ def dash_parks(request):
 
     context = {
         'parkings': parkings, 
-       'form': form, 
-       'error': error
+        'form': form, 
+        'error': error
     }
     return render(request, 'dash_parks.html', context)
 
 @login_required(redirect_field_name=None)
 def dash_fin(request):
-
     error = ''
     form = DashfinForm()  
     period_start = global_variables.default_start_time
@@ -852,96 +872,135 @@ def pptx(request):
 def info(request):
     return render(request, 'info.html')
 
+def change_price(reg_num, new_price):
+    parking = Parking.objects.get(reg_num=reg_num)
+    now = datetime.now().replace(tzinfo=None)
+    tm = datetime(parking.change.year, parking.change.month, parking.change.day, parking.change.hour, parking.change.minute, parking.change.second, tzinfo=None)
+    if now - tm >= timedelta(days=90):
+        parking.price_per_hour = new_price
+        parking.change = now
+        parking.save()
+        error = ''
+    else:
+        error = 'Изменение цены доступно раз в три месяца'
+    
+    return error
+
 def dash_main(request):
     error = ''
     form = DashForm()
+    change_price_form = ChangePriceForm()
+    reg_num = list(Parking.objects.all())[0].reg_num 
+    period_start = global_variables.default_start_time
+    period_end = global_variables.default_end_time
+
     addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
     form.fields['reg_num'].choices = tuple(addresses)
-    reg_num = list(Parking.objects.all())[0].reg_num 
-    period_start = '2024-01-25'
-    period_end = '2024-02-05'
+
     if not request.user.admin_view: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':
+
         form = DashForm(data=request.POST)
+
         addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
         form.fields['reg_num'].choices = tuple(addresses)
-        if form.is_valid():
-            reg_num = request.POST['reg_num']
-            period_start = request.POST['date1']
-            period_end = request.POST['date2']
-            try:
-                users = User.objects.all()
-                corr_users = []
-                corr_reciepts = []
-                for user in users:
-                    user_reciepts = Reciept.objects.filter(user_id=user.pk)
-                    counter = 0
-                    for rec in user_reciepts:
-                        delta_hz = (rec.finish_time-rec.start_time)
-                        delta = delta_hz.days * 24 + delta_hz.seconds / 3600
-                        if rec.benefit and delta > 6 and rec.parking_id == reg_num:
-                            counter += 1
-                            corr_reciepts.append(rec)
-                            if counter >= 2:
-                                corr_users.append(user)
-                                corr_reciepts.append(rec)
-                            else:
-                                del corr_reciepts[-1]
 
-                park = data(period_start, period_end, reg_num)[0][0]
+        if 'delete' in request.POST:
+            reg_num = request.POST.get('delete')
+            parking = Parking.objects.get(reg_num=reg_num)
+            parking.delete()
+            return redirect(reverse('parkingapp:dash_main'))
 
-                # total_time average_time 
-                period_start = [i for i in period_start.split('-')]
-                period_end = [i for i in period_end.split('-')]
-                p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-                p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-                context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
-                context['parking'] = Parking.objects.get(reg_num=reg_num)
-                context['corr_users'] = corr_users
-                context['corr_reciepts'] = corr_reciepts
-                context['coupon_users'] = User.objects.filter(park_id=reg_num)
-                context['recs'] = Reciept.objects.filter(parking_id=reg_num)
-                return render(request, 'dash_main.html', context)
-            except Exception as e:
-                print(e)
-                error = 'Неизвестная ошибка'
+        elif 'change_price' in request.POST:
+            reg_num = request.POST.get('change_price')
+            new_price = request.POST.get('newprice')
+
+            park = data(period_start, period_end, reg_num)[0][0]
+            fin = data(period_start, period_end, reg_num)[1][0]
+            corr_users, corr_reciepts = corr_detector()
+
+            period_start = [i for i in period_start.split('-')]
+            period_end = [i for i in period_end.split('-')]
+
+            error = change_price(reg_num, new_price)
+            context = spice(period_start, period_end, reg_num, park)
+
+            context.update({
+                'form': form,
+                'change_price_form': change_price_form,
+                'reg_num': reg_num,
+                'error': error,
+                'parking': Parking.objects.get(reg_num=reg_num),
+                'corr_users': corr_users,
+                'corr_reciepts': corr_reciepts,
+                'coupon_users': User.objects.filter(park_id=reg_num),
+                'recs': Reciept.objects.filter(parking_id=reg_num)
+            })
+            return render(request, 'dash_main.html', context)
         else:
-            print(form.errors)
-            error = 'Неверные входные данные'
+            if form.is_valid():
+
+                reg_num = request.POST['reg_num']
+                period_start = request.POST['date1']
+                period_end = request.POST['date2']
+
+                try:
+                    
+                    corr_users, corr_reciepts = corr_detector()
+
+                    park = data(period_start, period_end, reg_num)[0][0]
+                    fin = data(period_start, period_end, reg_num)[1][0]
+
+                    period_start = [i for i in period_start.split('-')]
+                    period_end = [i for i in period_end.split('-')]
+            
+                    context = spice(period_start, period_end, reg_num, park)
+                    context.update({
+                        'form': form,
+                        'change_price_form': change_price_form,
+                        'reg_num': reg_num,
+                        'error': error,
+                        'parking': Parking.objects.get(reg_num=reg_num),
+                        'corr_users': corr_users,
+                        'corr_reciepts': corr_reciepts,
+                        'coupon_users': User.objects.filter(park_id=reg_num),
+                        'recs': Reciept.objects.filter(parking_id=reg_num),
+                        'fin': fin,
+                    })
+
+                    return render(request, 'dash_main.html', context)
+                except Exception as e:
+                    print(e)
+                    error = 'Неизвестная ошибка'
+            else:
+                print(form.errors)
+                error = 'Неверные входные данные'
 
     try:
-        users = User.objects.all()
-        corr_users = []
-        corr_reciepts = []
-        for user in users:
-            user_reciepts = Reciept.objects.filter(user_id=user.pk)
-            counter = 0
-            for rec in user_reciepts:
-                delta_hz = (rec.finish_time-rec.start_time)
-                delta = delta_hz.days * 24 + delta_hz.seconds / 3600
-                if rec.benefit and delta > 6 and rec.parking_id == reg_num:
-                    counter += 1
-                    corr_reciepts.append(rec)
-                    if counter >= 2:
-                        corr_users.append(user)
-                        corr_reciepts.append(rec)
-                    else:
-                        del corr_reciepts[-1]
+        corr_users, corr_reciepts = corr_detector()
 
         park = data(period_start, period_end, reg_num)[0][0]
-        # total_time average_time 
+        fin = data(period_start, period_end, reg_num)[1][0]
+
         period_start = [i for i in period_start.split('-')]
         period_end = [i for i in period_end.split('-')]
-        p_start = datetime( int(period_start[0]), int(period_start[1]), int(period_start[2]) , 0, 0, 0, tzinfo=None)
-        p_end = datetime( int(period_end[0]), int(period_end[1]), int(period_end[2]), 23, 59, 59, tzinfo=None)
-        context = spice(p_end, p_start, period_start, period_end, reg_num, form, park, error)
-        context['parking'] = Parking.objects.get(reg_num=reg_num)
-        context['corr_users'] = corr_users
-        context['corr_reciepts'] = corr_reciepts
-        context['coupon_users'] = User.objects.filter(park_id=reg_num)
-        context['recs'] = Reciept.objects.filter(parking_id=reg_num)
+
+        context = spice(period_start, period_end, reg_num, park)
+        context.update({
+            'form': form,
+            'change_price_form': change_price_form,
+            'reg_num': reg_num,
+            'error': error,
+            'parking': Parking.objects.get(reg_num=reg_num),
+            'corr_users': corr_users,
+            'corr_reciepts': corr_reciepts,
+            'coupon_users': User.objects.filter(park_id=reg_num),
+            'recs': Reciept.objects.filter(parking_id=reg_num),
+            'fin': fin,
+        })
+
         return render(request, 'dash_main.html', context)
     except Exception as e:
         print(e)

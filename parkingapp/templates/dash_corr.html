@@ -1,57 +1,75 @@
 {% extends 'dash_base.html' %}
 {% block corract %}active{% endblock %}
 {% block content %}
+<div class="modal fade" id="modalrec" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modelrecLabel">a</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive small">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Парковка</th>
+                <th scope="col">Начало</th>
+                <th scope="col">Конец</th>
+                <th scope="col">Льгота</th>
+                <th scope="col">Сумма</th>
+              </tr>
+            </thead>
+            <tbody class="align-middle">
+              {% for rec in corr_reciepts %}
+              <tr>
+                <td>{{ rec.pk }}</td>
+                <td>{{ rec.parking_id }}</td>
+                <td>{{ rec.start_time }}</td>
+                <td>{{ rec.finish_time }}</td>
+                <td>{{ rec.benefit }}</td>
+                <td>{{ rec.final_price }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Пользователи с подозрительной активностью</h1>
   </div>
 
-  <dl class="row g-3 p-2 text-start row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-6">
+  <dl class="row g-3 p-0 text-start row-cols-md-2 row-cols-xl-3 row-cols-xxl-4">
     {% for user in corr_users %}
     <div class="col">
       <div class="card">
         <div class="card-header">{{ user.phone_number }}</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{ user.username }}</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec" data-bs-whatever="{{ user.username }}">Показать чеки</button>
         </div>
       </div>
     </div>
     {% endfor %}
   </dl>
-
-  {% for user in corr_users %}
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">{{ user.username }}</h1>
-  </div>
-
-  <div class="table-responsive small">
-    <table class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Парковка</th>
-          <th scope="col">Начало</th>
-          <th scope="col">Конец</th>
-          <th scope="col">Льгота</th>
-          <th scope="col">Сумма</th>
-        </tr>
-      </thead>
-      <tbody class="align-middle">
-        {% for rec in corr_reciepts %}
-        <tr>
-          <td>{{ rec.pk }}</td>
-          <td>{{ rec.parking_id }}</td>
-          <td>{{ rec.start_time }}</td>
-          <td>{{ rec.finish_time }}</td>
-          <td>{{ rec.benefit }}</td>
-          <td>{{ rec.final_price }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endfor %}
-
 </main>
+<script>
+  const exampleModalD = document.getElementById('modalrec')
+    if (exampleModalD) {
+      exampleModalD.addEventListener('show.bs.modal', event => {
+        const buttonD = event.relatedTarget
+        const recipientD = buttonD.getAttribute('data-bs-whatever')
+        const modalTitleD = exampleModalD.querySelector('#modelrecLabel')
+
+        modalTitleD.textContent = `${recipientD}`
+      })
+    }
+</script>
 {% endblock %}

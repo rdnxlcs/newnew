@@ -61,7 +61,6 @@
     <table class="table table-striped table-sm">
       <thead>
         <tr>
-          <th scope="col">ID</th>
           <th scope="col">Улица</th>
           <th scope="col">Тр-ций на сумму</th>
           <th scope="col">Кол-во транзакций</th>
@@ -72,11 +71,10 @@
       <tbody>
         {% for el in parkings %}
         <tr>
-          <td>1</td>
           <td>{{el.address}}</td>
-          <td>{{el.total_sum}}</td>
+          <td>{{el.total_sum}} ₽</td>
           <td>{{el.how_much_people_used}}<br></td>
-          <td>{{el.benefit_sum}}</td>
+          <td>{{el.benefit_sum}} ₽</td>
           <td>{{el.with_benefits}}</td>
         </tr>
         {% endfor %}

@@ -78,6 +78,7 @@
       }
     })
   </script>
+
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Льготные места</h1>
   </div>
@@ -104,7 +105,7 @@
   <canvas class="my-4 w-100" id="myChartC" width="900" height="380"></canvas>
   <script>
     const ctxC = document.getElementById('myChartC');
-    let rC = "{{reciepts_benefit}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    let rC = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
     console.log(r);
     let recieptsC = JSON.parse(rC);
     let labelsC = [], recC = [];
@@ -122,7 +123,7 @@
         labels: labelsC,
         datasets: [{
           data: recC,
-          lineTension: 0,
+          lineTension: 0.3,
           backgroundColor: 'transparent',
           borderColor: '#dc3545',
           borderWidth: 4,

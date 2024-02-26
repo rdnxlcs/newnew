@@ -20,54 +20,9 @@
           <th scope="col">Кол-во мест</th>
           <th scope="col">Цена за час</th>
           <th scope="col">Секрет 🤫</th>
-          <th scope="col">Действие</th>
-          <th scope="col">Изменить цену</th>
           
         </tr>
       </thead>
-      <!-- MODAL -->
-      <div class="modal fade" id="exampleModal{{el.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Подтвердите изменение цены </h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              Изменение цены доступно один раз в три месяца
-            </div>
-            <form method="post">
-              {%csrf_token%}
-              <div class="modal-footer">
-                {{form.newprice}}
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button class="btn btn-primary" type="submit" name="change_price" id="submit">Изменить
-                  цену</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <!-- MODALD -->
-      <div class="modal fade" id="exampleModalD" tabindex="-1" aria-labelledby="exampleModalLabelD" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabelD">Подтвердите удаление</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post">
-              {%csrf_token%}
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button class="btn btn-primary" type="submit" id="submitD" name="delete">Удалить</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
       <tbody class="align-middle">
         {% for el in parkings %}
         <tr>
@@ -76,60 +31,10 @@
           <td>{{el.max_parking_lots}}</td>
           <td>{{el.price_per_hour}} ₽</td>
           <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot?secret={{el.secret}}">{{el.secret}}</a></td>
-
-          <td><button class="text-danger" style="background: none; border: none;" type="button" data-bs-toggle="modal"
-              data-bs-target="#exampleModalD" data-bs-whatever="{{el.pk}}">Удалить</button></td>
-          <td>
-            <div class="input-group">
-              <input type="number" placeholder="Новая цена"
-                style="background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;"
-                inputmode="numeric" required="">
-              <button type="button" class="btn btn-sm" style="background: none; border: none; border-bottom: 1px solid #0d6efd; outline: none;" data-bs-toggle="modal"
-                data-bs-target="#exampleModal" data-bs-whatever="{{ el.reg_num }}"><i
-                  class="bi bi-arrow-return-left"></i></button>
-            </div>
-          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <script>
-    const exampleModal = document.getElementById('exampleModal')
-    if (exampleModal) {
-      exampleModal.addEventListener('show.bs.modal', event => {
-        const button = event.relatedTarget
-        const recipient = button.getAttribute('data-bs-whatever')
-        const modalTitle = exampleModal.querySelector('.modal-title')
-
-        document.getElementById('submit').setAttribute('value', recipient)
-        const val = button.parentNode.children[0].value
-        document.getElementById('fucksubmit').setAttribute('value', val)
-
-        modalTitle.textContent = `Подтвердите изменение цены (ID ${recipient} | ${val} ₽)`
-      })
-    }
-
-    const exampleModalD = document.getElementById('exampleModalD')
-    if (exampleModalD) {
-      exampleModalD.addEventListener('show.bs.modal', event => {
-        const buttonD = event.relatedTarget
-        const recipientD = buttonD.getAttribute('data-bs-whatever')
-        const modalTitleD = exampleModalD.querySelector('#exampleModalLabelD')
-        document.getElementById('submitD').setAttribute('value', recipientD)
-
-        modalTitleD.textContent = `Подтвердите удаление (ID ${recipientD})`
-      })
-    }
-
-    $(document).ready(function () {
-      $("input[id=fucksubmit]").keydown(function (event) {
-        if (event.keyCode == 13) {
-          event.preventDefault();
-          return false;
-        }
-      });
-    });
-  </script>
 </main>
 {% endblock %}

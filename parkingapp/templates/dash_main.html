@@ -5,8 +5,10 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabelD">Подтвердите удаление</h1>
+        <h1 class="modal-title fs-5">Подтвердите удаление</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="exampleModalLabelD">
       </div>
       <form method="post">
         {%csrf_token%}
@@ -19,20 +21,20 @@
   </div>
 </div>
 
-<div class="modal fade" id="exampleModal{{el.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="exampleModalLabel">Подтвердите изменение цены </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        Изменение цены доступно один раз в три месяца!
-      </div>
       <form method="post">
         {%csrf_token%}
+        <div class="modal-body">
+          <p class="text-danger">Изменение цены доступно один раз в три месяца!</p>
+          {{change_price_form.newprice}}
+        </div>
         <div class="modal-footer">
-          {{form.newprice}}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
           <button class="btn btn-primary" type="submit" name="change_price" id="submit">Изменить
             цену</button>
@@ -104,8 +106,6 @@
           <button type="submit" class="btn btm-sm btn-primary radr"><i class="bi bi-arrow-return-left"></i></button>
         </div>
       </div>
-      <button class="btn btn-danger" hidden data-bs-toggle="modal" data-bs-target="#exampleModalD">Удалить (Убрать
-        вниз)</button>
 
     </div>
   </form>
@@ -141,7 +141,7 @@
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{ parking.price_per_hour }} ₽</h5>
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
-            data-bs-whatever="{{ el.pk }}">Новая цена</button>
+            data-bs-whatever="{{ reg_num }}">Новая цена</button>
         </div>
       </div>
     </div>
@@ -179,7 +179,7 @@
       <div class="card">
         <div class="card-header">Транзакций на сумму</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{Fin.total_price}} ₽</h5>
+          <h5 class="card-title fw-bolder">{{fin.total_price}} ₽</h5>
         </div>
       </div>
     </div>
@@ -187,7 +187,7 @@
       <div class="card">
         <div class="card-header">Количество транзакций</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{Fin.how_much_people_used}}</h5>
+          <h5 class="card-title fw-bolder">{{fin.how_much_people_used}}</h5>
         </div>
       </div>
     </div>
@@ -195,7 +195,7 @@
       <div class="card">
         <div class="card-header">Льготных транзакций на сумму</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{Fin.benefits_price}} ₽</h5>
+          <h5 class="card-title fw-bolder">{{fin.benefits_price}} ₽</h5>
         </div>
       </div>
     </div>
@@ -203,7 +203,7 @@
       <div class="card">
         <div class="card-header">Количество льготных транзакций</div>
         <div class="card-body">
-          <h5 class="card-title fw-bolder">{{Fin.with_benefits}}</h5>
+          <h5 class="card-title fw-bolder">{{fin.with_benefits}}</h5>
         </div>
       </div>
     </div>
@@ -254,7 +254,7 @@
         labels: labels,
         datasets: [{
           data: rec,
-          lineTension: 0,
+          lineTension: 0.3,
           backgroundColor: 'transparent',
           borderColor: '#007bff',
           borderWidth: 4,
@@ -349,7 +349,8 @@
         <div class="card-header">{{ user.phone_number }}</div>
         <div class="card-body">
           <h5 class="card-title fw-bolder">{{ user.username }}</h5>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec" data-bs-whatever="{{ user.username }}">Показать чеки</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalrec"
+            data-bs-whatever="{{ user.username }}">Показать чеки</button>
         </div>
       </div>
     </div>
@@ -451,7 +452,9 @@
       </tbody>
     </table>
   </div>
-
+  <button class="text-danger text-start mb-5" style="background: none; border: none; text-decoration: underline;"
+    type="button" data-bs-toggle="modal" data-bs-target="#exampleModalD" data-bs-whatever="{{ reg_num }}">Удалить
+    парковку</button>
 </main>
 <script>
   var outclosed = true
@@ -469,16 +472,40 @@
     }
   }
 
-  const exampleModalD = document.getElementById('modalrec')
-    if (exampleModalD) {
-      exampleModalD.addEventListener('show.bs.modal', event => {
-        const buttonD = event.relatedTarget
-        const recipientD = buttonD.getAttribute('data-bs-whatever')
-        const modalTitleD = exampleModalD.querySelector('#modelrecLabel')
-        document.getElementById('submitD').setAttribute('value', recipientD)
+  const modelrex = document.getElementById('modalrec')
+  if (modelrex) {
+    modelrex.addEventListener('show.bs.modal', event => {
+      const buttonD = event.relatedTarget
+      const recipientD = buttonD.getAttribute('data-bs-whatever')
+      const modalTitleD = modelrex.querySelector('#modelrecLabel')
 
-        modalTitleD.textContent = `${recipientD}`
-      })
-    }
+      modalTitleD.textContent = `${recipientD}`
+    })
+  }
+
+  const exampleModalD = document.getElementById('exampleModalD')
+  if (exampleModalD) {
+    exampleModalD.addEventListener('show.bs.modal', event => {
+      const buttonD = event.relatedTarget
+      const recipientD = buttonD.getAttribute('data-bs-whatever')
+      const modalTitleD = exampleModalD.querySelector('#exampleModalLabelD')
+      document.getElementById('submitD').setAttribute('value', recipientD)
+
+      modalTitleD.textContent = `Реестровый номер: ${recipientD}`
+    })
+  }
+
+  const exampleModal = document.getElementById('exampleModal')
+  if (exampleModal) {
+    exampleModal.addEventListener('show.bs.modal', event => {
+      const button = event.relatedTarget
+      const recipient = button.getAttribute('data-bs-whatever')
+      const modalTitle = exampleModal.querySelector('.modal-title')
+
+      document.getElementById('submit').setAttribute('value', recipient)
+
+      modalTitle.textContent = `Реестровый номер: ${recipient}`
+    })
+  }
 </script>
 {% endblock %}

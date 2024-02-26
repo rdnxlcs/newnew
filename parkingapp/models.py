@@ -8,7 +8,7 @@ class User(AbstractUser):
     card_num = models.PositiveBigIntegerField(default=0000)
     username = models.CharField(max_length=20, unique=True)
     phone_number = models.CharField(max_length=16, default=" ", unique=True)
-    park_id = models.IntegerField(default=0)
+    park_id = models.CharField(default='', max_length=100)
     car_num = models.CharField(max_length=12, default='', unique=True)
     user_control = models.BooleanField(default=False)
     parking_control = models.BooleanField(default=False)
