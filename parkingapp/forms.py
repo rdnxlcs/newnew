@@ -79,7 +79,7 @@ class AdminRegistrationForm(UserCreationForm):
     }))
     password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': 'form-control rounded-4',
-        'placeholder': 'Пароль',
+        'placeholder': 'Пароль ещё раз',
         'minlength': 8
     }))
     user_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={

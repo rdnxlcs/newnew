@@ -165,8 +165,13 @@ def sign(request):
     error = ''
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
-        if form.is_valid() and form.cleaned_data['password'] == form.cleaned_data['password2']:
-            form = form.save()
+        car_nums = [i.car_num for i in User.objects.all()]
+        phone_nums = [i.phone_number for i in User.objects.all()]
+        print(car_nums, phone_nums)
+        if form.is_valid() and form.cleaned_data['password'] == form.cleaned_data['password2'] and form.cleaned_data['car_num'] not in car_nums and form.cleaned_data['phone_number'] not in phone_nums:
+            user = form.save()
+            user.set_password(form.cleaned_data['password'])
+            user.save()
             return HttpResponseRedirect(reverse('parkingapp:enter'))
         else:
             print(form.errors)
@@ -182,8 +187,10 @@ def sign(request):
 
 def enter(request):
     error = ''
+
     if request.method == 'POST':
         form = UserLoginForm(data=request.POST)
+
         if form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
@@ -195,6 +202,7 @@ def enter(request):
                 else:
                     return HttpResponseRedirect(reverse('parkingapp:index')) 
         else:
+            print(form.errors)
             error = 'Не удалось войти'
 
     else:
@@ -265,9 +273,10 @@ def signadmin(request):
         form = AdminRegistrationForm(data=request.POST)
         addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
         form.fields['park_id'].choices = tuple(addresses)
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.save()
+        if form.is_valid() and form.cleaned_data['password'] == form.cleaned_data['password2']:
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
             return HttpResponseRedirect(reverse('parkingapp:dash_users'))
         else:
             error = 'Не удалось зарегистрировать пользователя'
