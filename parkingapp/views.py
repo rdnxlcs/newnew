@@ -53,7 +53,7 @@ def index(request):
             seconds -= minutes * 60
             seconds = int(seconds)
             price_per_minute = el.price_per_hour / 60
-            if minutes <= 14:
+            if minutes <= 15:
                 price_per_minute = 0
             bdsm.append([el, parkingxd.address, f'{minutes:02}', f'{seconds:02}', int(price_per_minute * minutes)])
     except Exception as e:
@@ -300,29 +300,15 @@ def coupon(request):
         return redirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':
-        form = CouponForm(data=request.POST)
-        if form.is_valid():
-            pk = request.POST['user_reciept_id']
-            reciept = Reciept.objects.filter(pk=pk)
-            if reciept and not reciept[0].benefit and reciept[0].final_price == -1:
-                reciept = reciept[0]
-                reciept.benefit = True
-                reciept.final_start_time = datetime.now().replace(tzinfo=None)
-                reciept.save()
-                
-                return HttpResponseRedirect(reverse('parkingapp:coupon'))
-    else:
-        if request.method == 'POST':
+        if 'car' in request.POST:
             form = CouponForm(data=request.POST)
             if form.is_valid():
                 car_num = request.POST['car'].upper()
-                # phone_number = request.POST['phone']
                 user = User.objects.filter(car_num=car_num)
-                # user = User.objects.filter(phone_number)
                 if user:
                     user = user[0]
                     reciept = Reciept.objects.filter(user_id=user.pk, final_price=-1)
-                    if reciept and not reciept[0].benefit and reciept[0].final_price == -1:
+                    if reciept and not reciept[0].benefit and reciept[0].final_price == -1 and request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
                         reciept = reciept[0]
                         reciept.benefit = True
                         reciept.final_start_time = datetime.now().replace(tzinfo=None)
@@ -332,10 +318,31 @@ def coupon(request):
                     else:
                         error = 'У пользователя нет чеков'
 
-            else:
-                error = 'Не удалось выдать льготу'
+                else:
+                    error = 'Не удалось выдать льготу'
+        elif 'phone' in request.POST:
+            form = CouponForm(data=request.POST)
+            if form.is_valid():
+                phone_number = request.POST['phone'].upper()
+                user = User.objects.filter(phone_number=phone_number)
+                if user:
+                    user = user[0]
+                    reciept = Reciept.objects.filter(user_id=user.pk, final_price=-1)
+                    if reciept and not reciept[0].benefit and request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
+                        reciept = reciept[0]
+                        reciept.benefit = True
+                        reciept.final_start_time = datetime.now().replace(tzinfo=None)
+                        reciept.save()
+                        
+                        return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                    else:
+                        error = 'Не удалось выдать льготу'
 
-    form = CouponForm()
+                else:
+                    error = 'Не удалось выдать льготу'
+            
+    else:
+        form = CouponForm()
     
     context = {
         'title': 'Обнуление чеков',
