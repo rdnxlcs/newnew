@@ -127,6 +127,7 @@
         </div>
       </div>
     </div>
+    {% if user.is_superadmin %}
     <div class="col-sm-6">
       <div class="card h-100">
         <div class="card-header">Секрет</div>
@@ -135,6 +136,8 @@
         </div>
       </div>
     </div>
+    {% endif %}
+    {% if user.is_superadmin or user.parking_control %}
     <div class="col-sm-6">
       <div class="card h-100">
         <div class="card-header">Цена за час</div>
@@ -145,7 +148,9 @@
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
+  {% if user.barrier_control %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Управление шлагбаумом</h1>
   </div>
@@ -168,8 +173,8 @@
       </div>
     </div>
   </div>
-
-
+  {% endif %}
+  {% if user.export_right %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Финансовый отчет</h1>
   </div>
@@ -208,12 +213,14 @@
       </div>
     </div>
   </div>
-
+  {% endif %}
+  {% if user.export_right %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Наполняемость</h1>
     <small class="text-danger text">{{ error }}</small>
   </div>
-
+  {% endif %}
+  {% if user.export_right %}
   <div class="row g-3">
     <div class="col-sm-6">
       <div class="card">
@@ -337,7 +344,6 @@
     })
   </script>
 
-
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Пользователи с подозрительной активностью</h1>
   </div>
@@ -356,6 +362,8 @@
     </div>
     {% endfor %}
   </dl>
+  {% endif %}
+  {% if user.is_superadmin %}
 
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Пользователи</h1>
@@ -420,7 +428,8 @@
       </tbody>
     </table>
   </div>
-
+  {% endif %}
+  {% if user.parking_control or user.export_right %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Чеки</h1>
   </div>
@@ -452,9 +461,12 @@
       </tbody>
     </table>
   </div>
+  {% endif %}
+  {% if user.parking_control %}
   <button class="text-danger text-start mb-5" style="background: none; border: none; text-decoration: underline;"
     type="button" data-bs-toggle="modal" data-bs-target="#exampleModalD" data-bs-whatever="{{ reg_num }}">Удалить
     парковку</button>
+  {% endif %}
 </main>
 <script>
   var outclosed = true

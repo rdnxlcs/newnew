@@ -28,9 +28,9 @@
       <hr class="my-4">
 
       <div class="form-check my-3">
-        {{ form.user_control }}
+        {{ form.is_superadmin }}
         <label class="form-check-label" for="flexCheckChecked">
-          Управление пользователями
+          Супер администратор
         </label>
       </div>
       <div class="form-check my-3">
@@ -52,9 +52,9 @@
         </label>
       </div>
       <div class="form-check my-3">
-        {{ form.admin_view }}
+        {{ form.export_right }}
         <label class="form-check-label" for="flexCheckChecked">
-          Просмотр панели администратора
+          Права просмотра и экспорта базы данных
         </label>
       </div>
       <div class="form-check my-3 mb-4">
@@ -90,20 +90,44 @@
   }
 
   function check() {
-    var users = document.getElementById('user_control').checked
-    var parks = document.getElementById('parking_control').checked
-    var admin = document.getElementById('admin_view').checked
-    if ((users || parks) & !(admin)) {
-      document.getElementById('admin_view').click()
-      document.getElementById('admin_view').setAttribute('disabled', 'true')
-    } else if (users || parks) {
-      document.getElementById('admin_view').setAttribute('disabled', 'true')
+    var superadmin = document.getElementById('is_superadmin')
+    var parking_lot = document.getElementById('parking_lot')
+    var coupon_control = document.getElementById('coupon_control')
+    var export_right = document.getElementById('export_right')
+    var parking_control = document.getElementById('parking_control')
+    var barrier_control = document.getElementById('barrier_control')
+
+    if (superadmin.checked) {
+      parking_lot.checked = true
+      coupon_control.checked = true
+      export_right.checked = true
+      parking_control.checked = true
+      barrier_control.checked = true
+
+      coupon_control.setAttribute('disabled', 'true')
+      export_right.setAttribute('disabled', 'true')
+      parking_control.setAttribute('disabled', 'true')
+      barrier_control.setAttribute('disabled', 'true')
+
     } else {
-      document.getElementById('admin_view').removeAttribute('disabled')
+      parking_lot.checked = false
+      coupon_control.checked = false
+      export_right.checked = false
+      parking_control.checked = false
+      barrier_control.checked = false
+
+      coupon_control.removeAttribute('disabled')
+      export_right.removeAttribute('disabled')
+      parking_control.removeAttribute('disabled')
+      barrier_control.removeAttribute('disabled')
     }
   }
   function help() {
-    document.getElementById('admin_view').removeAttribute('disabled')
+    coupon_control.removeAttribute('disabled')
+    export_right.removeAttribute('disabled')
+    parking_control.removeAttribute('disabled')
+    barrier_control.removeAttribute('disabled')
+    parking_lot.removeAttribute('disabled')
   }
 </script>
 {% endblock %}

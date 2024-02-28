@@ -162,6 +162,7 @@
               </li>
 
             </ul>
+            {% if user.export_right %}
             <h6
               class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
               <span>Отчеты</span>
@@ -188,12 +189,15 @@
                   Подозрительная активность
                 </a>
               </li>
-
+            </ul>
+            {% endif %}
+            {% if user.parking_control or user.export_right or user.is_superadmin %}
               <h6
                 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
                 <span>Базы данных</span>
               </h6>
               <ul class="nav flex-column mb-auto">
+                {% if user.is_superadmin %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block usersact %}{% endblock %}"
                     href="{% url 'parkingapp:dash_users' %}">
@@ -201,6 +205,8 @@
                     Пользователи
                   </a>
                 </li>
+                {% endif %}
+                {% if user.parking_control or user.export_right %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block parksact %}{% endblock %}"
                     href="{% url 'parkingapp:dash_parks' %}">
@@ -208,6 +214,8 @@
                     Парковки
                   </a>
                 </li>
+                {% endif %}
+                {% if user.parking_control or user.export_right %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block recact %}{% endblock %}"
                     href="{% url 'parkingapp:dash_reciepts' %}">
@@ -215,12 +223,17 @@
                     Чеки
                   </a>
                 </li>
+                {% endif %}
               </ul>
+            {% endif %}
+              {% if user.coupon_control %}
               <h6
                 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
                 <span>Действия</span>
               </h6>
+              
               <ul class="nav flex-column mb-auto">
+                
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block couponact %}{% endblock %}"
                     href="{% url 'parkingapp:coupon' %}">
@@ -230,11 +243,14 @@
                 </li>
 
               </ul>
+            {% endif %}
+              {% if user.parking_control or user.is_superadmin %}
               <h6
                 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
                 <span>Добавление</span>
               </h6>
               <ul class="nav flex-column mb-auto">
+                {% if user.parking_control %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block addact %}{% endblock %}"
                     href="{% url 'parkingapp:addparking' %}">
@@ -242,6 +258,8 @@
                     Новая парковка
                   </a>
                 </li>
+                {% endif %}
+                {% if user.is_superadmin %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2 {% block signact %}{% endblock %}"
                     href="{% url 'parkingapp:signadmin' %}">
@@ -249,9 +267,9 @@
                     Новый пользователь
                   </a>
                 </li>
-
+                {% endif %}
               </ul>
-
+              {% endif %}
               <hr class="my-3">
 
               <ul class="nav flex-column mb-auto">
@@ -262,12 +280,14 @@
                     Профиль
                   </a>
                 </li>
+                {% if user.export_right %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2" href="{% url 'parkingapp:export' %}">
                     <i class="bi bi-box-arrow-up"></i>
                     Экспорт
                   </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                   <a class="nav-link d-flex align-items-center gap-2" href="/pptx">
                     <i class="bi bi-easel-fill"></i>

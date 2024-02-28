@@ -14,14 +14,13 @@ from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrat
 import random
 import pandas as pd
 from parkingapp.global_variables import global_variables
-exit(0)
 
 @login_required(redirect_field_name=None)
 def index(request):
     form = CommitParkingForm()
     
-    # if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
-    #     return redirect(reverse('parkingapp:dont_have_access'))
+    if any([request.user.is_superadmin, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.export_right, request.user.parking_lot_view]):
+         return redirect(reverse('parkingapp:dont_have_access'))
     
     try:
         parkings = []
@@ -198,7 +197,7 @@ def enter(request):
             user = auth.authenticate(username=username, password=password)
             if user:
                 auth.login(request, user)
-                if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+                if any([request.user.is_superadmin, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.export_right, request.user.parking_lot_view]):
                     return HttpResponseRedirect(reverse('parkingapp:dash_full')) 
                 else:
                     return HttpResponseRedirect(reverse('parkingapp:index')) 
@@ -267,7 +266,7 @@ def addparking(request):
 @login_required(redirect_field_name=None)
 def signadmin(request):
     error = ''
-    if not request.user.user_control:
+    if not request.user.is_superadmin:
         return HttpResponseRedirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':    
@@ -361,7 +360,7 @@ def barrier(request):
 
 @login_required(redirect_field_name=None)
 def dash_corr(request):
-    if not request.user.admin_view:
+    if not request.user.export_right:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     users = User.objects.all()
@@ -400,6 +399,9 @@ def convert_data(DB):
 
 @login_required(redirect_field_name=None)       
 def export(request):
+    if not request.user.export_right:
+        return redirect(reverse('parkingapp:dont_have_access'))
+    
     df = pd.DataFrame(convert_data(Parking.objects.all()))
 
     writer = pd.ExcelWriter('parkingapp/static/data.xlsx', engine='xlsxwriter')
@@ -446,7 +448,7 @@ def profile(request):
         'user': User.objects.filter(pk=request.user.pk)[0], 
         'bdsm': bdsm
     }
-    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+    if any([request.user.is_superadmin, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.export_right, request.user.parking_lot_view]):
         return redirect(reverse('parkingapp:dash_profile'))
     else:
         return render(request, 'profile.html', context)
@@ -456,7 +458,7 @@ def dash_profile(request):
     context = {
         'user': User.objects.filter(pk=request.user.pk)[0], 
     }
-    if any([request.user.user_control, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.admin_view, request.user.parking_lot_view]):
+    if any([request.user.is_superadmin, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.export_right, request.user.parking_lot_view]):
         return render(request, 'dash_profile.html', context)
     else: 
         return redirect(reverse('parkingapp:profile'))
@@ -690,6 +692,8 @@ def corr_detector():
 
 @login_required(redirect_field_name=None)
 def dash_full(request):
+    if not request.user.export_right:
+        return redirect(reverse('parkingapp:dont_have_access'))
     # Переменные по умолчанию
     error = ''
     form = DashForm()
@@ -700,7 +704,7 @@ def dash_full(request):
     addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
     form.fields['reg_num'].choices = tuple(addresses)
 
-    if not request.user.admin_view: 
+    if not request.user.export_right: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':  
@@ -756,7 +760,7 @@ def dash_parks(request):
     parkings = Parking.objects.all()
     error = ''
 
-    if not request.user.parking_control: 
+    if not request.user.parking_control and not request.user.export_right: 
         return redirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':
@@ -799,7 +803,7 @@ def dash_fin(request):
 
     fin = data(period_start, period_end)
     
-    if not request.user.admin_view:
+    if not request.user.export_right:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     if request.method == 'POST':
@@ -830,7 +834,7 @@ def dash_fin(request):
 
 @login_required(redirect_field_name=None)
 def dash_users(request):
-    if not request.user.user_control:
+    if not request.user.is_superadmin:
         return redirect(reverse('parkingapp:dont_have_access'))
 
     if request.method == 'POST':
@@ -848,7 +852,7 @@ def dash_users(request):
 
 @login_required(redirect_field_name=None)
 def dash_reciepts(request):
-    if not request.user.admin_view:
+    if not request.user.export_right and not request.user.parking_control:
         return redirect(reverse('parkingapp:dont_have_access'))
     
     reciepts = Reciept.objects.all()
@@ -914,8 +918,8 @@ def dash_main(request):
     addresses = [tuple([park.reg_num, park.address]) for park in list(Parking.objects.all())]
     form.fields['reg_num'].choices = tuple(addresses)
 
-    if not request.user.admin_view: 
-        return redirect(reverse('parkingapp:dont_have_access'))
+    if not any([request.user.is_superadmin, request.user.parking_control, request.user.barrier_control, request.user.coupon_control, request.user.export_right, request.user.parking_lot_view]):
+         return redirect(reverse('parkingapp:dont_have_access'))
     
     if request.method == 'POST':
 

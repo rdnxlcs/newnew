@@ -16,7 +16,7 @@ class User(AbstractUser):
     export_right = models.BooleanField(default=False)
     parking_lot_view = models.BooleanField(default=False)
     def __str__(self) -> str:
-        return f'{self.username} | user control {self.user_control} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.admin_view}'
+        return f'{self.username} | user control {self.is_superadmin} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.export_right}'
     
 
 class Parking(models.Model):

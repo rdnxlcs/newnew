@@ -46,16 +46,16 @@
         <tr>
           <td>{{ el.pk }}</td>
           <td>{{ el.username }}</td>
-          <td class="{% if el.user_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
-            {{ el.user_control }}</td>
+          <td class="{% if el.is_superadmin %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
+            {{ el.is_superadmin }}</td>
           <td class="{% if el.parking_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.parking_control }}</td>
           <td class="{% if el.barrier_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.barrier_control }}</td>
           <td class="{% if el.coupon_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.coupon_control }}</td>
-          <td class="{% if el.admin_view %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
-            {{ el.admin_view }}</td>
+          <td class="{% if el.export_right %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
+            {{ el.export_right }}</td>
           <td>{{ el.park_id }}</td>
           <td class="{% if el.parking_lot_view %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.parking_lot_view }}</td>

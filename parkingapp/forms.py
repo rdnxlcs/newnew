@@ -82,46 +82,50 @@ class AdminRegistrationForm(UserCreationForm):
         'placeholder': 'Пароль ещё раз',
         'minlength': 8
     }))
-    user_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+    is_superadmin = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
         'onclick': 'check()',
-        'id': 'user_control',
+        'id': 'is_superadmin',
     }))
     parking_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
-        'onclick': 'check()',
         'id': 'parking_control',
     }))
     barrier_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
+        'id': 'barrier_control',
     }))
     coupon_control = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'onclick': 'temp()',
         'type': 'checkbox',
+        'id': 'coupon_control',
     }))
-    admin_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
+    export_right = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
-        'id': 'admin_view',
+        'id': 'export_right',
     }))
     parking_lot_view = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={
         'class': 'form-check-input',
         'type': 'checkbox',
         'id': 'parking_lot',
+        'disabled': 'true',
     }))
     park_id = forms.ChoiceField(required=False, choices=(), widget=forms.Select(attrs={
         'class': 'form-select rounded-4',
         'value': ''
     }))
     password1 = forms.CharField(required=False)
+    user_control = forms.ChoiceField(required=False)
+    admin_view = forms.ChoiceField(required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'user_control', 'parking_control', 'barrier_control', 'coupon_control', 'admin_view', 'parking_lot_view', 'park_id']
+        fields = ['username', 'password', 'is_superadmin', 'parking_control', 'barrier_control', 'coupon_control', 'export_right', 'parking_lot_view', 'park_id']
 class CouponForm(forms.Form):
     car = forms.CharField(required=False, widget=forms.NumberInput(attrs={
         'type': 'text',
