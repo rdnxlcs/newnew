@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import *
-from dateutil import tz
 # from phonenumber_field.modelfields import PhoneNumberField
 tzname = datetime.now().astimezone().tzname()
 class User(AbstractUser):
@@ -10,11 +9,11 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=16, default=" ")
     park_id = models.CharField(default='', max_length=100)
     car_num = models.CharField(max_length=12, default='')
-    user_control = models.BooleanField(default=False)
+    is_superadmin = models.BooleanField(default=False)
     parking_control = models.BooleanField(default=False)
     barrier_control = models.BooleanField(default=False)
     coupon_control = models.BooleanField(default=False)
-    admin_view = models.BooleanField(default=False)
+    export_right = models.BooleanField(default=False)
     parking_lot_view = models.BooleanField(default=False)
     def __str__(self) -> str:
         return f'{self.username} | user control {self.user_control} | park control {self.parking_control} | barr control {self.barrier_control} | coupon_control {self.coupon_control} | admin_view {self.admin_view}'

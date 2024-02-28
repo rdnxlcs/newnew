@@ -14,6 +14,7 @@ from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrat
 import random
 import pandas as pd
 from parkingapp.global_variables import global_variables
+exit(0)
 
 @login_required(redirect_field_name=None)
 def index(request):
