@@ -110,10 +110,10 @@
     let recieptsC = JSON.parse(rC);
     let labelsC = [], recC = [];
     let nameC = recieptsC["name"];
-    let keysC = Object.keys(recieptsC["period"]);
+    let keysC = Object.keys(recieptsC["free-period"]);
     for (let i = 0; i < keys.length; i++) {
       labelsC.push(keys[i]);
-      recC.push(recieptsC["period"][keys[i]]);
+      recC.push(recieptsC["free-period"][keys[i]]);
     }
 
     // eslint-disable-next-line no-unused-vars

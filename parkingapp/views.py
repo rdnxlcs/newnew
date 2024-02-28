@@ -307,17 +307,19 @@ def coupon(request):
                 user = User.objects.filter(car_num=car_num)
                 if user:
                     user = user[0]
-                    reciept = Reciept.objects.filter(user_id=user.pk, final_price=-1)
-                    if reciept and not reciept[0].benefit and reciept[0].final_price == -1 and request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
-                        reciept = reciept[0]
-                        reciept.benefit = True
-                        reciept.final_start_time = datetime.now().replace(tzinfo=None)
-                        reciept.save()
-                        
-                        return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                    reciept = Reciept.objects.filter(user_id=int(user.pk), final_price=-1)
+                    if request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
+                        if reciept and not reciept[0].benefit:
+                            reciept = reciept[0]
+                            reciept.benefit = True
+                            reciept.final_start_time = datetime.now().replace(tzinfo=None)
+                            reciept.save()
+                            
+                            return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                        else:
+                            error = 'У пользователя нет чеков'
                     else:
-                        error = 'У пользователя нет чеков'
-
+                        error = 'Нет прав'
                 else:
                     error = 'Не удалось выдать льготу'
         elif 'phone' in request.POST:
@@ -608,9 +610,9 @@ def spice(period_start, period_end, reg_num, park):
             for el in reciepts:
                 if el.parking_id == reg_num:
                     etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                    if ctime <= etime <= ctime+delta:
                         reciepts_to_send["period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
-                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                    if ctime <= etime <= ctime+delta and el.benefit:
                         reciepts_to_send["free-period"][str(ctime.hour)+'-'+str(ctime.day)] += 1
 
             ctime += delta
@@ -629,9 +631,9 @@ def spice(period_start, period_end, reg_num, park):
             for el in reciepts:
                 if el.parking_id == reg_num:
                     etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                    if ctime <= etime <= ctime+delta:
                         reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-                    elif ctime <= etime <= ctime+delta and (el.finish_time - el.start_time <= timedelta(minutes=15) or el.benefit):
+                    if ctime <= etime <= ctime+ delta and el.benefit:
                         reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
             ctime += delta
         reciepts_to_send = str(reciepts_to_send) 
@@ -652,9 +654,9 @@ def spice(period_start, period_end, reg_num, park):
             
                 if el.parking_id == reg_num:
                     etime = datetime(el.start_time.year, el.start_time.month, el.start_time.day, el.start_time.hour, el.start_time.minute, el.start_time.second, tzinfo=None)
-                    if ctime <= etime <= ctime+delta and el.finish_time - el.start_time > timedelta(minutes=15):
+                    if ctime <= etime <= ctime+delta:
                         reciepts_to_send['period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
-                    elif ctime <= etime <= ctime+delta and el.finish_time - el.start_time <= timedelta(minutes=15):
+                    if ctime <= etime <= ctime+delta and el.benefit:
                         reciepts_to_send['free-period'][str(ctime.day)+'.'+str(ctime.month)+'-'+str((ctime+delta).day)+'.'+str((ctime+delta).month)] += 1
                 
             ctime += delta
