@@ -19,5 +19,4 @@ def main():
 
 import os
 if __name__ == '__main__':
-    os.system('sudo shutdown -h now')
     main()

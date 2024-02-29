@@ -5,75 +5,105 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ЕСП</title>
+  <style>
+    #bd {
+      background: url('/static/9.png');
+      background-size: auto 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    #link {
+      color: #0d6efd; 
+      position: absolute; 
+      top: 50vh; 
+      left: calc(50vw - 106px);
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+      font-weight: 700;
+    }
+  </style>
 </head>
 
-<body style="background: #F8F8F8; padding: 0; margin: 0; overflow: hidden;">
-  {% load static %}
-  <img id="img" src="/static/9.png" style="width: auto; height: auto;">
+<body style="padding: 0; margin: 0; overflow: hidden; background: #F7F7F7;">
+  <div id="bd" >
+    <div class="">
+    <button onclick="previos()" id="previos" style="position: absolute; bottom: 1vh; right: 60vw; border: none; background: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+      </svg>
+    </button>
+    <a hidden id="link" href="{% url 'parkingapp:dash_main' %}">к панели администратора</a>
+    <button onclick="next()" id="next" style="position: absolute; bottom: 1vh; left: 60vw; border: none; background: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
+      </svg>
+    </button>
+    </div>
+  </div>
 </body>
 <script>
-  var el = document.getElementById('img')
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  var aspect = width / height;
+  var slide = 9
 
-  if (aspect >= (16 / 9)) {
-    el.style.width = ''
-    el.style.height = '100vh'
-  } else {
-    el.style.width = '100vw'
-    el.style.height = ''
-  }
-
-  el.style.marginLeft = 'calc(50% - ' + String(document.getElementById('img').offsetWidth / 2) + 'px)'
-
-  window.onresize = function () {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    var aspect = width / height;
-
-    if (aspect >= (16 / 9)) {
-      el.style.width = ''
-      el.style.height = '100vh'
+  window.onresize = re
+  function re(event) {
+    bg_size = document.getElementById('bd').style.backgroundSize
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    if (width / height > 16 / 9) {
+      document.getElementById('bd').style.backgroundSize = 'auto 100%'
     } else {
-      el.style.width = '100vw'
-      el.style.height = ''
+      document.getElementById('bd').style.backgroundSize = '100% auto'
     }
-
-    el.style.marginLeft = 'calc(50% - ' + String(document.getElementById('img').offsetWidth / 2) + 'px)'
   };
 
-  document.addEventListener(
-    "keydown",
-    (event) => {
-      const keyCode = event.keyCode;
-      console.log(el.getAttribute('src').split('.')[0].slice(8))
-      var slide = parseInt((el.getAttribute('src')).split('.')[0].slice(8))
+  re()
 
+  function check() {
+    if (slide == 8) {
+      document.getElementById('link').removeAttribute('hidden')
+    } else {
+      document.getElementById('link').setAttribute('hidden', 'true')
+    }
+  }
 
-      if (keyCode == 39) {
-        slide++;
-        el.setAttribute('src', '/static/' + String(slide) + '.png')
-        if (slide == 8) {
-          el.setAttribute('onclick', 'document.location.href = "/dash_full"')
-        } else {
-          el.removeAttribute('onclick')
-        }
-        return;
-      }
-      if (keyCode == 37) {
-        slide--;
-        el.setAttribute('src', '/static/' + String(slide) + '.png')
-        if (slide == 8) {
-          el.setAttribute('onclick', 'document.location.href = "/dash_full"')
-        } else {
-          el.removeAttribute('onclick')
-        }
-        return;
-      }
-    },
-    false,
-  );
+  function previos() {
+    slide--
+    img = "url('/static/" + String(slide) + ".png')"
+    document.getElementById('bd').style.cssText = `
+      background: ${img};
+      background-size: auto 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    `;
+    re()
+    check()
+  }
+  function next() {
+    slide++
+    img = "url('/static/" + String(slide) + ".png')"
+    document.getElementById('bd').style.cssText = `
+      background: ${img};
+      background-size: auto 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    `;
+    re()
+    check()
+  }
 </script>
 
 </html>
