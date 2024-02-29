@@ -50,18 +50,37 @@
 
   window.onresize = re
   function re(event) {
-    bg_size = document.getElementById('bd').style.backgroundSize
+    img = 'url("/static/' + String(slide) + '.png")'
     const width = window.innerWidth;
     const height = window.innerHeight;
     if (width / height > 16 / 9) {
-      document.getElementById('bd').style.backgroundSize = 'auto 100%'
+      document.getElementById('bd').style.cssText = `
+      background: ${img};
+      background-size: auto 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    `;
     } else {
-      document.getElementById('bd').style.backgroundSize = '100% auto'
+      document.getElementById('bd').style.cssText = `
+      background: ${img};
+      background-size: 100% auto;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    `;
     }
   };
 
   re()
-
   function check() {
     if (slide == 8) {
       document.getElementById('link').removeAttribute('hidden')

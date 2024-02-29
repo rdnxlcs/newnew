@@ -306,15 +306,15 @@
   <canvas class="my-4 w-100" id="myChartC" width="900" height="380"></canvas>
   <script>
     const ctxC = document.getElementById('myChartC');
-    let rC = "{{reciepts_benefit}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
+    let rC = "{{reciepts}}".replace(/&quot;/g, "").replace(/&#x27;/g, "\"");
     console.log(r);
     let recieptsC = JSON.parse(rC);
     let labelsC = [], recC = [];
     let nameC = recieptsC["name"];
-    let keysC = Object.keys(recieptsC["period"]);
+    let keysC = Object.keys(recieptsC["free-period"]);
     for (let i = 0; i < keys.length; i++) {
       labelsC.push(keys[i]);
-      recC.push(recieptsC["period"][keys[i]]);
+      recC.push(recieptsC["free-period"][keys[i]]);
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -324,7 +324,7 @@
         labels: labelsC,
         datasets: [{
           data: recC,
-          lineTension: 0,
+          lineTension: 0.3,
           backgroundColor: 'transparent',
           borderColor: '#dc3545',
           borderWidth: 4,
@@ -376,13 +376,13 @@
         <tr>
           <th scope="col">ID</th>
           <th scope="col">Имя пользователя</th>
-          <th scope="col">Управление пользователями</th>
+          <th scope="col">Супер администратор</th>
           <th scope="col">Управление парковками</th>
           <th scope="col">Управление шлагбаумами</th>
           <th scope="col">Обнуление чеков</th>
-          <th scope="col">Просмотр панели администратора</th>
+          <th scope="col">Экспорт БД</th>
           <th scope="col">Прикреплен к парковке</th>
-          <th scope="col">Является парковкой</th>
+          <th scope="col">Просмотр секретных ключей</th>
           <th scope="col">Действие</th>
         </tr>
       </thead>
@@ -409,7 +409,7 @@
           <td>{{ el.pk }}</td>
           <td>{{ el.username }}</td>
           <td class="{% if el.user_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
-            {{ el.user_control }}</td>
+            {{ el.is_superadmin }}</td>
           <td class="{% if el.parking_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.parking_control }}</td>
           <td class="{% if el.barrier_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
@@ -417,7 +417,7 @@
           <td class="{% if el.coupon_control %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.coupon_control }}</td>
           <td class="{% if el.admin_view %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
-            {{ el.admin_view }}</td>
+            {{ el.export_right }}</td>
           <td>{{ el.park_id }}</td>
           <td class="{% if el.parking_lot_view %} bg-success-subtle {% else %} bg-danger-subtle {% endif %}">
             {{ el.parking_lot_view }}</td>
