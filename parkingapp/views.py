@@ -11,7 +11,7 @@ from django.http import JsonResponse
 import ymaps
 import json
 from parkingapp.forms import UserLoginForm, UserRegistrationForm, AdminRegistrationForm, CouponForm, DashForm, DashfinForm, ChangePriceForm, AddParkingForm, CommitParkingForm
-import random
+from random import randint, choice, choices
 import pandas as pd
 from parkingapp.global_variables import global_variables
 
@@ -19,7 +19,48 @@ from parkingapp.global_variables import global_variables
 def handler404(request, *args, **kwargs):
     return render(request, 'error.html')
 
+def data_xd(request):
+    for parking in Parking.objects.all():
+        users = User.objects.filter(is_superadmin=False, parking_lot_view=False, export_right=False, parking_control=False, coupon_control=False, barrier_control=False)
+        k = randint(1, 5)
+        for i in range(k):
+            user = choice(users).pk
+            reg_num = parking.reg_num
+            day_beg = randint(10, 29)
+            hour_beg = randint(0, 23)
+            minute = randint(0, 59)
+            second = randint(0, 59)
+            data_beg = datetime(2024, 2, day_beg, hour_beg, minute, second, tzinfo=None)
+            min = randint(10, 70)
+            delta = timedelta(minutes=min)
+            data_end = data_beg + delta
+            
+            if min <= 15:
+                price = 0
+            else:
+                hours = delta.total_seconds()/3600
+                price = int(parking.price_per_hour * hours)
 
+            benefit = randint(1, 10)
+            benefit = 10
+            if benefit <= 7: # без льготы
+                Reciept.objects.create(start_time=data_beg, final_start_time=data_beg, finish_time=data_end, final_price=price, benefit=0, user_id=user, parking_id=reg_num, price_per_hour=parking.price_per_hour)
+            else: # со льготой
+                if min >= 25:
+                    min = randint(10, 20)
+                    delta_benefit = timedelta(minutes=min)
+                    data_finalbeg = data_end - delta_benefit
+                    if min <= 15:
+                        price = 0
+                    else:
+                        hours = delta_benefit.total_seconds()/3600
+                        price = int(parking.price_per_hour * hours)
+                    Reciept.objects.create(start_time=data_beg, final_start_time=data_finalbeg, finish_time=data_end, final_price=price, benefit=1, user_id=user, parking_id=reg_num, price_per_hour=parking.price_per_hour)
+                else:
+                    Reciept.objects.create(start_time=data_beg, final_start_time=data_beg, finish_time=data_end, final_price=price, benefit=0, user_id=user, parking_id=reg_num, price_per_hour=parking.price_per_hour)
+            
+                    
+    return redirect(reverse('parkingapp:dash_main'))
 @login_required(redirect_field_name=None)
 def index(request):
     form = CommitParkingForm()
@@ -90,7 +131,7 @@ def index(request):
                         context['form'] = form
                         return render(request, 'index.html', context)
                     else:
-                        extremecode = str(random.randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
+                        extremecode = str(randint(1000, 9999)) + f'{parking.pk:03}' # subscribe!!!
                         parking.code = extremecode
                         parking.occupied_lots += 1
                         parking.save()
@@ -248,11 +289,11 @@ def addparking(request):
                 occupied_lots = 0
                 alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
                 alph = list(alph)
-                secret = ''.join(random.choices(alph, k=100))
+                secret = ''.join(choices(alph, k=100))
                 Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret)
                 park = Parking.objects.filter(secret=secret)[0]
                 park.reg_num = park.reg_num
-                code = str(random.randint(1000, 9999)) + f'{park.pk:03}' 
+                code = str(randint(1000, 9999)) + f'{park.pk:03}' 
                 park.code = code
                 park.save()
                 return redirect(reverse('parkingapp:dash_parks'))
@@ -313,7 +354,7 @@ def coupon(request):
                 if user:
                     user = user[0]
                     reciept = Reciept.objects.filter(user_id=int(user.pk), final_price=-1)
-                    if request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
+                    if request.user.coupon_control and reciept[0].parking_id == request.user.park_id or request.user.is_staff:
                         if reciept and not reciept[0].benefit:
                             reciept = reciept[0]
                             reciept.benefit = True
@@ -322,11 +363,11 @@ def coupon(request):
                             
                             return HttpResponseRedirect(reverse('parkingapp:coupon'))
                         else:
-                            error = 'У пользователя нет чеков'
+                            error = 'У пользователя нет активных чеков'
                     else:
                         error = 'Нет прав'
                 else:
-                    error = 'Не удалось выдать льготу'
+                    error = 'Нет пользователя с таким номером'
         elif 'phone' in request.POST:
             form = CouponForm(data=request.POST)
             if form.is_valid():
@@ -335,18 +376,20 @@ def coupon(request):
                 if user:
                     user = user[0]
                     reciept = Reciept.objects.filter(user_id=user.pk, final_price=-1)
-                    if reciept and not reciept[0].benefit and request.user.coupon_control and reciept[0].parking_id == request.user.park_id:
-                        reciept = reciept[0]
-                        reciept.benefit = True
-                        reciept.final_start_time = datetime.now().replace(tzinfo=None)
-                        reciept.save()
-                        
-                        return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                    if request.user.coupon_control and reciept[0].parking_id == request.user.park_id or request.user.is_staff:
+                        if reciept and not reciept[0].benefit:
+                            reciept = reciept[0]
+                            reciept.benefit = True
+                            reciept.final_start_time = datetime.now().replace(tzinfo=None)
+                            reciept.save()
+                            
+                            return HttpResponseRedirect(reverse('parkingapp:coupon'))
+                        else:
+                            return 'У пользователя нет активных чеков'
                     else:
-                        error = 'Не удалось выдать льготу'
-
+                        error = 'Нет прав'
                 else:
-                    error = 'Не удалось выдать льготу'
+                    error = 'Нет пользователя с таким номером'
             
     else:
         form = CouponForm()
@@ -1067,9 +1110,9 @@ def create():
         occupied_lots = 0
         alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
         alph = list(alph)
-        secret = ''.join(random.choices(alph, k=100))
+        secret = ''.join(choices(alph, k=100))
         Parking.objects.create(lattitude=lat, longitude=lng, address=address, max_parking_lots=max_parking_lots, occupied_lots=occupied_lots, price_per_hour=price, secret=secret, reg_num=reg_num)
         park = Parking.objects.filter(secret=secret)[0]
-        code = str(random.randint(1000, 9999)) + f'{park.pk:03}'
+        code = str(randint(1000, 9999)) + f'{park.pk:03}'
         park.code = code
         park.save()
