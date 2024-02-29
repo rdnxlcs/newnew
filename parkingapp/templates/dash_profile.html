@@ -16,9 +16,9 @@
     <h1>{{ user.username }}</h1>
     <p>Профиль администратора</p>
     <dl class="row g-3 text-start mx-auto" style="max-width: 450px;">
-      {% if user.user_control %}
+      {% if user.is_superadmin %}
       <div class="rounded-2 border p-3">
-        <dt class="col-sm-9 m-0">Управление пользователями</dt>
+        <dt class="col-sm-9 m-0">Супер администратор</dt>
       </div>
       {% endif %}
       {% if user.parking_control %}
@@ -33,17 +33,12 @@
       {% endif %}
       {% if user.coupon_control %}
       <div class="rounded-2 border p-3">
-        <dt class="col-sm-9 m-0">Выдача льгот</dt>
+        <dt class="col-sm-9 m-0">Выдача льгот / Обнуление чеков</dt>
       </div>
       {% endif %}
-      {% if user.admin_view %}
+      {% if user.export_right %}
       <div class="rounded-2 border p-3">
-        <dt class="col-sm-9 m-0">Просмотр панели администратора</dt>
-      </div>
-      {% endif %}
-      {% if user.parking_lot_view %}
-      <div class="rounded-2 border p-3">
-        <dt class="col-sm-9 m-0">Является парковкой</dt>
+        <dt class="col-sm-9 m-0">Права на экспорт и просмотр базы данных</dt>
       </div>
       {% endif %}
 

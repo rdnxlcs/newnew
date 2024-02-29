@@ -113,7 +113,6 @@ class AdminRegistrationForm(UserCreationForm):
         'class': 'form-check-input',
         'type': 'checkbox',
         'id': 'parking_lot',
-        'disabled': 'true',
     }))
     park_id = forms.ChoiceField(required=False, choices=(), widget=forms.Select(attrs={
         'class': 'form-select rounded-4',

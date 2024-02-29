@@ -19,7 +19,7 @@
           <th scope="col">Реестровый номер</th>
           <th scope="col">Кол-во мест</th>
           <th scope="col">Цена за час</th>
-          {% if user.is_superadmin %}
+          {% if user.parking_lot_view %}
           <th scope="col">Секрет 🤫</th>
           {% endif %}
         </tr>
@@ -31,8 +31,8 @@
           <td>{{el.reg_num}}</td>
           <td>{{el.max_parking_lots}}</td>
           <td>{{el.price_per_hour}} ₽</td>
-          {% if user.is_superadmin %}
-          <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot/?secret={{el.secret}}">{{el.secret}}</a></td>
+          {% if user.parking_lot_view %}
+          <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot?secret={{el.secret}}">{{el.secret}}</a></td>
           {% endif %} 
         </tr>
         {% endfor %}
