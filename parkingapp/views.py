@@ -531,12 +531,13 @@ def data(period_start, period_end, id=0):
                 seconds = difference.total_seconds()
                 benefit_minutes = benefit_difference.total_seconds() // 60
                 minutes = seconds // 60
+                # benefit_minutes = minutes - benefit_minutes
 
                 sessions.append(minutes)
                 prices.append(reciept.final_price)
                 if reciept.benefit:
-                    if minutes > 15:
-                        benefit_prices.append(max(0 , minutes * reciept.price_per_hour - benefit_minutes * reciept.price_per_hour) / 60)
+                    if benefit_minutes > 15:
+                        benefit_prices.append(reciept.final_price)
                     benefit_sessions.append(minutes)
                     with_benefits += 1
                 if minutes <= 15:
