@@ -15,6 +15,11 @@ import random
 import pandas as pd
 from parkingapp.global_variables import global_variables
 
+
+def handler404(request, *args, **kwargs):
+    return render(request, 'error.html')
+
+
 @login_required(redirect_field_name=None)
 def index(request):
     form = CommitParkingForm()
