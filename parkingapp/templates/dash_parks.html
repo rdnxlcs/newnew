@@ -32,7 +32,7 @@
           <td>{{el.max_parking_lots}}</td>
           <td>{{el.price_per_hour}} ₽</td>
           {% if user.is_superadmin %}
-          <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot?secret={{el.secret}}">{{el.secret}}</a></td>
+          <td class="text-truncate" style="max-width: 128px;"><a href="/parking_lot/?secret={{el.secret}}">{{el.secret}}</a></td>
           {% endif %} 
         </tr>
         {% endfor %}
