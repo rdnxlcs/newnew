@@ -32,7 +32,7 @@ class Parking(models.Model):
     reg_num = models.CharField(default='', max_length=100)
 
     def __str__(self) -> str:
-        return f'{self.lattitude} | {self.longitude} | {self.address} | {self.max_parking_lots} | {self.occupied_lots} | {self.price_per_hour} ||| '
+        return f'{self.lattitude} | {self.longitude} | {self.reg_num} | {self.address} | {self.max_parking_lots} | {self.occupied_lots} | {self.price_per_hour} ||| '
 
 class Reciept(models.Model):
     parking_id = models.CharField(default='', max_length=100)
